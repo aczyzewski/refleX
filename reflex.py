@@ -18,12 +18,13 @@ SEED = 23
 LABELING_FOLDER = os.path.join(os.path.dirname(__file__))
 LABELING_FILE = os.path.join(LABELING_FOLDER, "reflex.csv")
 LABELS = OrderedDict(sorted({
-    "1": "a",
-    "2": "b",
-    "3": "c",
-    "4": "d",
-    "5": "e",
-    "6": "f",
+    "1": "Loop scattering",
+    "2": "Background ring",
+    "3": "Strong background",
+    "4": "Diffuse scattering",
+    "5": "Artifact",
+    "6": "Ice ring",
+    "7": "Non-uniform detector",
 }.items()))
 
 
@@ -111,10 +112,13 @@ def analyze_clusters(k_means, img_x, img_y):
 
 def label_images(files):
     msg = "Enter labels(" + ", ".join([k + ":" + v for k, v in LABELS.iteritems()]) + "): "
-    prev_processed_files = set(pd.read_csv(LABELING_FILE)["Image"])
+    if os.path.isfile(LABELING_FILE):
+        prev_processed_files = set(pd.read_csv(LABELING_FILE)["Image"])
+    else:
+        prev_processed_files = None
 
     for image_path in files:
-        if image_path in prev_processed_files:
+        if prev_processed_files is not None and image_path in prev_processed_files:
             continue
 
         print
