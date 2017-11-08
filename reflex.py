@@ -1,22 +1,67 @@
 import glob
 import logging
+import subprocess
+import os
+import signal
+import csv
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 from scipy import misc
 from sklearn import cluster
+from collections import OrderedDict
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s", datefmt="%m/%d/%Y %H:%M:%S")
 SEED = 23
+LABELING_FOLDER = os.path.join(os.path.dirname(__file__))
+LABELING_FILE = os.path.join(LABELING_FOLDER, "reflex.csv")
+LABELS = OrderedDict(sorted({
+    "1": "a",
+    "2": "b",
+    "3": "c",
+    "4": "d",
+    "5": "e",
+    "6": "f",
+}.items()))
 
 
-def get_data_from_png(file_mask):
+def write_to_csv(image_path, labels, file_path=LABELING_FILE):
+    save_to_folder = os.path.dirname(file_path)
+
+    if not os.path.exists(save_to_folder):
+        os.mkdir(save_to_folder)
+
+    if os.path.isfile(file_path):
+        write_header = False
+        mode = "a"
+    else:
+        write_header = True
+        mode = "w"
+
+    with open(file_path, mode) as f:
+        writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONNUMERIC, lineterminator='\n')
+
+        if write_header:
+            header = ["Image"]
+            header.extend(LABELS.values())
+            writer.writerow(header)
+
+        row = [image_path]
+        label_flags = [0] * LABELS.__len__()
+        for label in labels:
+            label_flags[int(label)-1] = 1
+        row.extend(label_flags)
+        writer.writerow(row)
+
+
+def get_data_from_png(file_list):
     logging.info("Reading images from PNG files")
 
     images = []
     image_paths = []
-    for image_path in glob.glob(file_mask):
+    for image_path in file_list:
         image_paths.append(image_path)
         images.append(misc.imread(image_path, flatten=True))
 
@@ -35,7 +80,7 @@ def normalize_data(dataset):
     return dataset, dataset_size, img_x, img_y, depth
 
 
-def cluster_images(X, dataset_size, img_x, img_y, depth, k, n_jobs=-1):
+def cluster_images(paths, X, dataset_size, img_x, img_y, depth, k, n_jobs=-1):
     logging.info("Clustering %d images into %d groups", dataset_size, k)
     X = np.reshape(X, (dataset_size, img_x*img_y*depth))
     k_means = cluster.KMeans(n_clusters=k, max_iter=50, n_jobs=n_jobs, random_state=SEED)
@@ -50,7 +95,7 @@ def cluster_images(X, dataset_size, img_x, img_y, depth, k, n_jobs=-1):
     return k_means
 
 
-def analyze_clusters(k_means):
+def analyze_clusters(k_means, img_x, img_y):
     unique, counts = np.unique(k_means.labels_, return_counts=True)
     label_dict = dict(zip(unique, counts))
 
@@ -64,10 +109,30 @@ def analyze_clusters(k_means):
         plt.show()
 
 
-if __name__ == "__main__":
-    k = 15
+def label_images(files):
+    msg = "Enter labels(" + ", ".join([k + ":" + v for k, v in LABELS.iteritems()]) + "): "
+    prev_processed_files = set(pd.read_csv(LABELING_FILE)["Image"])
 
-    dataset, paths = get_data_from_png("./data/*100x100.png")
-    dataset, dataset_size, img_x, img_y, depth = normalize_data(dataset)
-    k_means = cluster_images(dataset, dataset_size, img_x, img_y, depth, k)
-    analyze_clusters(k_means)
+    for image_path in files:
+        if image_path in prev_processed_files:
+            continue
+
+        print
+        print image_path
+        pro = subprocess.Popen("xdg-open " + image_path, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
+        labels = list(raw_input(msg))
+        write_to_csv(image_path, labels)
+        os.killpg(os.getpgid(pro.pid), signal.SIGTERM)
+
+
+if __name__ == "__main__":
+    files = [fn for fn in glob.glob("./data/*.png") if not (fn.endswith("100x100.png") or fn.endswith("300x300.png"))]
+
+    # dataset, paths = get_data_from_png(files)
+    # dataset, dataset_size, img_x, img_y, depth = normalize_data(dataset)
+    # k_means = cluster_images(paths, dataset, dataset_size, img_x, img_y, depth, 15)
+    # analyze_clusters(k_means, img_x, img_y)
+
+    label_images(files)
+
+
