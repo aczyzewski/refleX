@@ -4,8 +4,7 @@ import pandas as pd
 import logging
 
 from matplotlib import pyplot as plt
-from sklearn.metrics import matthews_corrcoef
-from sklearn.metrics import hamming_loss
+from sklearn import metrics
 from sklearn.model_selection import train_test_split
 from scipy import misc
 
@@ -83,7 +82,8 @@ class Reflex():
 
         return X_train, X_test, y_train, y_test
 
-    def train_model(self, X_train, y_train, save_model=True, model_name=MODEL_PATH, plot_learning_curve=True):
+    def train_model(self, X_train, y_train, verbose=1, save_model=True, model_name=MODEL_PATH,
+                    plot_learning_curve=True):
         model = Sequential()
         model.add(Conv2D(32, kernel_size=(5, 5), strides=(1, 1), activation='relu', input_shape=self.input_shape))
         model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
@@ -99,7 +99,7 @@ class Reflex():
         model.fit(X_train, y_train,
                   batch_size=128,
                   epochs=10,
-                  verbose=1,
+                  verbose=verbose,
                   validation_split=0.1,
                   callbacks=[history])
 
@@ -110,12 +110,15 @@ class Reflex():
             plt.show()
 
         if save_model:
+            logging.info("Saving model to file: %s", model_name)
             model.save(model_name)
 
         return model
 
-    def test_model(self, X_test, y_test, model_object=None, load_model_from_file=True, model_name=MODEL_PATH):
+    def test_model(self, X_test, y_test, model_object=None, load_model_from_file=True, model_name=MODEL_PATH,
+                   diversify_thresholds=False):
         if load_model_from_file:
+            logging.info("Loading model from file: %s", model_name)
             model = load_model(model_name)
         elif model_object is not None:
             model = model_object
@@ -126,29 +129,46 @@ class Reflex():
         y_proba = np.array(y_proba)
         threshold = np.arange(0.1, 0.9, 0.1)
 
-        acc = []
-        accuracies = []
-        best_threshold = np.zeros(y_proba.shape[1])
-        for i in range(y_proba.shape[1]):
-            y_prob = np.array(y_proba[:, i])
-            for j in threshold:
-                y_pred = [1 if prob >= j else 0 for prob in y_prob]
-                acc.append(matthews_corrcoef(y_test[:, i], y_pred))
-            acc = np.array(acc)
-            index = np.where(acc == acc.max())
-            accuracies.append(acc.max())
-            best_threshold[i] = threshold[index[0][0]]
+        if diversify_thresholds:
             acc = []
+            accuracies = []
+            best_threshold = np.zeros(y_proba.shape[1])
+            for i in range(y_proba.shape[1]):
+                y_prob = np.array(y_proba[:, i])
+                for j in threshold:
+                    y_pred = [1 if prob >= j else 0 for prob in y_prob]
+                    acc.append(metrics.matthews_corrcoef(y_test[:, i], y_pred))
+                acc = np.array(acc)
+                index = np.where(acc == acc.max())
+                accuracies.append(acc.max())
+                best_threshold[i] = threshold[index[0][0]]
+                acc = []
+        else:
+            best_threshold = np.ones(y_proba.shape[1])*0.5
 
         logging.info("Class thresholds: %s", best_threshold)
         y_pred = np.array([[1 if y_proba[i, j] >= best_threshold[j] else 0 for j in range(y_test.shape[1])] for i in
                            range(len(y_test))])
 
-        h_loss = hamming_loss(y_test, y_pred)
-        crisp_accuracy = len([i for i in range(len(y_test)) if (y_test[i] == y_pred[i]).sum() == 5]) / y_test.shape[0]
+        logging.info("Hamming score: %.3f", self._hamming_score(y_test, y_pred))
+        logging.info("Exact match ratio: %.3f", metrics.accuracy_score(y_test, y_pred, normalize=True, sample_weight=None))
+        logging.info("Hamming loss: %.3f", metrics.hamming_loss(y_test, y_pred))
+        logging.info("Micro-averaged precision: %.3f", metrics.precision_score(y_test, y_pred, average="micro"))
+        logging.info("Micro-averaged recall: %.3f", metrics.recall_score(y_test, y_pred, average="micro"))
 
-        logging.info("Hamming loss: %s", h_loss)
-        logging.info("Accuracy: %s", crisp_accuracy)
+    def _hamming_score(self, y_true, y_pred):
+        acc_list = []
+        for i in range(y_true.shape[0]):
+            set_true = set(np.where(y_true[i])[0])
+            set_pred = set(np.where(y_pred[i])[0])
+
+            if len(set_true) == 0 and len(set_pred) == 0:
+                tmp_a = 1
+            else:
+                tmp_a = len(set_true.intersection(set_pred)) / \
+                        float(len(set_true.union(set_pred)))
+            acc_list.append(tmp_a)
+        return np.mean(acc_list)
 
 
 if __name__ == "__main__":
@@ -156,5 +176,5 @@ if __name__ == "__main__":
     reflex = Reflex(img_x=300, img_y=300, num_classes=7, image_files=files, label_file="reflex.csv")
     reflex.load_files()
     X_train, X_test, y_train, y_test = reflex.split_data(test_ratio=0.1)
-    reflex.train_model(X_train, y_train)
+    # reflex.train_model(X_train, y_train)
     reflex.test_model(X_test, y_test)
