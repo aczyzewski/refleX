@@ -1,142 +1,160 @@
 import glob
-import logging
-import subprocess
-import os
-import signal
-import csv
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import logging
 
+from matplotlib import pyplot as plt
+from sklearn.metrics import matthews_corrcoef
+from sklearn.metrics import hamming_loss
+from sklearn.model_selection import train_test_split
 from scipy import misc
-from sklearn import cluster
-from collections import OrderedDict
 
+from keras.models import Sequential
+from keras.models import load_model
+from keras.layers import Dense, Dropout, Activation, Flatten
+from keras.layers import Conv2D, MaxPooling2D
+from keras.optimizers import Adam
+from keras.callbacks import Callback
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s", datefmt="%m/%d/%Y %H:%M:%S")
 SEED = 23
-LABELING_FOLDER = os.path.join(os.path.dirname(__file__))
-LABELING_FILE = os.path.join(LABELING_FOLDER, "reflex.csv")
-LABELS = OrderedDict(sorted({
-    "1": "Loop scattering",
-    "2": "Background ring",
-    "3": "Strong background",
-    "4": "Diffuse scattering",
-    "5": "Artifact",
-    "6": "Ice ring",
-    "7": "Non-uniform detector",
-}.items()))
+MODEL_PATH = "reflex.h5"
+np.random.seed(SEED)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%m/%d/%Y %H:%M:%S')
 
 
-def write_to_csv(image_path, labels, file_path=LABELING_FILE):
-    save_to_folder = os.path.dirname(file_path)
+class AccuracyHistory(Callback):
+    def on_train_begin(self, logs={}):
+        self.acc = []
 
-    if not os.path.exists(save_to_folder):
-        os.mkdir(save_to_folder)
-
-    if os.path.isfile(file_path):
-        write_header = False
-        mode = "a"
-    else:
-        write_header = True
-        mode = "w"
-
-    with open(file_path, mode) as f:
-        writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONNUMERIC, lineterminator='\n')
-
-        if write_header:
-            header = ["Image"]
-            header.extend(LABELS.values())
-            writer.writerow(header)
-
-        row = [image_path]
-        label_flags = [0] * LABELS.__len__()
-        for label in labels:
-            label_flags[int(label)-1] = 1
-        row.extend(label_flags)
-        writer.writerow(row)
+    def on_epoch_end(self, batch, logs={}):
+        self.acc.append(logs.get('acc'))
 
 
-def get_data_from_png(file_list):
-    logging.info("Reading images from PNG files")
+class Reflex():
+    def __init__(self, img_x, img_y, num_classes, image_files, label_file):
+        self.img_x = img_x
+        self.img_y = img_y
+        self.input_shape = (img_x, img_y, 1)
+        self.num_classes = num_classes
+        self.image_files = image_files
+        self.label_file = label_file
+        self.X = None
+        self.y = None
 
-    images = []
-    image_paths = []
-    for image_path in file_list:
-        image_paths.append(image_path)
-        images.append(misc.imread(image_path, flatten=True))
+    def load_files(self):
+        images = []
+        image_paths = []
 
-    return np.stack(images), image_paths
+        logging.info("Reading files")
+        for image_path in self.image_files:
+            image_paths.append(image_path)
+            images.append(misc.imread(image_path, flatten=True))
 
+        X_full, X_paths = np.stack(images), image_paths
 
-def normalize_data(dataset):
-    logging.info("Normalizing images")
+        y_df = pd.read_csv(self.label_file)
+        y_paths = y_df.iloc[:, 0]
+        self.y = y_df.iloc[:, 1:]
 
-    dataset_size, img_x, img_y = dataset.shape
-    depth = 1
-    dataset = dataset.reshape(dataset_size, img_x, img_y, depth)
-    dataset = dataset.astype('float32')
-    dataset /= 255
+        X_filter = []
+        for idx, path in enumerate(X_paths):
+            raw_path = path[:-11] + "png"
+            if raw_path in set(y_paths.values):
+                X_filter.append(idx)
+        self.X = X_full[X_filter]
 
-    return dataset, dataset_size, img_x, img_y, depth
+        logging.info("Normalizing %d images", self.X.shape[0])
+        self.X = self.X.reshape(self.X.shape[0], self.img_x, self.img_y, 1)
+        self.X = self.X.astype('float32')
+        self.X /= 255
+        self.y = self.y.as_matrix()
 
+    def split_data(self, test_ratio):
+        if self.X is None or self.y is None:
+            raise Exception("No images! Load image files before splitting the data.")
 
-def cluster_images(paths, X, dataset_size, img_x, img_y, depth, k, n_jobs=-1):
-    logging.info("Clustering %d images into %d groups", dataset_size, k)
-    X = np.reshape(X, (dataset_size, img_x*img_y*depth))
-    k_means = cluster.KMeans(n_clusters=k, max_iter=50, n_jobs=n_jobs, random_state=SEED)
-    k_means.fit(X)
+        logging.info("Splitting %d examples into training and testing sets", self.X.shape[0])
+        X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=test_ratio, random_state=SEED)
 
-    for i in range(k_means.n_clusters):
-        with open("cluster_" + str(i) + ".txt", "w") as cluster_file:
-            for label_idx in range(dataset_size):
-                if k_means.labels_[label_idx] == i:
-                    cluster_file.write("%s\n" % paths[label_idx])
+        logging.debug("Training set shape: %s", X_train.shape)
+        logging.debug("Testing set shape: %s", X_test.shape)
+        logging.debug("Training labels shape: %s", y_train.shape)
+        logging.debug("Testing labels shape: %s", y_test.shape)
 
-    return k_means
+        return X_train, X_test, y_train, y_test
 
+    def train_model(self, X_train, y_train, save_model=True, model_name=MODEL_PATH, plot_learning_curve=True):
+        model = Sequential()
+        model.add(Conv2D(32, kernel_size=(5, 5), strides=(1, 1), activation='relu', input_shape=self.input_shape))
+        model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+        model.add(Conv2D(64, (5, 5), activation='relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Flatten())
+        model.add(Dense(1000, activation='relu'))
+        model.add(Dense(self.num_classes, activation='sigmoid'))
+        model.compile(loss='binary_crossentropy', optimizer=Adam(), metrics=['accuracy'])
 
-def analyze_clusters(k_means, img_x, img_y):
-    unique, counts = np.unique(k_means.labels_, return_counts=True)
-    label_dict = dict(zip(unique, counts))
+        history = AccuracyHistory()
 
-    for i in range(k_means.n_clusters):
-        print "Cluster %d contains %d images" % (i, label_dict[i])
-        cluster_center = k_means.cluster_centers_[i]
-        cluster_center_img = cluster_center.reshape(img_x, img_y)
-        cluster_center_img *= 255
-        cluster_center_img = cluster_center_img.astype('uint8')
-        plt.imshow(cluster_center_img, cmap=plt.cm.gray)
-        plt.show()
+        model.fit(X_train, y_train,
+                  batch_size=128,
+                  epochs=10,
+                  verbose=1,
+                  validation_split=0.1,
+                  callbacks=[history])
 
+        if plot_learning_curve:
+            plt.plot(range(1, 11), history.acc)
+            plt.xlabel('Epochs')
+            plt.ylabel('Accuracy')
+            plt.show()
 
-def label_images(files):
-    msg = "Enter labels(" + ", ".join([k + ":" + v for k, v in LABELS.iteritems()]) + "): "
-    if os.path.isfile(LABELING_FILE):
-        prev_processed_files = set(pd.read_csv(LABELING_FILE)["Image"])
-    else:
-        prev_processed_files = None
+        if save_model:
+            model.save(model_name)
 
-    for image_path in files:
-        if prev_processed_files is not None and image_path in prev_processed_files:
-            continue
+        return model
 
-        print
-        print image_path
-        pro = subprocess.Popen("xdg-open " + image_path, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
-        labels = list(raw_input(msg))
-        write_to_csv(image_path, labels)
-        os.killpg(os.getpgid(pro.pid), signal.SIGTERM)
+    def test_model(self, X_test, y_test, model_object=None, load_model_from_file=True, model_name=MODEL_PATH):
+        if load_model_from_file:
+            model = load_model(model_name)
+        elif model_object is not None:
+            model = model_object
+        else:
+            raise Exception("No model specified! Provide model file or pass the model_object argument")
+
+        y_proba = model.predict_proba(X_test)
+        y_proba = np.array(y_proba)
+        threshold = np.arange(0.1, 0.9, 0.1)
+
+        acc = []
+        accuracies = []
+        best_threshold = np.zeros(y_proba.shape[1])
+        for i in range(y_proba.shape[1]):
+            y_prob = np.array(y_proba[:, i])
+            for j in threshold:
+                y_pred = [1 if prob >= j else 0 for prob in y_prob]
+                acc.append(matthews_corrcoef(y_test[:, i], y_pred))
+            acc = np.array(acc)
+            index = np.where(acc == acc.max())
+            accuracies.append(acc.max())
+            best_threshold[i] = threshold[index[0][0]]
+            acc = []
+
+        logging.info("Class thresholds: %s", best_threshold)
+        y_pred = np.array([[1 if y_proba[i, j] >= best_threshold[j] else 0 for j in range(y_test.shape[1])] for i in
+                           range(len(y_test))])
+
+        h_loss = hamming_loss(y_test, y_pred)
+        crisp_accuracy = len([i for i in range(len(y_test)) if (y_test[i] == y_pred[i]).sum() == 5]) / y_test.shape[0]
+
+        logging.info("Hamming loss: %s", h_loss)
+        logging.info("Accuracy: %s", crisp_accuracy)
 
 
 if __name__ == "__main__":
-    files = [fn for fn in glob.glob("./data/*.png") if not (fn.endswith("100x100.png") or fn.endswith("300x300.png"))]
-
-    # dataset, paths = get_data_from_png(files)
-    # dataset, dataset_size, img_x, img_y, depth = normalize_data(dataset)
-    # k_means = cluster_images(paths, dataset, dataset_size, img_x, img_y, depth, 15)
-    # analyze_clusters(k_means, img_x, img_y)
-
-    label_images(files)
-
-
+    files = [fn for fn in glob.glob("./data/*.png") if (fn.endswith("300x300.png"))]
+    reflex = Reflex(img_x=300, img_y=300, num_classes=7, image_files=files, label_file="reflex.csv")
+    reflex.load_files()
+    X_train, X_test, y_train, y_test = reflex.split_data(test_ratio=0.1)
+    reflex.train_model(X_train, y_train)
+    reflex.test_model(X_test, y_test)
