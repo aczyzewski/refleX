@@ -117,8 +117,9 @@ class Reflex:
         self.label_file = label_file
         self.X = None
         self.y = None
+        self.class_weights = None
 
-    def load_files(self):
+    def load_files(self, calculate_class_weights=True):
         images = []
         image_paths = []
 
@@ -132,6 +133,9 @@ class Reflex:
         y_df = pd.read_csv(self.label_file)
         y_paths = y_df.iloc[:, 0]
         self.y = y_df.iloc[:, 1:]
+        if calculate_class_weights:
+            self.class_weights = self.y.sum(axis=0)
+            self.class_weights = self.class_weights.max() / self.class_weights
 
         X_filter = []
         for idx, path in enumerate(X_paths):
@@ -151,7 +155,9 @@ class Reflex:
             raise Exception("No images! Load image files before splitting the data.")
 
         logging.info("Splitting %d examples into training and testing sets", self.X.shape[0])
-        X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=test_ratio, random_state=SEED)
+        # Rozwazyc Iterative Stratification: On the Stratification of Multi-Label Data, Tsoumakas et al.
+        X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=test_ratio, random_state=SEED,
+                                                            stratify=self.y)
 
         logging.debug("Training set shape: %s", X_train.shape)
         logging.debug("Testing set shape: %s", X_test.shape)
@@ -191,7 +197,7 @@ class Reflex:
         model.add(Dense(1024, activation='relu'))
         model.add(Dense(self.num_classes, activation='sigmoid'))
 
-        model.compile(loss='binary_crossentropy', optimizer=Adam(decay=0.1), metrics=['accuracy'])
+        model.compile(loss='binary_crossentropy', optimizer=Adam(), metrics=['accuracy'])
 
         train_datagen = ReflexDataGenerator(
             zoom_range=(1, 1.2),
@@ -205,6 +211,7 @@ class Reflex:
         history = model.fit_generator(train_iterator,
                                       epochs=epochs,
                                       steps_per_epoch=max(len(X_train) / batch_size, 1),
+                                      class_weight=self.class_weights,
                                       verbose=verbose,
                                       validation_data=val_iterator,
                                       validation_steps=max(len(X_val) / batch_size, 1))
