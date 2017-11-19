@@ -13,7 +13,7 @@ from keras.models import load_model
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras.optimizers import Adam
-from keras.callbacks import Callback
+from keras.callbacks import Callback, TensorBoard
 from keras.preprocessing import image
 
 SEED = 23
@@ -147,7 +147,7 @@ class Reflex:
         logging.info("Normalizing %d images", self.X.shape[0])
         self.X = self.X.reshape(self.X.shape[0], self.img_x, self.img_y, 1)
         self.X = self.X.astype('float32')
-        self.X /= 255
+        self.X /= 255.0
         self.y = self.y.as_matrix()
 
     def split_data(self, test_ratio):
@@ -166,53 +166,100 @@ class Reflex:
 
         return X_train, X_test, y_train, y_test
 
-    def train_model(self, X_train, y_train, X_val, y_val, verbose=1, save_model=True, model_name=MODEL_PATH,
-                    plot_learning_curve=True, epochs=10, batch_size=64):
+    def get_cifar_model(self):
         model = Sequential()
+                
+        #Block 1
+        model.add(Conv2D(32, (3, 3), activation='relu', padding='same', input_shape=self.input_shape, name="block1_conv1"))
+        model.add(Dropout(0.2, name="block1_drop"))
+        model.add(Conv2D(32, (3, 3), activation='relu', padding='same', name="block1_conv2"))
+        model.add(MaxPooling2D(pool_size=(2, 2), name="block1_pool"))
+                
+        #Block 2
+        model.add(Conv2D(64, (3, 3), activation='relu', padding='same', name="block2_conv1"))
+        model.add(Dropout(0.2, name="block2_drop"))
+        model.add(Conv2D(64, (3, 3), activation='relu', padding='same', name="block2_conv2"))
+        model.add(MaxPooling2D(pool_size=(2, 2), name="block2_pool"))
+                
+        #Block 3
+        model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name="block3_conv1"))
+        model.add(Dropout(0.2, name="block3_drop"))
+        model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name="block3_conv2"))
+        model.add(MaxPooling2D(pool_size=(2, 2), name="block3_pool"))
+        
+        # Classification block
+        model.add(Flatten(name="flatten"))
+        model.add(Dropout(0.2, name="clf_drop1"))
+        model.add(Dense(1024, activation='relu', kernel_constraint=maxnorm(3), name="clf_fc1"))
+        model.add(Dropout(0.2, name="clf_drop2"))
+        model.add(Dense(512, activation='relu', kernel_constraint=maxnorm(3), name="clf_fc2"))
+        model.add(Dropout(0.2, name="clf_drop3"))
+        model.add(Dense(self.num_classes, activation='sigmoid', name="predictions"))
+        
+    def get_vgg_model(self):
+        model = Sequential()
+        
+        #Block 1
+        model.add(Conv2D(64, (3, 3), activation="relu", padding="same", input_shape=self.input_shape, name="block1_conv1"))
+        model.add(Conv2D(64, (3, 3), activation="relu", padding="same", name="block1_conv2"))
+        model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block1_pool"))
 
-        model.add(Conv2D(64, kernel_size=3, strides=1, activation='relu', padding='same', input_shape=self.input_shape))
-        model.add(Conv2D(64, kernel_size=3, strides=1, activation='relu', padding='same', input_shape=self.input_shape))
-        model.add(MaxPooling2D(pool_size=2, strides=2))
+        #Block 2
+        model.add(Conv2D(128, (3, 3), activation="relu", padding="same", name="block2_conv1"))
+        model.add(Conv2D(128, (3, 3), activation="relu", padding="same", name="block2_conv2"))
+        model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block2_pool"))
 
-        model.add(Conv2D(128, kernel_size=3, strides=1, activation='relu', padding='same', input_shape=self.input_shape))
-        model.add(Conv2D(128, kernel_size=3, strides=1, activation='relu', padding='same', input_shape=self.input_shape))
-        model.add(MaxPooling2D(pool_size=2, strides=2))
+        # Block 3
+        model.add(Conv2D(256, (3, 3), activation="relu", padding="same", name="block3_conv1"))
+        model.add(Conv2D(256, (3, 3), activation="relu", padding="same", name="block3_conv2"))
+        model.add(Conv2D(256, (3, 3), activation="relu", padding="same", name="block3_conv3"))
+        model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block3_pool"))
 
-        model.add(Conv2D(256, kernel_size=3, strides=1, activation='relu', padding='same', input_shape=self.input_shape))
-        model.add(Conv2D(256, kernel_size=3, strides=1, activation='relu', padding='same', input_shape=self.input_shape))
-        model.add(Conv2D(256, kernel_size=3, strides=1, activation='relu', padding='same', input_shape=self.input_shape))
-        model.add(MaxPooling2D(pool_size=2, strides=2))
+        # Block 4
+        model.add(Conv2D(512, (3, 3), activation="relu", padding="same", name="block4_conv1"))
+        model.add(Conv2D(512, (3, 3), activation="relu", padding="same", name="block4_conv2"))
+        model.add(Conv2D(512, (3, 3), activation="relu", padding="same", name="block4_conv3"))
+        model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block4_pool"))
+        
+        # Block 5
+        model.add(Conv2D(512, (3, 3), activation="relu", padding="same", name="block5_conv1"))
+        model.add(Conv2D(512, (3, 3), activation="relu", padding="same", name="block5_conv2"))
+        model.add(Conv2D(512, (3, 3), activation="relu", padding="same", name="block5_conv3"))
+        model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block5_pool"))
 
-        model.add(Conv2D(512, kernel_size=3, strides=1, activation='relu', padding='same', input_shape=self.input_shape))
-        model.add(Conv2D(512, kernel_size=3, strides=1, activation='relu', padding='same', input_shape=self.input_shape))
-        model.add(Conv2D(512, kernel_size=3, strides=1, activation='relu', padding='same', input_shape=self.input_shape))
-        model.add(MaxPooling2D(pool_size=2, strides=2))
+        # Classification block
+        model.add(Flatten(name="flatten"))
+        model.add(Dense(512, activation='relu', name="clf_fc1"))
+        model.add(Dense(512, activation='relu', name="clf_fc2"))
+        #model.add(Dense(4096, activation='relu', name="clf_fc1"))
+        #model.add(Dense(4096, activation='relu', name="clf_fc2"))
+        model.add(Dense(self.num_classes, activation='sigmoid', name="predictions"))
 
-        model.add(Conv2D(512, kernel_size=3, strides=1, activation='relu', padding='same', input_shape=self.input_shape))
-        model.add(Conv2D(512, kernel_size=3, strides=1, activation='relu', padding='same', input_shape=self.input_shape))
-        model.add(Conv2D(512, kernel_size=3, strides=1, activation='relu', padding='same', input_shape=self.input_shape))
-        model.add(MaxPooling2D(pool_size=2, strides=2))
-
-        model.add(Flatten())
-        model.add(Dense(1024, activation='relu'))
-        model.add(Dense(self.num_classes, activation='sigmoid'))
-
+        
+    def train_model(self, X_train, y_train, X_val, y_val, verbose=1, save_model=True, model_name=MODEL_PATH,
+                    plot_learning_curve=True, epochs=10, batch_size=64, vgg=True):
+        if vgg:
+            model = self.get_vgg_model()
+        else:
+            model.get_cifar_model()
         model.compile(loss='binary_crossentropy', optimizer=Adam(), metrics=['accuracy'])
 
         train_datagen = ReflexDataGenerator(
-            zoom_range=(1, 1.2),
+            zoom_range= (1, 1.2),
             horizontal_flip=True,
             vertical_flip=True,
             rotation_range=45,
         )
         train_iterator = train_datagen.flow(X_train, y_train, batch_size=batch_size, seed=SEED)
         val_iterator = ReflexDataGenerator().flow(X_val, y_val, batch_size=batch_size, seed=SEED)
+        tb_callback = TensorBoard(log_dir="./log_" + ("vgg" if vgg else "cifar"), histogram_freq=1, batch_size=batch_size, write_graph=True, write_images=True)
 
         history = model.fit_generator(train_iterator,
                                       epochs=epochs,
                                       steps_per_epoch=max(len(X_train) / batch_size, 1),
                                       class_weight=self.class_weights,
                                       verbose=verbose,
+                                      callbacks=[tb_callback],
                                       validation_data=val_iterator,
                                       validation_steps=max(len(X_val) / batch_size, 1))
 
@@ -223,7 +270,8 @@ class Reflex:
             plt.ylabel('accuracy')
             plt.xlabel('epoch')
             plt.legend(['train', 'validation'], loc='upper left')
-            plt.show()
+            plt.savefig(model_name + ".acc.png")
+            plt.close()
 
             plt.plot(history.history['loss'])
             plt.plot(history.history['val_loss'])
@@ -231,7 +279,8 @@ class Reflex:
             plt.ylabel('loss')
             plt.xlabel('epoch')
             plt.legend(['train', 'validation'], loc='upper left')
-            plt.show()
+            plt.savefig(model_name + ".loss.png")
+            plt.close()
 
         if save_model:
             logging.info("Saving model to file: %s", model_name)
@@ -281,6 +330,9 @@ class Reflex:
         logging.info("Micro-averaged precision: %.3f", metrics.precision_score(y_test, y_pred, average="micro"))
         logging.info("Micro-averaged recall: %.3f", metrics.recall_score(y_test, y_pred, average="micro"))
         logging.info("Micro-averaged F-score: %.3f", metrics.f1_score(y_test, y_pred, average="micro"))
+        logging.info("Macro-averaged precision: %.3f", metrics.precision_score(y_test, y_pred, average="macro"))
+        logging.info("Macro-averaged recall: %.3f", metrics.recall_score(y_test, y_pred, average="macro"))
+        logging.info("Macro-averaged F-score: %.3f", metrics.f1_score(y_test, y_pred, average="macro"))
 
     def _hamming_score(self, y_true, y_pred):
         acc_list = []
@@ -298,9 +350,14 @@ class Reflex:
 
 
 if __name__ == "__main__":
+    print "Rot flip zoom"
     files = [fn for fn in glob.glob("./data/*.png") if (fn.endswith("300x300.png"))]
     reflex = Reflex(img_x=300, img_y=300, num_classes=7, image_files=files, label_file="reflex.csv")
     reflex.load_files()
     X_train, X_test, y_train, y_test = reflex.split_data(test_ratio=0.1)
-    reflex.train_model(X_train, y_train, X_val=X_test, y_val=y_test, model_name="reflex_aug.h5")
-    reflex.test_model(X_test, y_test, model_name="reflex_aug.h5")
+    
+    reflex.train_model(X_train, y_train, X_val=X_test, y_val=y_test, model_name="reflex_cifar.h5", vgg=False)
+    reflex.test_model(X_test, y_test, model_name="reflex_cifar.h5")
+    
+    reflex.train_model(X_train, y_train, X_val=X_test, y_val=y_test, model_name="reflex_vgg.h5", vgg=True)
+    reflex.test_model(X_test, y_test, model_name="reflex_vgg.h5")
