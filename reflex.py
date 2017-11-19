@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import logging
 
+import matplotlib as mpl
+mpl.use('Agg')
 from matplotlib import pyplot as plt
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
@@ -17,8 +19,13 @@ from keras.callbacks import Callback, TensorBoard
 from keras.preprocessing import image
 from keras.constraints import max_norm
 
+import os
+import tensorflow as tf
+from keras import backend as K
+import random as rn
+
 SEED = 23
-MODEL_PATH = "reflex.h5"
+MODEL_PATH = "reflex"
 np.random.seed(SEED)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%m/%d/%Y %H:%M:%S')
 
@@ -240,13 +247,21 @@ class Reflex:
 
         return model
         
+    def reset_session(self):
+        os.environ['PYTHONHASHSEED'] = '0'
+        np.random.seed(SEED)
+        rn.seed(SEED+SEED)
+        tf.set_random_seed(SEED+SEED+SEED)
+        sess = tf.Session(graph=tf.get_default_graph())
+        K.set_session(sess)
+        
     def train_model(self, X_train, y_train, X_val, y_val, verbose=1, save_model=True, model_name=MODEL_PATH,
-                    plot_learning_curve=True, epochs=10, batch_size=64, vgg=True):
+                    plot_learning_curve=True, epochs=50, learning_rate=0.001, batch_size=64, vgg=True):
         if vgg:
             model = self.get_vgg_model()
         else:
             model = self.get_cifar_model()
-        model.compile(loss='binary_crossentropy', optimizer=Adam(), metrics=['accuracy'])
+        model.compile(loss='binary_crossentropy', optimizer=Adam(lr=learning_rate), metrics=['accuracy'])
 
         train_datagen = ReflexDataGenerator(
             zoom_range= (1, 1.2),
@@ -256,7 +271,7 @@ class Reflex:
         )
         train_iterator = train_datagen.flow(X_train, y_train, batch_size=batch_size, seed=SEED)
         val_iterator = ReflexDataGenerator().flow(X_val, y_val, batch_size=batch_size, seed=SEED)
-        tb_callback = TensorBoard(log_dir="./log_" + ("vgg" if vgg else "cifar"), histogram_freq=0, batch_size=batch_size, write_graph=True, write_images=True)
+        tb_callback = TensorBoard(log_dir="./logs/" + model_name, batch_size=batch_size, write_graph=True, write_images=True)
 
         history = model.fit_generator(train_iterator,
                                       epochs=epochs,
@@ -359,8 +374,11 @@ if __name__ == "__main__":
     reflex.load_files()
     X_train, X_test, y_train, y_test = reflex.split_data(test_ratio=0.1)
     
-    reflex.train_model(X_train, y_train, X_val=X_test, y_val=y_test, model_name="reflex_cifar.h5", vgg=False)
-    reflex.test_model(X_test, y_test, model_name="reflex_cifar.h5")
+    for lr in [0.01, 0.001, 0.0001, 0.00001]:
+        name = "cifar_lfr=" + str(lr)
+        reflex.reset_session()
+        reflex.train_model(X_train, y_train, X_val=X_test, y_val=y_test, model_name=name, vgg=False, epochs=30)
+        reflex.test_model(X_test, y_test, model_name=name)
     
-    reflex.train_model(X_train, y_train, X_val=X_test, y_val=y_test, model_name="reflex_vgg.h5", vgg=True)
-    reflex.test_model(X_test, y_test, model_name="reflex_vgg.h5")
+    #reflex.train_model(X_train, y_train, X_val=X_test, y_val=y_test, model_name="reflex_vgg.h5", vgg=True)
+    #reflex.test_model(X_test, y_test, model_name="reflex_vgg.h5")
