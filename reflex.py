@@ -256,7 +256,7 @@ class Reflex:
         )
         train_iterator = train_datagen.flow(X_train, y_train, batch_size=batch_size, seed=SEED)
         val_iterator = ReflexDataGenerator().flow(X_val, y_val, batch_size=batch_size, seed=SEED)
-        tb_callback = TensorBoard(log_dir="./log_" + ("vgg" if vgg else "cifar"), histogram_freq=1, batch_size=batch_size, write_graph=True, write_images=True)
+        tb_callback = TensorBoard(log_dir="./log_" + ("vgg" if vgg else "cifar"), histogram_freq=0, batch_size=batch_size, write_graph=True, write_images=True)
 
         history = model.fit_generator(train_iterator,
                                       epochs=epochs,
