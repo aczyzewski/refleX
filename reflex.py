@@ -15,6 +15,7 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras.optimizers import Adam
 from keras.callbacks import Callback, TensorBoard
 from keras.preprocessing import image
+from keras.constraints import max_norm
 
 SEED = 23
 MODEL_PATH = "reflex.h5"
@@ -190,11 +191,13 @@ class Reflex:
         # Classification block
         model.add(Flatten(name="flatten"))
         model.add(Dropout(0.2, name="clf_drop1"))
-        model.add(Dense(1024, activation='relu', kernel_constraint=maxnorm(3), name="clf_fc1"))
+        model.add(Dense(1024, activation='relu', kernel_constraint=max_norm(3), name="clf_fc1"))
         model.add(Dropout(0.2, name="clf_drop2"))
-        model.add(Dense(512, activation='relu', kernel_constraint=maxnorm(3), name="clf_fc2"))
+        model.add(Dense(512, activation='relu', kernel_constraint=max_norm(3), name="clf_fc2"))
         model.add(Dropout(0.2, name="clf_drop3"))
         model.add(Dense(self.num_classes, activation='sigmoid', name="predictions"))
+        
+        return model
         
     def get_vgg_model(self):
         model = Sequential()
@@ -235,13 +238,14 @@ class Reflex:
         #model.add(Dense(4096, activation='relu', name="clf_fc2"))
         model.add(Dense(self.num_classes, activation='sigmoid', name="predictions"))
 
+        return model
         
     def train_model(self, X_train, y_train, X_val, y_val, verbose=1, save_model=True, model_name=MODEL_PATH,
                     plot_learning_curve=True, epochs=10, batch_size=64, vgg=True):
         if vgg:
             model = self.get_vgg_model()
         else:
-            model.get_cifar_model()
+            model = self.get_cifar_model()
         model.compile(loss='binary_crossentropy', optimizer=Adam(), metrics=['accuracy'])
 
         train_datagen = ReflexDataGenerator(
@@ -350,7 +354,6 @@ class Reflex:
 
 
 if __name__ == "__main__":
-    print "Rot flip zoom"
     files = [fn for fn in glob.glob("./data/*.png") if (fn.endswith("300x300.png"))]
     reflex = Reflex(img_x=300, img_y=300, num_classes=7, image_files=files, label_file="reflex.csv")
     reflex.load_files()
