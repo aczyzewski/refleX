@@ -2,13 +2,14 @@ import glob
 import numpy as np
 import pandas as pd
 import logging
+import sys
+import getopt
+import os
 
-import matplotlib as mpl
-mpl.use('Agg')
-from matplotlib import pyplot as plt
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
 from scipy import misc
+from metrics import hamming_score
 
 from keras.models import Sequential
 from keras.models import load_model
@@ -19,14 +20,12 @@ from keras.callbacks import Callback, TensorBoard
 from keras.preprocessing import image
 from keras.constraints import max_norm
 
-import os
 import tensorflow as tf
 from keras import backend as K
 import random as rn
 
 SEED = 23
 MODEL_PATH = "reflex"
-np.random.seed(SEED)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%m/%d/%Y %H:%M:%S')
 
 
@@ -34,6 +33,7 @@ class ReflexDataGenerator(image.ImageDataGenerator):
     '''
     Provides uniform zoom in both directions
     '''
+
     def random_transform(self, x, seed=None):
         img_row_axis = self.row_axis - 1
         img_col_axis = self.col_axis - 1
@@ -84,8 +84,8 @@ class ReflexDataGenerator(image.ImageDataGenerator):
 
         if shear != 0:
             shear_matrix = np.array([[1, -np.sin(shear), 0],
-                                    [0, np.cos(shear), 0],
-                                    [0, 0, 1]])
+                                     [0, np.cos(shear), 0],
+                                     [0, 0, 1]])
             transform_matrix = shear_matrix if transform_matrix is None else np.dot(transform_matrix, shear_matrix)
 
         if zx != 1:
@@ -98,12 +98,12 @@ class ReflexDataGenerator(image.ImageDataGenerator):
             h, w = x.shape[img_row_axis], x.shape[img_col_axis]
             transform_matrix = image.transform_matrix_offset_center(transform_matrix, h, w)
             x = image.apply_transform(x, transform_matrix, img_channel_axis,
-                                fill_mode=self.fill_mode, cval=self.cval)
+                                      fill_mode=self.fill_mode, cval=self.cval)
 
         if self.channel_shift_range != 0:
             x = image.random_channel_shift(x,
-                                     self.channel_shift_range,
-                                     img_channel_axis)
+                                           self.channel_shift_range,
+                                           img_channel_axis)
         if self.horizontal_flip:
             if np.random.random() < 0.5:
                 x = image.flip_axis(x, img_col_axis)
@@ -158,6 +158,9 @@ class Reflex:
         self.X /= 255.0
         self.y = self.y.as_matrix()
 
+        logging.debug("X shape: %s", self.X.shape)
+        logging.debug("y shape: %s", self.y.shape)
+
     def split_data(self, test_ratio):
         if self.X is None or self.y is None:
             raise Exception("No images! Load image files before splitting the data.")
@@ -165,7 +168,7 @@ class Reflex:
         logging.info("Splitting %d examples into training and testing sets", self.X.shape[0])
         # Rozwazyc Iterative Stratification: On the Stratification of Multi-Label Data, Tsoumakas et al.
         X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=test_ratio, random_state=SEED,
-                                                            stratify=self.y)
+                                                            stratify=None)
 
         logging.debug("Training set shape: %s", X_train.shape)
         logging.debug("Testing set shape: %s", X_test.shape)
@@ -174,27 +177,28 @@ class Reflex:
 
         return X_train, X_test, y_train, y_test
 
-    def get_cifar_model(self):
+    def make_dropout_model(self):
         model = Sequential()
-                
-        #Block 1
-        model.add(Conv2D(32, (3, 3), activation='relu', padding='same', input_shape=self.input_shape, name="block1_conv1"))
+
+        # Block 1
+        model.add(
+            Conv2D(32, (3, 3), activation='relu', padding='same', input_shape=self.input_shape, name="block1_conv1"))
         model.add(Dropout(0.2, name="block1_drop"))
         model.add(Conv2D(32, (3, 3), activation='relu', padding='same', name="block1_conv2"))
         model.add(MaxPooling2D(pool_size=(2, 2), name="block1_pool"))
-                
-        #Block 2
+
+        # Block 2
         model.add(Conv2D(64, (3, 3), activation='relu', padding='same', name="block2_conv1"))
         model.add(Dropout(0.2, name="block2_drop"))
         model.add(Conv2D(64, (3, 3), activation='relu', padding='same', name="block2_conv2"))
         model.add(MaxPooling2D(pool_size=(2, 2), name="block2_pool"))
-                
-        #Block 3
+
+        # Block 3
         model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name="block3_conv1"))
         model.add(Dropout(0.2, name="block3_drop"))
         model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name="block3_conv2"))
         model.add(MaxPooling2D(pool_size=(2, 2), name="block3_pool"))
-        
+
         # Classification block
         model.add(Flatten(name="flatten"))
         model.add(Dropout(0.2, name="clf_drop1"))
@@ -203,18 +207,19 @@ class Reflex:
         model.add(Dense(512, activation='relu', kernel_constraint=max_norm(3), name="clf_fc2"))
         model.add(Dropout(0.2, name="clf_drop3"))
         model.add(Dense(self.num_classes, activation='sigmoid', name="predictions"))
-        
+
         return model
-        
-    def get_vgg_model(self):
+
+    def make_vgg_model(self):
         model = Sequential()
-        
-        #Block 1
-        model.add(Conv2D(64, (3, 3), activation="relu", padding="same", input_shape=self.input_shape, name="block1_conv1"))
+
+        # Block 1
+        model.add(
+        Conv2D(64, (3, 3), activation="relu", padding="same", input_shape=self.input_shape, name="block1_conv1"))
         model.add(Conv2D(64, (3, 3), activation="relu", padding="same", name="block1_conv2"))
         model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block1_pool"))
 
-        #Block 2
+        # Block 2
         model.add(Conv2D(128, (3, 3), activation="relu", padding="same", name="block2_conv1"))
         model.add(Conv2D(128, (3, 3), activation="relu", padding="same", name="block2_conv2"))
         model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block2_pool"))
@@ -230,7 +235,7 @@ class Reflex:
         model.add(Conv2D(512, (3, 3), activation="relu", padding="same", name="block4_conv2"))
         model.add(Conv2D(512, (3, 3), activation="relu", padding="same", name="block4_conv3"))
         model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block4_pool"))
-        
+
         # Block 5
         model.add(Conv2D(512, (3, 3), activation="relu", padding="same", name="block5_conv1"))
         model.add(Conv2D(512, (3, 3), activation="relu", padding="same", name="block5_conv2"))
@@ -241,65 +246,55 @@ class Reflex:
         model.add(Flatten(name="flatten"))
         model.add(Dense(512, activation='relu', name="clf_fc1"))
         model.add(Dense(512, activation='relu', name="clf_fc2"))
-        #model.add(Dense(4096, activation='relu', name="clf_fc1"))
-        #model.add(Dense(4096, activation='relu', name="clf_fc2"))
         model.add(Dense(self.num_classes, activation='sigmoid', name="predictions"))
 
         return model
-        
+
     def reset_session(self):
+        K.clear_session()
         os.environ['PYTHONHASHSEED'] = '0'
         np.random.seed(SEED)
-        rn.seed(SEED+SEED)
-        tf.set_random_seed(SEED+SEED+SEED)
+        rn.seed(SEED + SEED)
+        tf.set_random_seed(SEED + SEED + SEED)
         sess = tf.Session(graph=tf.get_default_graph())
         K.set_session(sess)
-        
-    def train_model(self, X_train, y_train, X_val, y_val, verbose=1, save_model=True, model_name=MODEL_PATH,
-                    plot_learning_curve=True, epochs=50, learning_rate=0.001, batch_size=64, vgg=True):
-        if vgg:
-            model = self.get_vgg_model()
+
+    def train_model(self, X_train, y_train, X_val, y_val, model, model_name, verbose=1, save_model=True, epochs=50,
+                    learning_rate=0.001, batch_size=32, debug=True, augment=True):
+        if debug:
+            tb_callback = TensorBoard(log_dir="./logs/" + model_name, batch_size=batch_size, histogram_freq=epochs / 10,
+                                      write_graph=True, write_images=True)
         else:
-            model = self.get_cifar_model()
+            tb_callback = None
+
         model.compile(loss='binary_crossentropy', optimizer=Adam(lr=learning_rate), metrics=['accuracy'])
 
-        train_datagen = ReflexDataGenerator(
-            zoom_range= (1, 1.2),
-            horizontal_flip=True,
-            vertical_flip=True,
-            rotation_range=45,
-        )
-        train_iterator = train_datagen.flow(X_train, y_train, batch_size=batch_size, seed=SEED)
-        val_iterator = ReflexDataGenerator().flow(X_val, y_val, batch_size=batch_size, seed=SEED)
-        tb_callback = TensorBoard(log_dir="./logs/" + model_name, batch_size=batch_size, write_graph=True, write_images=True)
-
-        history = model.fit_generator(train_iterator,
-                                      epochs=epochs,
-                                      steps_per_epoch=max(len(X_train) / batch_size, 1),
-                                      class_weight=self.class_weights,
-                                      verbose=verbose,
-                                      callbacks=[tb_callback],
-                                      validation_data=val_iterator,
-                                      validation_steps=max(len(X_val) / batch_size, 1))
-
-        if plot_learning_curve:
-            plt.plot(history.history['acc'])
-            plt.plot(history.history['val_acc'])
-            plt.title('model accuracy')
-            plt.ylabel('accuracy')
-            plt.xlabel('epoch')
-            plt.legend(['train', 'validation'], loc='upper left')
-            plt.savefig(model_name + ".acc.png")
-            plt.close()
-
-            plt.plot(history.history['loss'])
-            plt.plot(history.history['val_loss'])
-            plt.title('model loss')
-            plt.ylabel('loss')
-            plt.xlabel('epoch')
-            plt.legend(['train', 'validation'], loc='upper left')
-            plt.savefig(model_name + ".loss.png")
-            plt.close()
+        if augment:
+            datagen = ReflexDataGenerator(
+                zoom_range=(1, 1.2),
+                horizontal_flip=True,
+                vertical_flip=True,
+                rotation_range=45,
+            )
+            datagen.fit(X_train)
+            data_iterator = datagen.flow(X_train, y_train, batch_size=batch_size, seed=SEED)
+            model.fit_generator(data_iterator,
+                                epochs=epochs,
+                                steps_per_epoch=max(len(X_train) / batch_size, 1),
+                                class_weight=self.class_weights,
+                                verbose=verbose,
+                                callbacks=[tb_callback],
+                                validation_data=(X_val, y_val),
+                                validation_steps=max(len(X_val) / batch_size, 1))
+        else:
+            model.fit(X_train,
+                      y_train,
+                      epochs=epochs,
+                      batch_size=batch_size,
+                      class_weight=self.class_weights,
+                      verbose=verbose,
+                      callbacks=[tb_callback],
+                      validation_data=(X_val, y_val))
 
         if save_model:
             logging.info("Saving model to file: %s", model_name)
@@ -342,7 +337,7 @@ class Reflex:
         y_pred = np.array([[1 if y_proba[i, j] >= best_threshold[j] else 0 for j in range(y_test.shape[1])] for i in
                            range(len(y_test))])
 
-        logging.info("Hamming score: %.3f", self._hamming_score(y_test, y_pred))
+        logging.info("Hamming score: %.3f", hamming_score(y_test, y_pred))
         logging.info("Exact match ratio: %.3f",
                      metrics.accuracy_score(y_test, y_pred, normalize=True, sample_weight=None))
         logging.info("Hamming loss: %.3f", metrics.hamming_loss(y_test, y_pred))
@@ -353,32 +348,32 @@ class Reflex:
         logging.info("Macro-averaged recall: %.3f", metrics.recall_score(y_test, y_pred, average="macro"))
         logging.info("Macro-averaged F-score: %.3f", metrics.f1_score(y_test, y_pred, average="macro"))
 
-    def _hamming_score(self, y_true, y_pred):
-        acc_list = []
-        for i in range(y_true.shape[0]):
-            set_true = set(np.where(y_true[i])[0])
-            set_pred = set(np.where(y_pred[i])[0])
 
-            if len(set_true) == 0 and len(set_pred) == 0:
-                tmp_a = 1
-            else:
-                tmp_a = len(set_true.intersection(set_pred)) / \
-                        float(len(set_true.union(set_pred)))
-            acc_list.append(tmp_a)
-        return np.mean(acc_list)
-
-
-if __name__ == "__main__":
-    files = [fn for fn in glob.glob("./data/*.png") if (fn.endswith("300x300.png"))]
-    reflex = Reflex(img_x=300, img_y=300, num_classes=7, image_files=files, label_file="reflex.csv")
+def main(resolution):
+    files = [fn for fn in glob.glob("./data/*.png") if (fn.endswith(resolution + "x" + resolution + ".png"))]
+    reflex = Reflex(int(resolution), int(resolution), num_classes=7, image_files=files, label_file="reflex.csv")
     reflex.load_files()
     X_train, X_test, y_train, y_test = reflex.split_data(test_ratio=0.1)
-    
+
     for lr in [0.01, 0.001, 0.0001, 0.00001]:
         name = "cifar_lfr=" + str(lr)
         reflex.reset_session()
-        reflex.train_model(X_train, y_train, X_val=X_test, y_val=y_test, model_name=name, vgg=False, epochs=30)
+        reflex.train_model(X_train, y_train, X_test, y_test, reflex.make_dropout_model(), name,
+                           epochs=20, debug=True)
         reflex.test_model(X_test, y_test, model_name=name)
-    
-    #reflex.train_model(X_train, y_train, X_val=X_test, y_val=y_test, model_name="reflex_vgg.h5", vgg=True)
-    #reflex.test_model(X_test, y_test, model_name="reflex_vgg.h5")
+
+
+if __name__ == "__main__":
+    try:
+        usage = "Usage: python reflex.py -r <int resolution>\n" \
+                "       python reflex.py --resolution <int resolution>"
+        opts, args = getopt.getopt(sys.argv[1:], "r:", ["resolution="])
+        if len(opts) == 1 and len(args) == 0 and opts[0][0] in ("-r", "--resolution"):
+            main(opts[0][1])
+        else:
+            print(usage)
+            sys.exit(2)
+    except getopt.GetoptError as err:
+        print(str(err))
+        print(usage)
+        sys.exit(2)
