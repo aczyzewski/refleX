@@ -25,14 +25,6 @@ class ForcedStratifiedShuffleSplit(_split.BaseShuffleSplit):
         n_classes = classes.shape[0]
 
         class_counts = np.bincount(y_indices)
-        if n_train < n_classes:
-            raise ValueError('The train_size = %d should be greater or '
-                             'equal to the number of classes = %d' %
-                             (n_train, n_classes))
-        if n_test < n_classes:
-            raise ValueError('The test_size = %d should be greater or '
-                             'equal to the number of classes = %d' %
-                             (n_test, n_classes))
 
         # Find the sorted list of instances for each class:
         # (np.unique above performs a sort, so code is O(n logn) already)

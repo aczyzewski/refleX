@@ -267,7 +267,7 @@ class Reflex:
                     learning_rate=0.001, batch_size=32, debug=True, augment=True):
         if debug:
             tb_callback = TensorBoard(log_dir=LOGS_PATH + model_name, batch_size=batch_size, histogram_freq=epochs / 10,
-                                      write_graph=True, write_images=True)
+                                      write_graph=True, write_images=False)
         else:
             tb_callback = None
 
@@ -355,18 +355,27 @@ class Reflex:
         logging.info("Macro-averaged F-score: %.3f", sk_metrics.f1_score(y_test, y_pred, average="macro"))
 
 
-def run_experiments(resolution):
+def run_experiments(resolution, lrs=[0.001, 0.0001, 0.00001, 0.000001], epochs=[50]):
     files = [fn for fn in glob.glob(DATA_PATH + "*.png") if (fn.endswith(resolution + "x" + resolution + ".png"))]
     reflex = Reflex(int(resolution), int(resolution), num_classes=7, image_files=files, label_file="reflex.csv")
     reflex.load_files()
     X_train, X_test, y_train, y_test = reflex.split_data(test_ratio=0.1)
 
-    for lr in [0.01, 0.001, 0.0001, 0.00001]:
-        name = "cifar_lfr=" + str(lr)
-        reflex.reset_session()
-        reflex.train_model(X_train, y_train, X_test, y_test, reflex.make_dropout_model(), name,
-                           epochs=2, debug=True)
-        reflex.test_model(X_test, y_test, model_name=name)
+    for lr in lrs:
+        for epoch in epochs:
+            name = "dropout_lr=" + str(lr) + "_ep=" + str(epoch)
+            reflex.reset_session()
+            reflex.train_model(X_train, y_train, X_test, y_test, reflex.make_dropout_model(), name,
+                               epochs=epoch, debug=True, learning_rate=lr)
+            reflex.test_model(X_test, y_test, model_name=name)
+
+    # for lr in lrs:
+    #     for epoch in epochs:
+    #         name = "vgg_lr=" + str(lr) + "_ep=" + str(epoch)
+    #         reflex.reset_session()
+    #         reflex.train_model(X_train, y_train, X_test, y_test, reflex.make_vgg_model(), name,
+    #                            epochs=epoch, debug=True)
+    #         reflex.test_model(X_test, y_test, model_name=name)
 
 
 if __name__ == "__main__":
