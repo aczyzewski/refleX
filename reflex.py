@@ -9,8 +9,9 @@ import os
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
 from scipy import misc
-from metrics import hamming_score
+from metrics import hamming_score, keras_hamming_loss
 
+from keras import backend as K
 from keras.models import Sequential
 from keras.models import load_model
 from keras.layers import Dense, Dropout, Activation, Flatten
@@ -21,7 +22,6 @@ from keras.preprocessing import image
 from keras.constraints import max_norm
 
 import tensorflow as tf
-from keras import backend as K
 import random as rn
 
 SEED = 23
@@ -215,7 +215,7 @@ class Reflex:
 
         # Block 1
         model.add(
-        Conv2D(64, (3, 3), activation="relu", padding="same", input_shape=self.input_shape, name="block1_conv1"))
+            Conv2D(64, (3, 3), activation="relu", padding="same", input_shape=self.input_shape, name="block1_conv1"))
         model.add(Conv2D(64, (3, 3), activation="relu", padding="same", name="block1_conv2"))
         model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block1_pool"))
 
@@ -267,7 +267,8 @@ class Reflex:
         else:
             tb_callback = None
 
-        model.compile(loss='binary_crossentropy', optimizer=Adam(lr=learning_rate), metrics=['accuracy'])
+        model.compile(loss='binary_crossentropy', optimizer=Adam(lr=learning_rate),
+                      metrics=[keras_hamming_loss])
 
         if augment:
             datagen = ReflexDataGenerator(
@@ -306,7 +307,7 @@ class Reflex:
                    diversify_thresholds=False):
         if load_model_from_file:
             logging.info("Loading model from file: %s", model_name)
-            model = load_model(model_name)
+            model = load_model(model_name, custom_objects={'keras_hamming_loss': keras_hamming_loss})
         elif model_object is not None:
             model = model_object
         else:
@@ -337,9 +338,8 @@ class Reflex:
         y_pred = np.array([[1 if y_proba[i, j] >= best_threshold[j] else 0 for j in range(y_test.shape[1])] for i in
                            range(len(y_test))])
 
+        logging.info("Exact match ratio: %.3f", metrics.accuracy_score(y_test, y_pred))
         logging.info("Hamming score: %.3f", hamming_score(y_test, y_pred))
-        logging.info("Exact match ratio: %.3f",
-                     metrics.accuracy_score(y_test, y_pred, normalize=True, sample_weight=None))
         logging.info("Hamming loss: %.3f", metrics.hamming_loss(y_test, y_pred))
         logging.info("Micro-averaged precision: %.3f", metrics.precision_score(y_test, y_pred, average="micro"))
         logging.info("Micro-averaged recall: %.3f", metrics.recall_score(y_test, y_pred, average="micro"))
@@ -349,7 +349,7 @@ class Reflex:
         logging.info("Macro-averaged F-score: %.3f", metrics.f1_score(y_test, y_pred, average="macro"))
 
 
-def main(resolution):
+def run_experiments(resolution):
     files = [fn for fn in glob.glob("./data/*.png") if (fn.endswith(resolution + "x" + resolution + ".png"))]
     reflex = Reflex(int(resolution), int(resolution), num_classes=7, image_files=files, label_file="reflex.csv")
     reflex.load_files()
@@ -359,7 +359,7 @@ def main(resolution):
         name = "cifar_lfr=" + str(lr)
         reflex.reset_session()
         reflex.train_model(X_train, y_train, X_test, y_test, reflex.make_dropout_model(), name,
-                           epochs=20, debug=True)
+                           epochs=5, debug=True)
         reflex.test_model(X_test, y_test, model_name=name)
 
 
@@ -369,7 +369,7 @@ if __name__ == "__main__":
                 "       python reflex.py --resolution <int resolution>"
         opts, args = getopt.getopt(sys.argv[1:], "r:", ["resolution="])
         if len(opts) == 1 and len(args) == 0 and opts[0][0] in ("-r", "--resolution"):
-            main(opts[0][1])
+            run_experiments(opts[0][1])
         else:
             print(usage)
             sys.exit(2)

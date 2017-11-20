@@ -1,4 +1,5 @@
 import numpy as np
+from keras import backend as K
 
 def hamming_score(y_true, y_pred):
     acc_list = []
@@ -13,8 +14,6 @@ def hamming_score(y_true, y_pred):
                     float(len(set_true.union(set_pred)))
         acc_list.append(tmp_a)
     return np.mean(acc_list)
-#
-# def _keras_hamming_loss(y_true, y_pred):
-#     n_differences = count_nonzero(y_true - y_pred)
-#     return (n_differences /
-#             (y_true.shape[0] * len(labels) * weight_average))
+
+def keras_hamming_loss(y_true, y_pred):
+    return K.sum(K.abs(y_true - K.round(y_pred))) / K.cast(K.shape(y_true)[0] * K.shape(y_true)[1], K.floatx())
