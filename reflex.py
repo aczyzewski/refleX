@@ -5,11 +5,12 @@ import logging
 import sys
 import getopt
 import os
+import gc
 
-from sklearn import metrics
-from sklearn.model_selection import train_test_split
+from sklearn import metrics as sk_metrics
 from scipy import misc
-from metrics import hamming_score, keras_hamming_loss
+import metrics
+import util
 
 from keras import backend as K
 from keras.models import Sequential
@@ -25,15 +26,16 @@ import tensorflow as tf
 import random as rn
 
 SEED = 23
-MODEL_PATH = "reflex"
+MODELS_PATH = "./models/"
+LOGS_PATH = "./logs/"
+DATA_PATH = "./data/"
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%m/%d/%Y %H:%M:%S')
 
 
 class ReflexDataGenerator(image.ImageDataGenerator):
-    '''
+    """
     Provides uniform zoom in both directions
-    '''
-
+    """
     def random_transform(self, x, seed=None):
         img_row_axis = self.row_axis - 1
         img_col_axis = self.col_axis - 1
@@ -128,6 +130,7 @@ class Reflex:
         self.class_weights = None
 
     def load_files(self, calculate_class_weights=True):
+        gc.collect()
         images = []
         image_paths = []
 
@@ -158,6 +161,7 @@ class Reflex:
         self.X /= 255.0
         self.y = self.y.as_matrix()
 
+        gc.collect()
         logging.debug("X shape: %s", self.X.shape)
         logging.debug("y shape: %s", self.y.shape)
 
@@ -167,8 +171,8 @@ class Reflex:
 
         logging.info("Splitting %d examples into training and testing sets", self.X.shape[0])
         # Rozwazyc Iterative Stratification: On the Stratification of Multi-Label Data, Tsoumakas et al.
-        X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=test_ratio, random_state=SEED,
-                                                            stratify=None)
+        X_train, X_test, y_train, y_test = util.train_test_split(self.X, self.y, test_size=test_ratio, stratify=self.y,
+                                                                 random_state=SEED)
 
         logging.debug("Training set shape: %s", X_train.shape)
         logging.debug("Testing set shape: %s", X_test.shape)
@@ -262,13 +266,13 @@ class Reflex:
     def train_model(self, X_train, y_train, X_val, y_val, model, model_name, verbose=1, save_model=True, epochs=50,
                     learning_rate=0.001, batch_size=32, debug=True, augment=True):
         if debug:
-            tb_callback = TensorBoard(log_dir="./logs/" + model_name, batch_size=batch_size, histogram_freq=epochs / 10,
+            tb_callback = TensorBoard(log_dir=LOGS_PATH + model_name, batch_size=batch_size, histogram_freq=epochs / 10,
                                       write_graph=True, write_images=True)
         else:
             tb_callback = None
 
         model.compile(loss='binary_crossentropy', optimizer=Adam(lr=learning_rate),
-                      metrics=[keras_hamming_loss])
+                      metrics=[metrics.hamming_loss])
 
         if augment:
             datagen = ReflexDataGenerator(
@@ -299,15 +303,17 @@ class Reflex:
 
         if save_model:
             logging.info("Saving model to file: %s", model_name)
-            model.save(model_name)
+            if not os.path.exists(MODELS_PATH):
+                os.mkdir(MODELS_PATH)
+            model.save(MODELS_PATH + model_name)
 
         return model
 
-    def test_model(self, X_test, y_test, model_object=None, load_model_from_file=True, model_name=MODEL_PATH,
+    def test_model(self, X_test, y_test, model_object=None, load_model_from_file=True, model_name=None,
                    diversify_thresholds=False):
         if load_model_from_file:
             logging.info("Loading model from file: %s", model_name)
-            model = load_model(model_name, custom_objects={'keras_hamming_loss': keras_hamming_loss})
+            model = load_model(MODELS_PATH + model_name, custom_objects={'hamming_loss': metrics.hamming_loss})
         elif model_object is not None:
             model = model_object
         else:
@@ -338,19 +344,19 @@ class Reflex:
         y_pred = np.array([[1 if y_proba[i, j] >= best_threshold[j] else 0 for j in range(y_test.shape[1])] for i in
                            range(len(y_test))])
 
-        logging.info("Exact match ratio: %.3f", metrics.accuracy_score(y_test, y_pred))
-        logging.info("Hamming score: %.3f", hamming_score(y_test, y_pred))
-        logging.info("Hamming loss: %.3f", metrics.hamming_loss(y_test, y_pred))
-        logging.info("Micro-averaged precision: %.3f", metrics.precision_score(y_test, y_pred, average="micro"))
-        logging.info("Micro-averaged recall: %.3f", metrics.recall_score(y_test, y_pred, average="micro"))
-        logging.info("Micro-averaged F-score: %.3f", metrics.f1_score(y_test, y_pred, average="micro"))
-        logging.info("Macro-averaged precision: %.3f", metrics.precision_score(y_test, y_pred, average="macro"))
-        logging.info("Macro-averaged recall: %.3f", metrics.recall_score(y_test, y_pred, average="macro"))
-        logging.info("Macro-averaged F-score: %.3f", metrics.f1_score(y_test, y_pred, average="macro"))
+        logging.info("Exact match ratio: %.3f", sk_metrics.accuracy_score(y_test, y_pred))
+        logging.info("Hamming score: %.3f", metrics.hamming_score(y_test, y_pred))
+        logging.info("Hamming loss: %.3f", sk_metrics.hamming_loss(y_test, y_pred))
+        logging.info("Micro-averaged precision: %.3f", sk_metrics.precision_score(y_test, y_pred, average="micro"))
+        logging.info("Micro-averaged recall: %.3f", sk_metrics.recall_score(y_test, y_pred, average="micro"))
+        logging.info("Micro-averaged F-score: %.3f", sk_metrics.f1_score(y_test, y_pred, average="micro"))
+        logging.info("Macro-averaged precision: %.3f", sk_metrics.precision_score(y_test, y_pred, average="macro"))
+        logging.info("Macro-averaged recall: %.3f", sk_metrics.recall_score(y_test, y_pred, average="macro"))
+        logging.info("Macro-averaged F-score: %.3f", sk_metrics.f1_score(y_test, y_pred, average="macro"))
 
 
 def run_experiments(resolution):
-    files = [fn for fn in glob.glob("./data/*.png") if (fn.endswith(resolution + "x" + resolution + ".png"))]
+    files = [fn for fn in glob.glob(DATA_PATH + "*.png") if (fn.endswith(resolution + "x" + resolution + ".png"))]
     reflex = Reflex(int(resolution), int(resolution), num_classes=7, image_files=files, label_file="reflex.csv")
     reflex.load_files()
     X_train, X_test, y_train, y_test = reflex.split_data(test_ratio=0.1)
@@ -359,7 +365,7 @@ def run_experiments(resolution):
         name = "cifar_lfr=" + str(lr)
         reflex.reset_session()
         reflex.train_model(X_train, y_train, X_test, y_test, reflex.make_dropout_model(), name,
-                           epochs=5, debug=True)
+                           epochs=2, debug=True)
         reflex.test_model(X_test, y_test, model_name=name)
 
 
