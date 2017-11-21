@@ -325,15 +325,15 @@ if __name__ == "__main__":
             num_classes = 7
             models = [
                 DropoutModel(input_shape, num_classes, dropout_ratio=0.2),
-                DropoutModel(input_shape, num_classes, dropout_ratio=0.4),
-                VggModel(input_shape, num_classes, 3),
-                VggModel(input_shape, num_classes, 4),
+                #DropoutModel(input_shape, num_classes, dropout_ratio=0.4),
+                #VggModel(input_shape, num_classes, 3),
+                #VggModel(input_shape, num_classes, 4),
                 VggModel(input_shape, num_classes, 5)
             ]
             lrs = [0.001]
             epochs = 200
             batch_sizes = [32]
-            augmenting = [True, False]
+            augmenting = [False]
             test_ratio = 0.2
 
             run_experiments(resolution, num_classes, models, lrs, epochs, augmenting, batch_sizes, test_ratio)
