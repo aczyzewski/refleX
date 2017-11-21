@@ -332,7 +332,7 @@ if __name__ == "__main__":
             ]
             lrs = [0.001]
             epochs = 200
-            batch_sizes = [32]
+            batch_sizes = [64]
             augmenting = [False]
             test_ratio = 0.2
 
