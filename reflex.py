@@ -324,14 +324,14 @@ if __name__ == "__main__":
             input_shape = (int(resolution), int(resolution), 1)
             num_classes = 7
             models = [
-                # DropoutModel(input_shape, num_classes, dropout_ratio=0.2),
-                # DropoutModel(input_shape, num_classes, dropout_ratio=0.4),
+                DropoutModel(input_shape, num_classes, dropout_ratio=0.2),
+                DropoutModel(input_shape, num_classes, dropout_ratio=0.4),
                 VggModel(input_shape, num_classes, 3),
                 VggModel(input_shape, num_classes, 4),
                 VggModel(input_shape, num_classes, 5)
             ]
             lrs = [0.001]
-            epochs = 2
+            epochs = 200
             batch_sizes = [32]
             augmenting = [True, False]
             test_ratio = 0.2
