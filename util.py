@@ -1,7 +1,11 @@
+# coding: utf-8
+
 import warnings
 import numpy as np
 from itertools import chain
 from sklearn.model_selection import _split
+
+__author__ = "Dariusz Brzezinski"
 
 
 class ForcedStratifiedShuffleSplit(_split.BaseShuffleSplit):

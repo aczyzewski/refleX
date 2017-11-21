@@ -1,3 +1,5 @@
+# coding: utf-8
+
 import glob
 import logging
 import subprocess
@@ -6,6 +8,8 @@ import signal
 import csv
 import pandas as pd
 from collections import OrderedDict
+
+__author__ = "Dariusz Brzezinski"
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s", datefmt="%m/%d/%Y %H:%M:%S")

@@ -1,5 +1,10 @@
+# coding: utf-8
+
 import numpy as np
 from keras import backend as K
+
+__author__ = "Dariusz Brzezinski"
+
 
 def hamming_score(y_true, y_pred):
     acc_list = []

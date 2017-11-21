@@ -1,3 +1,5 @@
+# coding: utf-8
+
 import glob
 import numpy as np
 import pandas as pd
@@ -13,17 +15,17 @@ import metrics
 import util
 
 from keras import backend as K
-from keras.models import Sequential
 from keras.models import load_model
-from keras.layers import Dense, Dropout, Activation, Flatten
-from keras.layers import Conv2D, MaxPooling2D
 from keras.optimizers import Adam
-from keras.callbacks import Callback, TensorBoard
+from keras.callbacks import TensorBoard
 from keras.preprocessing import image
-from keras.constraints import max_norm
 
 import tensorflow as tf
 import random as rn
+
+from models import DropoutModel, VggModel
+
+__author__ = "Dariusz Brzezinski"
 
 SEED = 23
 MODELS_PATH = "./models/"
@@ -36,6 +38,7 @@ class ReflexDataGenerator(image.ImageDataGenerator):
     """
     Provides uniform zoom in both directions
     """
+
     def random_transform(self, x, seed=None):
         img_row_axis = self.row_axis - 1
         img_col_axis = self.col_axis - 1
@@ -181,80 +184,8 @@ class Reflex:
 
         return X_train, X_test, y_train, y_test
 
-    def make_dropout_model(self):
-        model = Sequential()
-
-        # Block 1
-        model.add(
-            Conv2D(32, (3, 3), activation='relu', padding='same', input_shape=self.input_shape, name="block1_conv1"))
-        model.add(Dropout(0.2, name="block1_drop"))
-        model.add(Conv2D(32, (3, 3), activation='relu', padding='same', name="block1_conv2"))
-        model.add(MaxPooling2D(pool_size=(2, 2), name="block1_pool"))
-
-        # Block 2
-        model.add(Conv2D(64, (3, 3), activation='relu', padding='same', name="block2_conv1"))
-        model.add(Dropout(0.2, name="block2_drop"))
-        model.add(Conv2D(64, (3, 3), activation='relu', padding='same', name="block2_conv2"))
-        model.add(MaxPooling2D(pool_size=(2, 2), name="block2_pool"))
-
-        # Block 3
-        model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name="block3_conv1"))
-        model.add(Dropout(0.2, name="block3_drop"))
-        model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name="block3_conv2"))
-        model.add(MaxPooling2D(pool_size=(2, 2), name="block3_pool"))
-
-        # Classification block
-        model.add(Flatten(name="flatten"))
-        model.add(Dropout(0.2, name="clf_drop1"))
-        model.add(Dense(1024, activation='relu', kernel_constraint=max_norm(3), name="clf_fc1"))
-        model.add(Dropout(0.2, name="clf_drop2"))
-        model.add(Dense(512, activation='relu', kernel_constraint=max_norm(3), name="clf_fc2"))
-        model.add(Dropout(0.2, name="clf_drop3"))
-        model.add(Dense(self.num_classes, activation='sigmoid', name="predictions"))
-
-        return model
-
-    def make_vgg_model(self):
-        model = Sequential()
-
-        # Block 1
-        model.add(
-            Conv2D(64, (3, 3), activation="relu", padding="same", input_shape=self.input_shape, name="block1_conv1"))
-        model.add(Conv2D(64, (3, 3), activation="relu", padding="same", name="block1_conv2"))
-        model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block1_pool"))
-
-        # Block 2
-        model.add(Conv2D(128, (3, 3), activation="relu", padding="same", name="block2_conv1"))
-        model.add(Conv2D(128, (3, 3), activation="relu", padding="same", name="block2_conv2"))
-        model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block2_pool"))
-
-        # Block 3
-        model.add(Conv2D(256, (3, 3), activation="relu", padding="same", name="block3_conv1"))
-        model.add(Conv2D(256, (3, 3), activation="relu", padding="same", name="block3_conv2"))
-        model.add(Conv2D(256, (3, 3), activation="relu", padding="same", name="block3_conv3"))
-        model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block3_pool"))
-
-        # Block 4
-        model.add(Conv2D(512, (3, 3), activation="relu", padding="same", name="block4_conv1"))
-        model.add(Conv2D(512, (3, 3), activation="relu", padding="same", name="block4_conv2"))
-        model.add(Conv2D(512, (3, 3), activation="relu", padding="same", name="block4_conv3"))
-        model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block4_pool"))
-
-        # Block 5
-        model.add(Conv2D(512, (3, 3), activation="relu", padding="same", name="block5_conv1"))
-        model.add(Conv2D(512, (3, 3), activation="relu", padding="same", name="block5_conv2"))
-        model.add(Conv2D(512, (3, 3), activation="relu", padding="same", name="block5_conv3"))
-        model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block5_pool"))
-
-        # Classification block
-        model.add(Flatten(name="flatten"))
-        model.add(Dense(512, activation='relu', name="clf_fc1"))
-        model.add(Dense(512, activation='relu', name="clf_fc2"))
-        model.add(Dense(self.num_classes, activation='sigmoid', name="predictions"))
-
-        return model
-
-    def reset_session(self):
+    @staticmethod
+    def reset_session():
         K.clear_session()
         os.environ['PYTHONHASHSEED'] = '0'
         np.random.seed(SEED)
@@ -309,7 +240,8 @@ class Reflex:
 
         return model
 
-    def test_model(self, X_test, y_test, model_object=None, load_model_from_file=True, model_name=None,
+    @staticmethod
+    def test_model(X_test, y_test, model_object=None, load_model_from_file=True, model_name=None,
                    diversify_thresholds=False):
         if load_model_from_file:
             logging.info("Loading model from file: %s", model_name)
@@ -331,7 +263,7 @@ class Reflex:
                 y_prob = np.array(y_proba[:, i])
                 for j in threshold:
                     y_pred = [1 if prob >= j else 0 for prob in y_prob]
-                    acc.append(metrics.matthews_corrcoef(y_test[:, i], y_pred))
+                    acc.append(sk_metrics.matthews_corrcoef(y_test[:, i], y_pred))
                 acc = np.array(acc)
                 index = np.where(acc == acc.max())
                 accuracies.append(acc.max())
@@ -355,36 +287,50 @@ class Reflex:
         logging.info("Macro-averaged F-score: %.3f", sk_metrics.f1_score(y_test, y_pred, average="macro"))
 
 
-def run_experiments(resolution, lrs=[0.001, 0.0001, 0.00001, 0.000001], epochs=[50]):
-    files = [fn for fn in glob.glob(DATA_PATH + "*.png") if (fn.endswith(resolution + "x" + resolution + ".png"))]
-    reflex = Reflex(int(resolution), int(resolution), num_classes=7, image_files=files, label_file="reflex.csv")
+def get_run_name(model, resolution, learning_rate, epochs, augment, batch):
+    return str(model) + "_res=" + str(resolution) + "_lr=" + str(learning_rate) + "_ep=" + str(epochs) + "_aug=" + \
+           str(augment) + "_b=" + str(batch)
+
+
+def run_experiments(res, num_classes, models, lrs, epochs, augmenting, batch_sizes, test_ratio):
+    files = [fn for fn in glob.glob(DATA_PATH + "*.png") if (fn.endswith(res + "x" + res + ".png"))]
+    reflex = Reflex(int(res), int(res), num_classes=num_classes, image_files=files, label_file="reflex.csv")
     reflex.load_files()
-    X_train, X_test, y_train, y_test = reflex.split_data(test_ratio=0.1)
+    X_train, X_test, y_train, y_test = reflex.split_data(test_ratio=test_ratio)
 
-    for lr in lrs:
-        for epoch in epochs:
-            name = "dropout_lr=" + str(lr) + "_ep=" + str(epoch)
-            reflex.reset_session()
-            reflex.train_model(X_train, y_train, X_test, y_test, reflex.make_dropout_model(), name,
-                               epochs=epoch, debug=True, learning_rate=lr)
-            reflex.test_model(X_test, y_test, model_name=name)
-
-    # for lr in lrs:
-    #     for epoch in epochs:
-    #         name = "vgg_lr=" + str(lr) + "_ep=" + str(epoch)
-    #         reflex.reset_session()
-    #         reflex.train_model(X_train, y_train, X_test, y_test, reflex.make_vgg_model(), name,
-    #                            epochs=epoch, debug=True)
-    #         reflex.test_model(X_test, y_test, model_name=name)
+    for model in models:
+        for lr in lrs:
+            for augment in augmenting:
+                for batch_size in batch_sizes:
+                    name = get_run_name(model, res, lr, epochs, augment, batch_size)
+                    reflex.reset_session()
+                    reflex.train_model(X_train, y_train, X_test, y_test, model.create(), name, epochs=epochs,
+                                       learning_rate=lr, augment=augment, batch_size=batch_size)
+                    reflex.test_model(X_test, y_test, model_name=name)
 
 
 if __name__ == "__main__":
+    usage = "Usage: python reflex.py -r <int resolution>\n" \
+            "       python reflex.py --resolution <int resolution>"
+
     try:
-        usage = "Usage: python reflex.py -r <int resolution>\n" \
-                "       python reflex.py --resolution <int resolution>"
         opts, args = getopt.getopt(sys.argv[1:], "r:", ["resolution="])
         if len(opts) == 1 and len(args) == 0 and opts[0][0] in ("-r", "--resolution"):
-            run_experiments(opts[0][1])
+            resolution = opts[0][1]
+            input_shape = (int(resolution), int(resolution), 1)
+            num_classes = 7
+            models = [DropoutModel(input_shape, num_classes, dropout_ratio=0.2),
+                      DropoutModel(input_shape, num_classes, dropout_ratio=0.4),
+                      VggModel(input_shape, num_classes, 3),
+                      VggModel(input_shape, num_classes, 4),
+                      VggModel(input_shape, num_classes, 5)]
+            lrs = [0.001]
+            epochs = 2
+            batch_sizes = [32]
+            augmenting = [True, False]
+            test_ratio = 0.2
+
+            run_experiments(resolution, num_classes, models, lrs, epochs, augmenting, batch_sizes, test_ratio)
         else:
             print(usage)
             sys.exit(2)
