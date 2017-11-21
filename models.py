@@ -107,7 +107,7 @@ class VggModel(ReflexModel):
 
         # Classification block
         model.add(Flatten(name="flatten"))
-        model.add(Dense(1024, activation='relu', name="clf_fc1"))
+        model.add(Dense(512, activation='relu', name="clf_fc1"))
         model.add(Dense(512, activation='relu', name="clf_fc2"))
         model.add(Dense(self.num_classes, activation='sigmoid', name="predictions"))
 

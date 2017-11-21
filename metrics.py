@@ -20,5 +20,10 @@ def hamming_score(y_true, y_pred):
         acc_list.append(tmp_a)
     return np.mean(acc_list)
 
+
 def hamming_loss(y_true, y_pred):
     return K.sum(K.abs(y_true - K.round(y_pred))) / K.cast(K.shape(y_true)[0] * K.shape(y_true)[1], K.floatx())
+
+
+def exact_match_ratio(y_true, y_pred):
+    return K.mean(K.all(K.equal(y_true - K.round(y_pred), y_true*0), axis=-1))

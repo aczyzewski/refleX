@@ -203,7 +203,7 @@ class Reflex:
             tb_callback = None
 
         model.compile(loss='binary_crossentropy', optimizer=Adam(lr=learning_rate),
-                      metrics=[metrics.hamming_loss])
+                      metrics=[metrics.hamming_loss, metrics.exact_match_ratio])
 
         if augment:
             datagen = ReflexDataGenerator(
@@ -245,7 +245,11 @@ class Reflex:
                    diversify_thresholds=False):
         if load_model_from_file:
             logging.info("Loading model from file: %s", model_name)
-            model = load_model(MODELS_PATH + model_name, custom_objects={'hamming_loss': metrics.hamming_loss})
+            model = load_model(MODELS_PATH + model_name,
+                               custom_objects={
+                                   'hamming_loss': metrics.hamming_loss,
+                                   'exact_match_ratio': metrics.exact_match_ratio
+                               })
         elif model_object is not None:
             model = model_object
         else:
@@ -319,11 +323,13 @@ if __name__ == "__main__":
             resolution = opts[0][1]
             input_shape = (int(resolution), int(resolution), 1)
             num_classes = 7
-            models = [DropoutModel(input_shape, num_classes, dropout_ratio=0.2),
-                      DropoutModel(input_shape, num_classes, dropout_ratio=0.4),
-                      VggModel(input_shape, num_classes, 3),
-                      VggModel(input_shape, num_classes, 4),
-                      VggModel(input_shape, num_classes, 5)]
+            models = [
+                # DropoutModel(input_shape, num_classes, dropout_ratio=0.2),
+                # DropoutModel(input_shape, num_classes, dropout_ratio=0.4),
+                VggModel(input_shape, num_classes, 3),
+                VggModel(input_shape, num_classes, 4),
+                VggModel(input_shape, num_classes, 5)
+            ]
             lrs = [0.001]
             epochs = 2
             batch_sizes = [32]
