@@ -331,10 +331,10 @@ if __name__ == "__main__":
                 VggModel(input_shape, num_classes, 5, use_dropout=True, dropout_ratio=0.2),
                 # FcModel(input_shape, num_classes)
             ]
-            lrs = [0.001]
-            epochs = 20
+            lrs = [0.0001]
+            epochs = 300
             batch_sizes = [64]
-            augmenting = [False]
+            augmenting = [False, True]
             test_ratio = 0.2
 
             run_experiments(resolution, num_classes, models, lrs, epochs, augmenting, batch_sizes, test_ratio)
