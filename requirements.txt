@@ -1,0 +1,8 @@
+tensorflow
+scipy
+numpy
+pandas
+Keras
+scikit_learn
+h5py
+Pillow

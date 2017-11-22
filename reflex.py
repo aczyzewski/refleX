@@ -23,7 +23,7 @@ from keras.preprocessing import image
 import tensorflow as tf
 import random as rn
 
-from models import DropoutModel, VggModel
+from models import DropoutModel, VggModel, FcModel
 
 __author__ = "Dariusz Brzezinski"
 
@@ -173,7 +173,6 @@ class Reflex:
             raise Exception("No images! Load image files before splitting the data.")
 
         logging.info("Splitting %d examples into training and testing sets", self.X.shape[0])
-        # Rozwazyc Iterative Stratification: On the Stratification of Multi-Label Data, Tsoumakas et al.
         X_train, X_test, y_train, y_test = util.train_test_split(self.X, self.y, test_size=test_ratio, stratify=self.y,
                                                                  random_state=SEED)
 
@@ -240,9 +239,7 @@ class Reflex:
 
         return model
 
-    @staticmethod
-    def test_model(X_test, y_test, model_object=None, load_model_from_file=True, model_name=None,
-                   diversify_thresholds=False):
+    def test_model(self, X_test, y_test, model_object=None, load_model_from_file=True, model_name=None):
         if load_model_from_file:
             logging.info("Loading model from file: %s", model_name)
             model = load_model(MODELS_PATH + model_name,
@@ -257,24 +254,22 @@ class Reflex:
 
         y_proba = model.predict_proba(X_test)
         y_proba = np.array(y_proba)
-        threshold = np.arange(0.1, 0.9, 0.1)
+        threshold = np.arange(0.001, 0.999, 0.001)
 
-        if diversify_thresholds:
+        acc = []
+        accuracies = []
+        best_threshold = np.zeros(self.num_classes)
+
+        for i in range(self.num_classes):
+            y_prob = np.array(y_proba[:, i])
+            for j in threshold:
+                y_pred = [1 if prob >= j else 0 for prob in y_prob]
+                acc.append(sk_metrics.matthews_corrcoef(y_test[:, i], y_pred))
+            acc = np.array(acc)
+            index = np.where(acc == acc.max())
+            accuracies.append(acc.max())
+            best_threshold[i] = threshold[index[0][0]]
             acc = []
-            accuracies = []
-            best_threshold = np.zeros(y_proba.shape[1])
-            for i in range(y_proba.shape[1]):
-                y_prob = np.array(y_proba[:, i])
-                for j in threshold:
-                    y_pred = [1 if prob >= j else 0 for prob in y_prob]
-                    acc.append(sk_metrics.matthews_corrcoef(y_test[:, i], y_pred))
-                acc = np.array(acc)
-                index = np.where(acc == acc.max())
-                accuracies.append(acc.max())
-                best_threshold[i] = threshold[index[0][0]]
-                acc = []
-        else:
-            best_threshold = np.ones(y_proba.shape[1]) * 0.5
 
         logging.info("Class thresholds: %s", best_threshold)
         y_pred = np.array([[1 if y_proba[i, j] >= best_threshold[j] else 0 for j in range(y_test.shape[1])] for i in
@@ -328,10 +323,11 @@ if __name__ == "__main__":
                 #DropoutModel(input_shape, num_classes, dropout_ratio=0.4),
                 #VggModel(input_shape, num_classes, 3),
                 #VggModel(input_shape, num_classes, 4),
-                VggModel(input_shape, num_classes, 5)
+                # VggModel(input_shape, num_classes, 5),
+                # FcModel(input_shape, num_classes)
             ]
             lrs = [0.001]
-            epochs = 200
+            epochs = 20
             batch_sizes = [64]
             augmenting = [False]
             test_ratio = 0.2

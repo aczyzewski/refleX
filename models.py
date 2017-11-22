@@ -26,38 +26,38 @@ class DropoutModel(ReflexModel):
 
     def __repr__(self):
         if self.use_dropout:
-            return 'dropout_max=%.2f_drop=%.2f' % (self.max_norm_value, self.dropout_ratio)
+            return "dropout_max=%.2f_drop=%.2f" % (self.max_norm_value, self.dropout_ratio)
         else:
-            return 'dropout_max=%.2f' % (self.max_norm_value)
+            return "dropout_max=%.2f" % (self.max_norm_value)
 
     def create(self):
         model = Sequential()
 
-        model.add(Conv2D(32, (3, 3), activation='relu', padding='same', name="block1_conv1", input_shape=self.input_shape))
+        model.add(Conv2D(32, (3, 3), activation="relu", padding="same", name="block1_conv1", input_shape=self.input_shape))
         if self.use_dropout: model.add(Dropout(self.dropout_ratio, name="block1_drop"))
-        model.add(Conv2D(32, (3, 3), activation='relu', padding='same', name="block1_conv2"))
+        model.add(Conv2D(32, (3, 3), activation="relu", padding="same", name="block1_conv2"))
         model.add(MaxPooling2D(pool_size=(2, 2), name="block1_pool"))
 
         # Block 2
-        model.add(Conv2D(64, (3, 3), activation='relu', padding='same', name="block2_conv1"))
+        model.add(Conv2D(64, (3, 3), activation="relu", padding="same", name="block2_conv1"))
         if self.use_dropout: model.add(Dropout(self.dropout_ratio, name="block2_drop"))
-        model.add(Conv2D(64, (3, 3), activation='relu', padding='same', name="block2_conv2"))
+        model.add(Conv2D(64, (3, 3), activation="relu", padding="same", name="block2_conv2"))
         model.add(MaxPooling2D(pool_size=(2, 2), name="block2_pool"))
 
         # Block 3
-        model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name="block3_conv1"))
+        model.add(Conv2D(128, (3, 3), activation="relu", padding="same", name="block3_conv1"))
         if self.use_dropout: model.add(Dropout(self.dropout_ratio, name="block3_drop"))
-        model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name="block3_conv2"))
+        model.add(Conv2D(128, (3, 3), activation="relu", padding="same", name="block3_conv2"))
         model.add(MaxPooling2D(pool_size=(2, 2), name="block3_pool"))
 
         # Classification block
         model.add(Flatten(name="flatten"))
         if self.use_dropout: model.add(Dropout(self.dropout_ratio, name="clf_drop1"))
-        model.add(Dense(1024, activation='relu', kernel_constraint=max_norm(self.max_norm_value), name="clf_fc1"))
+        model.add(Dense(1024, activation="relu", kernel_constraint=max_norm(self.max_norm_value), name="clf_fc1"))
         if self.use_dropout: model.add(Dropout(self.dropout_ratio, name="clf_drop2"))
-        model.add(Dense(512, activation='relu', kernel_constraint=max_norm(self.max_norm_value), name="clf_fc2"))
+        model.add(Dense(512, activation="relu", kernel_constraint=max_norm(self.max_norm_value), name="clf_fc2"))
         if self.use_dropout: model.add(Dropout(self.dropout_ratio, name="clf_drop3"))
-        model.add(Dense(self.num_classes, activation='sigmoid', name="predictions"))
+        model.add(Dense(self.num_classes, activation="sigmoid", name="predictions"))
 
         return model
 
@@ -70,7 +70,7 @@ class VggModel(ReflexModel):
         super(VggModel, self).__init__(input_shape, num_classes)
 
     def __repr__(self):
-        return 'vgg_blocks=%d' % self.blocks
+        return "vgg_blocks=%d" % self.blocks
 
     def create(self):
         model = Sequential()
@@ -107,8 +107,28 @@ class VggModel(ReflexModel):
 
         # Classification block
         model.add(Flatten(name="flatten"))
-        model.add(Dense(1024, activation='relu', name="clf_fc1"))
-        model.add(Dense(1024, activation='relu', name="clf_fc2"))
-        model.add(Dense(self.num_classes, activation='sigmoid', name="predictions"))
+        model.add(Dense(1024, activation="relu", name="clf_fc1"))
+        model.add(Dense(1024, activation="relu", name="clf_fc2"))
+        model.add(Dense(self.num_classes, activation="sigmoid", name="predictions"))
+
+        return model
+
+
+class FcModel(ReflexModel):
+    def __init__(self, input_shape, num_classes):
+        super(FcModel, self).__init__(input_shape, num_classes)
+
+    def __repr__(self):
+        return "fc4_"
+
+    def create(self):
+        model = Sequential()
+
+        model.add(Flatten(name="flatten", input_shape=self.input_shape))
+        model.add(Dense(1024, activation="relu", name="clf_fc1"))
+        model.add(Dense(1024, activation="relu", name="clf_fc2"))
+        model.add(Dense(1024, activation="relu", name="clf_fc3"))
+        model.add(Dense(512, activation="relu", name="clf_fc4"))
+        model.add(Dense(self.num_classes, activation="sigmoid", name="predictions"))
 
         return model
