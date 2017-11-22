@@ -148,8 +148,15 @@ class Reflex:
         y_paths = y_df.iloc[:, 0]
         self.y = y_df.iloc[:, 1:]
         if calculate_class_weights:
-            self.class_weights = self.y.sum(axis=0)
-            self.class_weights = self.class_weights.max() / self.class_weights
+            class_weights = self.y.sum(axis=0)
+            class_weights = class_weights.max() / class_weights
+            weight_dict = {}
+            idx = 0
+            for cls, weight in class_weights.iteritems():
+                weight_dict[idx] = weight
+                idx += 1
+            self.class_weights = weight_dict
+
 
         X_filter = []
         for idx, path in enumerate(X_paths):
@@ -201,7 +208,7 @@ class Reflex:
         else:
             tb_callback = None
 
-        model.compile(loss='binary_crossentropy', optimizer=Adam(lr=learning_rate),
+        model.compile(loss="binary_crossentropy", optimizer=Adam(lr=learning_rate),
                       metrics=[metrics.hamming_loss, metrics.exact_match_ratio])
 
         if augment:
@@ -319,11 +326,9 @@ if __name__ == "__main__":
             input_shape = (int(resolution), int(resolution), 1)
             num_classes = 7
             models = [
-                DropoutModel(input_shape, num_classes, dropout_ratio=0.2),
+                # DropoutModel(input_shape, num_classes, dropout_ratio=0.2),
                 #DropoutModel(input_shape, num_classes, dropout_ratio=0.4),
-                #VggModel(input_shape, num_classes, 3),
-                #VggModel(input_shape, num_classes, 4),
-                # VggModel(input_shape, num_classes, 5),
+                VggModel(input_shape, num_classes, 5, use_dropout=True, dropout_ratio=0.2),
                 # FcModel(input_shape, num_classes)
             ]
             lrs = [0.001]
