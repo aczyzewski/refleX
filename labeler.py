@@ -4,6 +4,7 @@ import glob
 import logging
 import subprocess
 import os
+import sys
 import signal
 import csv
 import pandas as pd
@@ -69,12 +70,17 @@ def label_images(files):
 
         print
         print image_path
-        pro = subprocess.Popen("xdg-open " + image_path, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
+        if sys.platform == 'linux2':
+            pro = subprocess.Popen("xdg-open " + image_path, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
+        else:
+            os.startfile(image_path)
+
         labels = list(raw_input(msg))
         write_to_csv(image_path, labels)
-        os.killpg(os.getpgid(pro.pid), signal.SIGTERM)
+        if sys.platform == 'linux2':
+            os.killpg(os.getpgid(pro.pid), signal.SIGTERM)
 
 
 if __name__ == "__main__":
-    files = [fn for fn in glob.glob("./data/*.png") if not (fn.endswith("100x100.png") or fn.endswith("300x300.png"))]
+    files = [fn for fn in glob.glob("./data/*.png") if (fn.endswith("300x300.png"))]
     label_images(files)
