@@ -62,6 +62,35 @@ class DropoutModel(ReflexModel):
         return model
 
 
+class PoolingModel(ReflexModel):
+    def __init__(self, input_shape, num_classes):
+        super(PoolingModel, self).__init__(input_shape, num_classes)
+
+    def __repr__(self):
+        return "pool_"
+
+    def create(self):
+        model = Sequential()
+
+        model.add(Conv2D(16, (3, 3), activation="relu", padding="same", name="block1_conv1", input_shape=self.input_shape))
+        model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block1_pool"))
+        model.add(Conv2D(32, (3, 3), activation="relu", padding="same", name="block2_conv1"))
+        model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block2_pool"))
+        model.add(Conv2D(64, (3, 3), activation="relu", padding="same", name="block3_conv1"))
+        model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block3_pool"))
+        model.add(Conv2D(64, (3, 3), activation="relu", padding="same", name="block4_conv1"))
+        model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block4_pool"))
+        model.add(Conv2D(32, (3, 3), activation="relu", padding="same", name="block5_conv1"))
+        model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block5_pool"))
+
+        # Classification block
+        model.add(Flatten(name="flatten"))
+        model.add(Dense(265, activation="relu", name="clf_fc1"))
+        model.add(Dense(128, activation="relu", name="clf_fc2"))
+        model.add(Dense(self.num_classes, activation="sigmoid", name="predictions"))
+
+        return model
+
 class VggModel(ReflexModel):
     def __init__(self, input_shape, num_classes, blocks=5, dropout_ratio=0.2, use_dropout=True):
         if blocks < 3 or blocks > 5:

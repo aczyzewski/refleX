@@ -23,7 +23,7 @@ from keras.preprocessing import image
 import tensorflow as tf
 import random as rn
 
-from models import DropoutModel, VggModel, FcModel
+from models import DropoutModel, VggModel, FcModel, PoolingModel
 
 __author__ = "Dariusz Brzezinski"
 
@@ -328,13 +328,14 @@ if __name__ == "__main__":
             models = [
                 # DropoutModel(input_shape, num_classes, dropout_ratio=0.2),
                 #DropoutModel(input_shape, num_classes, dropout_ratio=0.4),
-                VggModel(input_shape, num_classes, 5, use_dropout=True, dropout_ratio=0.2),
+                # VggModel(input_shape, num_classes, 5, use_dropout=True, dropout_ratio=0.2),
+                PoolingModel(input_shape, num_classes),
                 # FcModel(input_shape, num_classes)
             ]
-            lrs = [0.0001]
-            epochs = 300
+            lrs = [0.001]
+            epochs = 50
             batch_sizes = [64]
-            augmenting = [False, True]
+            augmenting = [True]
             test_ratio = 0.2
 
             run_experiments(resolution, num_classes, models, lrs, epochs, augmenting, batch_sizes, test_ratio)
