@@ -132,6 +132,15 @@ class Reflex:
         self.y = None
         self.class_weights = None
 
+    def preprocess_images(self, X):
+        logging.info("Normalizing %d images", X.shape[0])
+        X = X.reshape(X.shape[0], self.img_x, self.img_y, 1)
+        X = X.astype('float32')
+        X /= 255.0
+        X = 1.0 - X
+
+        return X
+
     def load_files(self, calculate_class_weights=True):
         gc.collect()
         images = []
@@ -164,13 +173,11 @@ class Reflex:
             if raw_path in set(y_paths.values):
                 X_filter.append(idx)
         self.X = X_full[X_filter]
+        self.X = self.preprocess_images(self.X)
 
-        logging.info("Normalizing %d images", self.X.shape[0])
-        self.X = self.X.reshape(self.X.shape[0], self.img_x, self.img_y, 1)
-        self.X = self.X.astype('float32')
-        self.X /= 255.0
         self.y = self.y.as_matrix()
         self.y = self.y.astype('float32')
+        self.y = self.y[:, 2]
 
         gc.collect()
         logging.debug("X shape: %s", self.X.shape)
@@ -284,10 +291,10 @@ def get_run_name(model, resolution, learning_rate, epochs, augment, batch):
            str(augment) + "_b=" + str(batch)
 
 
-def run_experiments(res, num_classes, models, lrs, epochs, augmenting, batch_sizes, test_ratio):
+def run_experiments(res, num_classes, models, lrs, epochs, augmenting, batch_sizes, test_ratio, weights):
     files = [fn for fn in glob.glob(DATA_PATH + "*.png") if (fn.endswith(res + "x" + res + ".png"))]
     reflex = Reflex(int(res), int(res), num_classes=num_classes, image_files=files, label_file="reflex.csv")
-    reflex.load_files()
+    reflex.load_files(calculate_class_weights=weights)
     X_train, X_test, y_train, y_test = reflex.split_data(test_ratio=test_ratio)
 
     for model in models:
@@ -311,7 +318,7 @@ if __name__ == "__main__":
         if len(opts) == 1 and len(args) == 0 and opts[0][0] in ("-r", "--resolution"):
             resolution = opts[0][1]
             input_shape = (int(resolution), int(resolution), 1)
-            num_classes = 7
+            num_classes = 1
             models = [
                 # DropoutModel(input_shape, num_classes, dropout_ratio=0.2, activation="sigmoid"),
                 #DropoutModel(input_shape, num_classes, dropout_ratio=0.4),
@@ -319,13 +326,14 @@ if __name__ == "__main__":
                 PoolingModel(input_shape, num_classes, activation="sigmoid"),
                 # FcModel(input_shape, num_classes)
             ]
-            lrs = [0.01]
+            lrs = [0.001]
             epochs = 50
-            batch_sizes = [64]
+            batch_sizes = [32]
             augmenting = [True, False]
             test_ratio = 0.1
+            weights = False
 
-            run_experiments(resolution, num_classes, models, lrs, epochs, augmenting, batch_sizes, test_ratio)
+            run_experiments(resolution, num_classes, models, lrs, epochs, augmenting, batch_sizes, test_ratio, weights)
         else:
             print(usage)
             sys.exit(2)
