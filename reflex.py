@@ -24,7 +24,7 @@ from keras.preprocessing import image
 import tensorflow as tf
 import random as rn
 
-from models import DropoutModel, VggModel, FcModel, PoolingModel
+from models import DropoutModel, VggModel, PoolingModel, BatchNormPoolingModel
 
 __author__ = "Dariusz Brzezinski"
 
@@ -343,12 +343,12 @@ if __name__ == "__main__":
                 # DropoutModel(input_shape, num_classes, use_dropout=False, activation="sigmoid"),
                 #DropoutModel(input_shape, num_classes, dropout_ratio=0.4),
                 # VggModel(input_shape, num_classes, "sigmoid", 5, use_dropout=False, dropout_ratio=0.2),
-                PoolingModel(input_shape, num_classes, activation="sigmoid"),
-                # FcModel(input_shape, num_classes)
+                # PoolingModel(input_shape, num_classes, activation="sigmoid"),
+                BatchNormPoolingModel(input_shape, num_classes, activation="sigmoid")
             ]
             lrs = [0.001]
-            epochs = 200
-            batch_sizes = [32]
+            epochs = 300
+            batch_sizes = [64]
             augmenting = [False]
             test_ratio = 0.3
             weights = False
