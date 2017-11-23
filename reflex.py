@@ -166,7 +166,6 @@ class Reflex:
                 idx += 1
             self.class_weights = weight_dict
 
-
         X_filter = []
         for idx, path in enumerate(X_paths):
             raw_path = path[:-11] + "png"
@@ -177,7 +176,6 @@ class Reflex:
 
         self.y = self.y.as_matrix()
         self.y = self.y.astype('float32')
-        self.y = self.y[:, 2]
 
         gc.collect()
         logging.debug("X shape: %s", self.X.shape)
@@ -297,6 +295,27 @@ def run_experiments(res, num_classes, models, lrs, epochs, augmenting, batch_siz
     reflex.load_files(calculate_class_weights=weights)
     X_train, X_test, y_train, y_test = reflex.split_data(test_ratio=test_ratio)
 
+    # import keras
+    # from keras.datasets import mnist
+    #
+    # res = 28
+    # num_classes = 10
+    # epochs = 10
+    # reflex = Reflex(res, res, num_classes, None, None)
+    # (x_train, y_train), (x_test, y_test) = mnist.load_data()
+    # X_train = x_train.reshape(x_train.shape[0], res, res, 1)
+    # X_test = x_test.reshape(x_test.shape[0], res, res, 1)
+    # X_train = X_train.astype('float32')
+    # X_test = X_test.astype('float32')
+    # X_train /= 255
+    # X_test /= 255
+    # y_train = keras.utils.to_categorical(y_train, num_classes)
+    # y_test = keras.utils.to_categorical(y_test, num_classes)
+    # reflex.input_shape = (28, 28, 1)
+    # models = [
+    #     DropoutModel(reflex.input_shape, num_classes, "sigmoid", dropout_ratio=0.2)
+    # ]
+
     for model in models:
         for lr in lrs:
             for augment in augmenting:
@@ -318,18 +337,18 @@ if __name__ == "__main__":
         if len(opts) == 1 and len(args) == 0 and opts[0][0] in ("-r", "--resolution"):
             resolution = opts[0][1]
             input_shape = (int(resolution), int(resolution), 1)
-            num_classes = 1
+            num_classes = 7
             models = [
-                # DropoutModel(input_shape, num_classes, dropout_ratio=0.2, activation="sigmoid"),
+                # DropoutModel(input_shape, num_classes, use_dropout=False, activation="sigmoid"),
                 #DropoutModel(input_shape, num_classes, dropout_ratio=0.4),
-                # VggModel(input_shape, num_classes, 5, use_dropout=True, dropout_ratio=0.2),
-                PoolingModel(input_shape, num_classes, activation="sigmoid"),
+                VggModel(input_shape, num_classes, "sigmoid", 5, use_dropout=False, dropout_ratio=0.2),
+                # PoolingModel(input_shape, num_classes, activation="sigmoid"),
                 # FcModel(input_shape, num_classes)
             ]
             lrs = [0.001]
             epochs = 50
-            batch_sizes = [32]
-            augmenting = [True, False]
+            batch_sizes = [64]
+            augmenting = [False]
             test_ratio = 0.1
             weights = False
 
