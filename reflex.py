@@ -170,6 +170,7 @@ class Reflex:
         self.X = self.X.astype('float32')
         self.X /= 255.0
         self.y = self.y.as_matrix()
+        self.y = self.y.astype('float32')
 
         gc.collect()
         logging.debug("X shape: %s", self.X.shape)
@@ -201,14 +202,14 @@ class Reflex:
         K.set_session(sess)
 
     def train_model(self, X_train, y_train, X_val, y_val, model, model_name, verbose=1, save_model=True, epochs=50,
-                    learning_rate=0.001, batch_size=32, debug=True, augment=True):
+                    learning_rate=0.001, batch_size=32, debug=True, augment=True, loss="binary_crossentropy"):
         if debug:
             tb_callback = TensorBoard(log_dir=LOGS_PATH + model_name, batch_size=batch_size, histogram_freq=epochs / 10,
                                       write_graph=True, write_images=False)
         else:
             tb_callback = None
 
-        model.compile(loss="binary_crossentropy", optimizer=Adam(lr=learning_rate),
+        model.compile(loss=loss, optimizer=Adam(lr=learning_rate),
                       metrics=[metrics.hamming_loss, metrics.exact_match_ratio])
 
         if augment:
@@ -261,22 +262,7 @@ class Reflex:
 
         y_proba = model.predict_proba(X_test)
         y_proba = np.array(y_proba)
-        threshold = np.arange(0.001, 0.999, 0.001)
-
-        acc = []
-        accuracies = []
-        best_threshold = np.zeros(self.num_classes)
-
-        for i in range(self.num_classes):
-            y_prob = np.array(y_proba[:, i])
-            for j in threshold:
-                y_pred = [1 if prob >= j else 0 for prob in y_prob]
-                acc.append(sk_metrics.matthews_corrcoef(y_test[:, i], y_pred))
-            acc = np.array(acc)
-            index = np.where(acc == acc.max())
-            accuracies.append(acc.max())
-            best_threshold[i] = threshold[index[0][0]]
-            acc = []
+        best_threshold = np.ones(self.num_classes) * 0.5
 
         logging.info("Class thresholds: %s", best_threshold)
         y_pred = np.array([[1 if y_proba[i, j] >= best_threshold[j] else 0 for j in range(y_test.shape[1])] for i in
@@ -311,7 +297,8 @@ def run_experiments(res, num_classes, models, lrs, epochs, augmenting, batch_siz
                     name = get_run_name(model, res, lr, epochs, augment, batch_size)
                     reflex.reset_session()
                     reflex.train_model(X_train, y_train, X_test, y_test, model.create(), name, epochs=epochs,
-                                       learning_rate=lr, augment=augment, batch_size=batch_size)
+                                       learning_rate=lr, augment=augment, batch_size=batch_size,
+                                       loss="binary_crossentropy")
                     reflex.test_model(X_test, y_test, model_name=name)
 
 
@@ -326,17 +313,17 @@ if __name__ == "__main__":
             input_shape = (int(resolution), int(resolution), 1)
             num_classes = 7
             models = [
-                # DropoutModel(input_shape, num_classes, dropout_ratio=0.2),
+                # DropoutModel(input_shape, num_classes, dropout_ratio=0.2, activation="sigmoid"),
                 #DropoutModel(input_shape, num_classes, dropout_ratio=0.4),
                 # VggModel(input_shape, num_classes, 5, use_dropout=True, dropout_ratio=0.2),
-                PoolingModel(input_shape, num_classes),
+                PoolingModel(input_shape, num_classes, activation="sigmoid"),
                 # FcModel(input_shape, num_classes)
             ]
-            lrs = [0.001]
+            lrs = [0.01]
             epochs = 50
             batch_sizes = [64]
-            augmenting = [True]
-            test_ratio = 0.2
+            augmenting = [True, False]
+            test_ratio = 0.1
 
             run_experiments(resolution, num_classes, models, lrs, epochs, augmenting, batch_sizes, test_ratio)
         else:

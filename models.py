@@ -9,20 +9,21 @@ __author__ = "Dariusz Brzezinski"
 
 
 class ReflexModel(object):
-    def __init__(self, input_shape, num_classes):
+    def __init__(self, input_shape, num_classes, activation):
         self.input_shape = input_shape
         self.num_classes = num_classes
+        self.activation = activation
 
     def create(self):
         pass
 
 
 class DropoutModel(ReflexModel):
-    def __init__(self, input_shape, num_classes, max_norm_value=3, dropout_ratio=0.2, use_dropout=True):
+    def __init__(self, input_shape, num_classes, activation, max_norm_value=3, dropout_ratio=0.2, use_dropout=True):
         self.max_norm_value = max_norm_value
         self.dropout_ratio = dropout_ratio
         self.use_dropout = use_dropout
-        super(DropoutModel, self).__init__(input_shape, num_classes)
+        super(DropoutModel, self).__init__(input_shape, num_classes, activation)
 
     def __repr__(self):
         if self.use_dropout:
@@ -57,14 +58,14 @@ class DropoutModel(ReflexModel):
         if self.use_dropout: model.add(Dropout(self.dropout_ratio, name="clf_drop2"))
         model.add(Dense(512, activation="relu", kernel_constraint=max_norm(self.max_norm_value), name="clf_fc2"))
         if self.use_dropout: model.add(Dropout(self.dropout_ratio, name="clf_drop3"))
-        model.add(Dense(self.num_classes, activation="sigmoid", name="predictions"))
+        model.add(Dense(self.num_classes, activation=self.activation, name="predictions"))
 
         return model
 
 
 class PoolingModel(ReflexModel):
-    def __init__(self, input_shape, num_classes):
-        super(PoolingModel, self).__init__(input_shape, num_classes)
+    def __init__(self, input_shape, num_classes, activation):
+        super(PoolingModel, self).__init__(input_shape, num_classes, activation)
 
     def __repr__(self):
         return "pool_"
@@ -87,18 +88,19 @@ class PoolingModel(ReflexModel):
         model.add(Flatten(name="flatten"))
         model.add(Dense(265, activation="relu", name="clf_fc1"))
         model.add(Dense(128, activation="relu", name="clf_fc2"))
-        model.add(Dense(self.num_classes, activation="sigmoid", name="predictions"))
+        model.add(Dense(self.num_classes, activation=self.activation, name="predictions"))
 
         return model
 
+
 class VggModel(ReflexModel):
-    def __init__(self, input_shape, num_classes, blocks=5, dropout_ratio=0.2, use_dropout=True):
+    def __init__(self, input_shape, num_classes, activation, blocks=5, dropout_ratio=0.2, use_dropout=True):
         if blocks < 3 or blocks > 5:
             raise Exception("Use from 3 to 5 blocks!")
         self.blocks = blocks
         self.dropout_ratio = dropout_ratio
         self.use_dropout = use_dropout
-        super(VggModel, self).__init__(input_shape, num_classes)
+        super(VggModel, self).__init__(input_shape, num_classes, activation)
 
     def __repr__(self):
         return "vgg_blocks=%d" % self.blocks
@@ -148,14 +150,14 @@ class VggModel(ReflexModel):
         if self.use_dropout: model.add(Dropout(self.dropout_ratio, name="clf_drop2"))
         model.add(Dense(4096, activation="relu", name="clf_fc2"))
         if self.use_dropout: model.add(Dropout(self.dropout_ratio, name="clf_drop3"))
-        model.add(Dense(self.num_classes, activation="sigmoid", name="predictions"))
+        model.add(Dense(self.num_classes, activation=self.activation , name="predictions"))
 
         return model
 
 
 class FcModel(ReflexModel):
-    def __init__(self, input_shape, num_classes):
-        super(FcModel, self).__init__(input_shape, num_classes)
+    def __init__(self, input_shape, num_classes, activation):
+        super(FcModel, self).__init__(input_shape, num_classes, activation)
 
     def __repr__(self):
         return "fc4_"
@@ -168,6 +170,6 @@ class FcModel(ReflexModel):
         model.add(Dense(1024, activation="relu", name="clf_fc2"))
         model.add(Dense(1024, activation="relu", name="clf_fc3"))
         model.add(Dense(512, activation="relu", name="clf_fc4"))
-        model.add(Dense(self.num_classes, activation="sigmoid", name="predictions"))
+        model.add(Dense(self.num_classes, activation=self.activation, name="predictions"))
 
         return model
