@@ -109,29 +109,22 @@ class VggModel(ReflexModel):
         model = Sequential()
 
         # Block 1
-        model.add(Conv2D(16, (3, 3), activation="relu", padding="same", name="block1_conv1", input_shape=self.input_shape))
+        model.add(Conv2D(64, (3, 3), activation="relu", padding="same", name="block1_conv1", input_shape=self.input_shape))
         if self.use_dropout: model.add(Dropout(self.dropout_ratio, name="block1_drop"))
-        model.add(Conv2D(16, (3, 3), activation="relu", padding="same", name="block1_conv2"))
-        model.add(Conv2D(16, (3, 3), activation="relu", padding="same", name="block1_conv3"))
-        model.add(Conv2D(16, (3, 3), activation="relu", padding="same", name="block1_conv4"))
-        model.add(Conv2D(16, (3, 3), activation="relu", padding="same", name="block1_conv5"))
+        model.add(Conv2D(64, (3, 3), activation="relu", padding="same", name="block1_conv2"))
         model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block1_pool"))
 
         # Block 2
-        model.add(Conv2D(32, (3, 3), activation="relu", padding="same", name="block2_conv1"))
+        model.add(Conv2D(128, (3, 3), activation="relu", padding="same", name="block2_conv1"))
         if self.use_dropout: model.add(Dropout(self.dropout_ratio, name="block2_drop"))
-        model.add(Conv2D(32, (3, 3), activation="relu", padding="same", name="block2_conv2"))
-        model.add(Conv2D(32, (3, 3), activation="relu", padding="same", name="block2_conv3"))
-        model.add(Conv2D(32, (3, 3), activation="relu", padding="same", name="block2_conv4"))
-        model.add(Conv2D(32, (3, 3), activation="relu", padding="same", name="block2_conv5"))
+        model.add(Conv2D(128, (3, 3), activation="relu", padding="same", name="block2_conv"))
         model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block2_pool"))
 
         # Block 3
-        model.add(Conv2D(64, (3, 3), activation="relu", padding="same", name="block3_conv1"))
+        model.add(Conv2D(256, (3, 3), activation="relu", padding="same", name="block3_conv1"))
         if self.use_dropout: model.add(Dropout(self.dropout_ratio, name="block3_drop"))
-        model.add(Conv2D(64, (3, 3), activation="relu", padding="same", name="block3_conv2"))
-        model.add(Conv2D(64, (3, 3), activation="relu", padding="same", name="block3_conv3"))
-        model.add(Conv2D(64, (3, 3), activation="relu", padding="same", name="block3_conv4"))
+        model.add(Conv2D(256, (3, 3), activation="relu", padding="same", name="block3_conv2"))
+        model.add(Conv2D(256, (3, 3), activation="relu", padding="same", name="block3_conv3"))
         model.add(MaxPooling2D((2, 2), strides=(2, 2), name="block3_pool"))
 
         if self.blocks > 3:

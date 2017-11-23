@@ -8,6 +8,7 @@ import sys
 import getopt
 import os
 import gc
+import time
 
 from sklearn import metrics as sk_metrics
 from scipy import misc
@@ -207,7 +208,7 @@ class Reflex:
         K.set_session(sess)
 
     def train_model(self, X_train, y_train, X_val, y_val, model, model_name, verbose=1, save_model=True, epochs=50,
-                    learning_rate=0.001, batch_size=32, debug=True, augment=True, loss="binary_crossentropy"):
+                    learning_rate=0.001, batch_size=32, debug=True, augment=False, loss="binary_crossentropy"):
         if debug:
             tb_callback = TensorBoard(log_dir=LOGS_PATH + model_name, batch_size=batch_size, histogram_freq=epochs / 10,
                                       write_graph=True, write_images=False)
@@ -286,7 +287,7 @@ class Reflex:
 
 def get_run_name(model, resolution, learning_rate, epochs, augment, batch):
     return str(model) + "_res=" + str(resolution) + "_lr=" + str(learning_rate) + "_ep=" + str(epochs) + "_aug=" + \
-           str(augment) + "_b=" + str(batch)
+           str(augment) + "_b=" + str(batch) + "_t=" + time.strftime("%Y%m%d_%H%M%S", time.localtime())
 
 
 def run_experiments(res, num_classes, models, lrs, epochs, augmenting, batch_sizes, test_ratio, weights):
@@ -341,15 +342,15 @@ if __name__ == "__main__":
             models = [
                 # DropoutModel(input_shape, num_classes, use_dropout=False, activation="sigmoid"),
                 #DropoutModel(input_shape, num_classes, dropout_ratio=0.4),
-                VggModel(input_shape, num_classes, "sigmoid", 5, use_dropout=False, dropout_ratio=0.2),
-                # PoolingModel(input_shape, num_classes, activation="sigmoid"),
+                # VggModel(input_shape, num_classes, "sigmoid", 5, use_dropout=False, dropout_ratio=0.2),
+                PoolingModel(input_shape, num_classes, activation="sigmoid"),
                 # FcModel(input_shape, num_classes)
             ]
             lrs = [0.001]
-            epochs = 50
-            batch_sizes = [64]
+            epochs = 200
+            batch_sizes = [32]
             augmenting = [False]
-            test_ratio = 0.1
+            test_ratio = 0.3
             weights = False
 
             run_experiments(resolution, num_classes, models, lrs, epochs, augmenting, batch_sizes, test_ratio, weights)
