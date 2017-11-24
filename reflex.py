@@ -344,10 +344,10 @@ if __name__ == "__main__":
                 BatchNormPoolingModel(input_shape, num_classes, activation="sigmoid")
             ]
             lrs = [0.001]
-            epochs = 300
+            epochs = 500
             batch_sizes = [64]
-            augmenting = [False]
-            test_ratio = 0.3
+            augmenting = [True]
+            test_ratio = 0.2
             weights = True
 
             run_experiments(resolution, num_classes, models, lrs, epochs, augmenting, batch_sizes, test_ratio, weights)

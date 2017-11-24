@@ -4,6 +4,7 @@ import warnings
 import numpy as np
 from itertools import chain
 from sklearn.model_selection import _split
+from scipy.misc import imsave, imread, imresize
 
 __author__ = "Dariusz Brzezinski"
 
@@ -114,3 +115,10 @@ def train_test_split(*arrays, **options):
 
     return list(chain.from_iterable((_split.safe_indexing(a, train),
                                      _split.safe_indexing(a, test)) for a in arrays))
+
+
+def resize_images(image_files, width, height):
+    for image_file in image_files:
+        img = imread(image_file)
+        img = imresize(img, (height, width))
+        imsave(image_file[:-3] + str(width) + "x" + str(height) + ".png", img)

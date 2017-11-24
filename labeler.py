@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import glob
+import util
 import logging
 import subprocess
 import os
@@ -82,5 +83,5 @@ def label_images(files):
 
 
 if __name__ == "__main__":
-    files = [fn for fn in glob.glob("./data/*.png") if (fn.endswith("300x300.png"))]
+    files = [fn for fn in glob.glob("./data/*.png") if not (fn.endswith("300x300.png") or fn.endswith("100x100.png"))]
     label_images(files)
