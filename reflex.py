@@ -220,10 +220,10 @@ class Reflex:
 
         if augment:
             datagen = ReflexDataGenerator(
-                zoom_range=(1, 1.2),
+                # zoom_range=(1, 1.2),
                 horizontal_flip=True,
                 vertical_flip=True,
-                rotation_range=45,
+                # rotation_range=45,
             )
             datagen.fit(X_train)
             data_iterator = datagen.flow(X_train, y_train, batch_size=batch_size, seed=SEED)
@@ -268,26 +268,44 @@ class Reflex:
 
         y_proba = model.predict_proba(X_test)
         y_proba = np.array(y_proba)
-        best_threshold = np.ones(self.num_classes) * 0.5
-
-        logging.info("Class thresholds: %s", best_threshold)
-        y_pred = np.array([[1 if y_proba[i, j] >= best_threshold[j] else 0 for j in range(y_test.shape[1])] for i in
+        thresholds_05 = np.ones(self.num_classes) * 0.5
+        y_pred_05 = np.array([[1 if y_proba[i, j] >= thresholds_05[j] else 0 for j in range(y_test.shape[1])] for i in
                            range(len(y_test))])
 
-        logging.info("Exact match ratio: %.3f", sk_metrics.accuracy_score(y_test, y_pred))
-        logging.info("Hamming score: %.3f", metrics.hamming_score(y_test, y_pred))
-        logging.info("Hamming loss: %.3f", sk_metrics.hamming_loss(y_test, y_pred))
-        logging.info("Micro-averaged precision: %.3f", sk_metrics.precision_score(y_test, y_pred, average="micro"))
-        logging.info("Micro-averaged recall: %.3f", sk_metrics.recall_score(y_test, y_pred, average="micro"))
-        logging.info("Micro-averaged F-score: %.3f", sk_metrics.f1_score(y_test, y_pred, average="micro"))
-        logging.info("Macro-averaged precision: %.3f", sk_metrics.precision_score(y_test, y_pred, average="macro"))
-        logging.info("Macro-averaged recall: %.3f", sk_metrics.recall_score(y_test, y_pred, average="macro"))
-        logging.info("Macro-averaged F-score: %.3f", sk_metrics.f1_score(y_test, y_pred, average="macro"))
+        thresholds_ham = np.zeros(self.num_classes)
+        y_pred_ham = np.zeros((y_test.shape[0], y_test.shape[1]), np.float32)
+        for cls_idx in range(self.num_classes):
+            best_acc = 0
+            best_threshold = 0
+            best_y_pred = np.zeros(y_test.shape[0])
+            for threshold in np.arange(0.01, 0.99, 0.01):
+                y_pred_t = np.array(y_proba[:, cls_idx] >= threshold, np.float32)
+                acc = sk_metrics.accuracy_score(y_test[:, cls_idx], y_pred_t)
+                if acc > best_acc:
+                    best_acc = acc
+                    best_threshold = threshold
+                    best_y_pred = y_pred_t
+            y_pred_ham[:, cls_idx] = best_y_pred
+            thresholds_ham[cls_idx] = best_threshold
+
+        for (y_pred, thresholds) in [(y_pred_05, thresholds_05), (y_pred_ham, thresholds_ham)]:
+            logging.info("---------------------------------")
+            logging.info("Class thresholds: %s", thresholds)
+            logging.info("Exact match ratio: %.3f", sk_metrics.accuracy_score(y_test, y_pred))
+            logging.info("Hamming score: %.3f", metrics.hamming_score(y_test, y_pred))
+            logging.info("Hamming loss: %.3f", sk_metrics.hamming_loss(y_test, y_pred))
+            logging.info("Micro-averaged precision: %.3f", sk_metrics.precision_score(y_test, y_pred, average="micro"))
+            logging.info("Micro-averaged recall: %.3f", sk_metrics.recall_score(y_test, y_pred, average="micro"))
+            logging.info("Micro-averaged F-score: %.3f", sk_metrics.f1_score(y_test, y_pred, average="micro"))
+            logging.info("Macro-averaged precision: %.3f", sk_metrics.precision_score(y_test, y_pred, average="macro"))
+            logging.info("Macro-averaged recall: %.3f", sk_metrics.recall_score(y_test, y_pred, average="macro"))
+            logging.info("Macro-averaged F-score: %.3f", sk_metrics.f1_score(y_test, y_pred, average="macro"))
 
 
-def get_run_name(model, resolution, learning_rate, epochs, augment, batch):
+def get_run_name(model, resolution, learning_rate, epochs, augment, batch, dataset_size, weights):
     return str(model) + "_res=" + str(resolution) + "_lr=" + str(learning_rate) + "_ep=" + str(epochs) + "_aug=" + \
-           str(augment) + "_b=" + str(batch) + "_t=" + time.strftime("%Y%m%d_%H%M%S", time.localtime())
+           str(augment) + "_b=" + str(batch) + "_n=" + str(dataset_size) + "_w=" + str(weights)  + \
+           "_t=" + time.strftime("%Y%m%d_%H%M%S", time.localtime())
 
 
 def run_experiments(res, num_classes, models, lrs, epochs, augmenting, batch_sizes, test_ratio, weights):
@@ -296,32 +314,11 @@ def run_experiments(res, num_classes, models, lrs, epochs, augmenting, batch_siz
     reflex.load_files(calculate_class_weights=weights)
     X_train, X_test, y_train, y_test = reflex.split_data(test_ratio=test_ratio)
 
-    # import keras
-    # from keras.datasets import mnist
-    #
-    # res = 28
-    # num_classes = 10
-    # epochs = 10
-    # reflex = Reflex(res, res, num_classes, None, None)
-    # (x_train, y_train), (x_test, y_test) = mnist.load_data()
-    # X_train = x_train.reshape(x_train.shape[0], res, res, 1)
-    # X_test = x_test.reshape(x_test.shape[0], res, res, 1)
-    # X_train = X_train.astype('float32')
-    # X_test = X_test.astype('float32')
-    # X_train /= 255
-    # X_test /= 255
-    # y_train = keras.utils.to_categorical(y_train, num_classes)
-    # y_test = keras.utils.to_categorical(y_test, num_classes)
-    # reflex.input_shape = (28, 28, 1)
-    # models = [
-    #     DropoutModel(reflex.input_shape, num_classes, "sigmoid", dropout_ratio=0.2)
-    # ]
-
     for model in models:
         for lr in lrs:
             for augment in augmenting:
                 for batch_size in batch_sizes:
-                    name = get_run_name(model, res, lr, epochs, augment, batch_size)
+                    name = get_run_name(model, res, lr, epochs, augment, batch_size, X_train.shape[0], weights)
                     reflex.reset_session()
                     reflex.train_model(X_train, y_train, X_test, y_test, model.create(), name, epochs=epochs,
                                        learning_rate=lr, augment=augment, batch_size=batch_size,
@@ -351,7 +348,7 @@ if __name__ == "__main__":
             batch_sizes = [64]
             augmenting = [False]
             test_ratio = 0.3
-            weights = False
+            weights = True
 
             run_experiments(resolution, num_classes, models, lrs, epochs, augmenting, batch_sizes, test_ratio, weights)
         else:
