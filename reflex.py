@@ -338,7 +338,7 @@ if __name__ == "__main__":
             num_classes = 7
             models = [
                 # DropoutModel(input_shape, num_classes, use_dropout=False, activation="sigmoid"),
-                #DropoutModel(input_shape, num_classes, dropout_ratio=0.4),
+                # DropoutModel(input_shape, num_classes, dropout_ratio=0.4),
                 # VggModel(input_shape, num_classes, "sigmoid", 5, use_dropout=False, dropout_ratio=0.2),
                 # PoolingModel(input_shape, num_classes, activation="sigmoid"),
                 BatchNormPoolingModel(input_shape, num_classes, activation="sigmoid")

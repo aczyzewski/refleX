@@ -108,3 +108,5 @@ data/*
 models/*
 logs/*
 
+# Apple metadata files
+**/.DS_Store

@@ -59,7 +59,7 @@ def write_to_csv(image_path, labels, file_path=LABELING_FILE):
 
 
 def label_images(files):
-    msg = "Enter labels(" + ", ".join([k + ":" + v for k, v in LABELS.iteritems()]) + "): "
+    msg = "Enter labels(" + ", ".join([k + ":" + v for k, v in LABELS.items()]) + "): "
     if os.path.isfile(LABELING_FILE):
         prev_processed_files = set(pd.read_csv(LABELING_FILE)["Image"])
     else:
@@ -69,14 +69,18 @@ def label_images(files):
         if prev_processed_files is not None and image_path in prev_processed_files:
             continue
 
-        print
-        print image_path
+        print()
+        print(image_path)
         if sys.platform == 'linux2':
             pro = subprocess.Popen("xdg-open " + image_path, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
         else:
-            os.startfile(image_path)
+            if os.name == 'nt': # if running on Windows
+                os.startfile(image_path)
+            else:
+                opener = "open" if sys.platform == "darwin" else "xdg-open"
+                subprocess.call([opener, image_path])
 
-        labels = list(raw_input(msg))
+        labels = list(input(msg))
         write_to_csv(image_path, labels)
         if sys.platform == 'linux2':
             os.killpg(os.getpgid(pro.pid), signal.SIGTERM)
@@ -86,4 +90,5 @@ if __name__ == "__main__":
     files = [fn for fn in glob.glob("./data/*.png") if not (fn.endswith("512x512.png")
                                                             or fn.endswith("300x300.png")
                                                             or fn.endswith("100x100.png"))]
+    print("Labelling " + str(len(files)) + " images")
     label_images(files)
