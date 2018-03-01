@@ -71,7 +71,7 @@ def label_images(files):
 
         print()
         print(image_path)
-        if sys.platform == 'linux2':
+        if sys.platform == 'linux2' or sys.platform == 'linux': # Backward compatibility
             pro = subprocess.Popen("xdg-open " + image_path, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
         else:
             if os.name == 'nt': # if running on Windows
@@ -82,9 +82,9 @@ def label_images(files):
 
         labels = list(input(msg))
         write_to_csv(image_path, labels)
-        if sys.platform == 'linux2':
-            os.killpg(os.getpgid(pro.pid), signal.SIGTERM)
 
+        if sys.platform == 'linux2' or sys.platform == 'linux': #Backward compatibility:
+            os.killpg(os.getpgid(pro.pid), signal.SIGTERM)
 
 if __name__ == "__main__":
     files = [fn for fn in glob.glob("./data/*.png") if not (fn.endswith("512x512.png")
