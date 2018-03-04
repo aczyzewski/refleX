@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-DATA_PATH = "./data/"
+DATA_PATH = "../data/"
 
 def show_img(image):
     cv2.namedWindow('image', cv2.WINDOW_NORMAL)
@@ -15,7 +15,7 @@ def narrow_gaps(img):
     #image = cv2.imread(file, cv2.IMREAD_GRAYSCALE) !
 
     # Mask
-    mask = cv2.imread('./preprocessing/narrow_gaps_mask.png', cv2.IMREAD_GRAYSCALE)
+    mask = cv2.imread('./narrow_gaps_mask.png', cv2.IMREAD_GRAYSCALE)
     mask = np.uint8(np.absolute(mask))
 
     # Detecting squares
