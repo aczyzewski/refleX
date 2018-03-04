@@ -23,6 +23,10 @@ def narrow_gaps(img):
     mask = cv.imread('../resources/narrow_gaps_mask.png', cv.IMREAD_GRAYSCALE)
     mask = np.uint8(np.absolute(mask))
 
+    if img.shape != mask.shape:
+        ratio = img.shape[0] / mask.shape[0]
+        mask = cv.resize(mask, (int(mask.shape[0] * ratio), int(mask.shape[1] * ratio)))
+
     # Detecting squares
     laplacian = cv.Laplacian(img, cv.CV_64F)
     sobel_xy = cv.Sobel(img, cv.CV_64F, 1, 1, ksize=1 + 2 * 0)
@@ -78,12 +82,6 @@ def narrow_gaps(img):
 
     while np.sum(grid[offsets['top']]) == 0:
         offsets['top'] += 1
-
-
-    #grid[offsets['top'], : ] = 120
-    #grid[offsets['bottom'], : ] = 120
-    #grid[:, offsets['left']] = 120
-    #grid[:, offsets['right']] = 120
 
     temp = img.copy()
     grid = grid[offsets['top']: offsets['bottom'], offsets['left'] : offsets['right']]
