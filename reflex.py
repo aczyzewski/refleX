@@ -156,6 +156,15 @@ class Reflex:
 
         y_df = pd.read_csv(self.label_file)
         y_paths = y_df.iloc[:, 0]
+
+        temp = list(y_paths)
+        for path in self.image_files:
+            path = path[:-11] + "png"
+            if path in temp:
+                temp.remove(path)
+
+        print(temp)
+
         self.y = y_df.iloc[:, 1:]
         if calculate_class_weights:
             class_weights = self.y.sum(axis=0)
