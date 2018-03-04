@@ -6,3 +6,4 @@ Keras
 scikit_learn
 h5py
 Pillow
+cv2

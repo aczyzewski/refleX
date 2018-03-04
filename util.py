@@ -122,3 +122,16 @@ def resize_images(image_files, width, height):
         img = imread(image_file)
         img = imresize(img, (height, width))
         imsave(image_file[:-3] + str(width) + "x" + str(height) + ".png", img)
+
+
+def hsv2rgb(h, s, v):
+    c = s*v
+    x = c * (1 - abs(h/60 % 2 - 1))
+    tab = [(c, x, 0), (x, c, 0), (0, c, x), (0, x, c), (x, 0, c), (c, 0, x)]
+    ans = tab[int(h/60) % 6]
+    ans = [255 * float(i+v-c) for i in ans]
+    return ans
+
+
+def linear_interpolation(val, lb, ub, nlb, nub):
+    return nlb + (val-lb)/(ub-lb) * (nub-nlb)
