@@ -2,9 +2,30 @@ import cv2 as cv
 import numpy as np
 
 
-def radial_mark_irrelevant(img=np.zeros((1, 1))): #FIXME
-    ret, thresh_trunc = cv.threshold(img, 200, 255, cv.THRESH_BINARY_INV)
-    return thresh_trunc
+def radial_mark_irrelevant(im=np.zeros((1, 1)),
+                           min_line_length=20,
+                           max_line_gap=3,
+                           rho=1,
+                           theta=np.pi/180,
+                           threshold=80): #TODO smarter params, as fcn of imsize ?
+
+    img = np.zeros_like(im)
+    gray = cv.cvtColor(im, cv.COLOR_BGR2GRAY)
+    edges = cv.Canny(gray, 50, 150, apertureSize=3, L2gradient=True) #TODO adjust thresholds, apertureSize; L2gradient ?
+    lines = cv.HoughLines(edges, rho, theta, threshold, min_line_length, max_line_gap)
+    if lines is not None:
+        for line in lines:
+            rho, theta = line[0]
+            a = np.cos(theta)
+            b = np.sin(theta)
+            x0 = a * rho
+            y0 = b * rho
+            x1 = int(x0 + 1000 * (-b))
+            y1 = int(y0 + 1000 * (a))
+            x2 = int(x0 - 1000 * (-b))
+            y2 = int(y0 - 1000 * (a))
+            cv.line(img, (x1, y1), (x2, y2), (255, 0, 255), 2)
+    return img
 
 
 def show_img(image):

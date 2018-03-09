@@ -11,8 +11,8 @@ import util
 
 
 #TODO https://pdfs.semanticscholar.org/9729/61e8fdc619464b5ee25f870c5e24871e9370.pdf ?
-def calculate_center(im):
-    return im.shape[1]//2, im.shape[0]//2 #FIXME
+def calculate_center(im): #FIXME
+    return im.shape[1]//2, im.shape[0]//2
 
 
 #return discrete coordinates of pixels on circle of radius r, given the center of the circle
@@ -80,35 +80,17 @@ def color_layers(img, layers, color_alpha=0.1, gamma=0):
     return cv.addWeighted(color, color_alpha, img, 1-color_alpha, gamma)
 
 
-#TODO 4 kittens died
-
-def radial_max(img, irrelevant, layers=[]):
-    values = [[img[coord][0] if irrelevant[coord][0] != 0 else 0 for coord in coords] for coords in layers] #FIXME else 0
-    return [max(layer) for layer in values]
-
-
-def radial_min(img, irrelevant, layers=[]):
-    values = [[img[coord][0] if irrelevant[coord][0] != 0 else 0 for coord in coords] for coords in
-              layers]  # FIXME else 0
-    return [min(layer) for layer in values]
-
-
-def radial_mean(img, irrelevant, layers=[]):
-    values = [[img[coord][0] if irrelevant[coord][0] != 0 else 0 for coord in coords] for coords in
-              layers]  # FIXME else 0
-    return [np.mean(layer) for layer in values]
-
-
-def radial_median(img, irrelevant, layers=[]):
-    values = [[img[coord][0] if irrelevant[coord][0] != 0 else 0 for coord in coords] for coords in
-              layers]  # FIXME else 0
-    return [np.median(layer) for layer in values]
-
-
-def radial_variance(img, irrelevant, layers=[]):
-    values = [[img[coord][0] if irrelevant[coord][0] != 0 else 0 for coord in coords] for coords in
-              layers]  # FIXME else 0
-    return [np.var(layer) for layer in values]
+#TODO read img as 2d grayscale rather than 3d pseudoRGB monster
+def apply_aggregate_fcn(img, stat_fcn, irrelevant, layers=[]):
+    values = [[img[coord][0] for coord in coords if not irrelevant[coord][0]] for coords in layers]
+    aggregated = [stat_fcn(layer) if layer else None for layer in values]
+    if aggregated[0] is None:
+        aggregated[0] = 0 #FIXME dunno what to do if first result is empty
+    for i in range(len(aggregated)):
+        if aggregated[i] is None:
+            aggregated[i] = aggregated[i - 1]
+    return aggregated
+#TODO taking last non-empty result might not be the best idea
 
 
 def parse_command_line_options():
@@ -142,9 +124,10 @@ def main():
     file_names, chosen_stats, col_width = parse_command_line_options()
     for im_name in file_names:
         original_image = cv.imread(im_name) #TODO read grayscale
-        #im = preprocess.narrow_gaps(original_image)
-        im = original_image #FIXME
-        irrelevant = preprocess.radial_mark_irrelevant(original_image)
+        #im = preprocess.narrow_gaps(original_image) #FIXME
+        im = original_image #FIXME ^
+        irrelevant = preprocess.radial_mark_irrelevant(im)
+        #irrelevant = np.zeros_like(im)
 
         center = calculate_center(im)
         logger.debug(im_name.ljust(col_width) + str(center))
@@ -152,7 +135,7 @@ def main():
         layers = get_layers(im, center)
         compressed_1d_images = []
         for s in chosen_stats:
-            vector = stat_names[s.lower()](im, irrelevant, layers)
+            vector = apply_aggregate_fcn(im, stat_names[s], irrelevant, layers)
             compressed_1d_images.append(vector)
             vector = np.array(vector)
             cv.imwrite("./1d_" + im_name[2:-4] + s + ".png", np.vstack((vector, vector, vector)))
@@ -179,10 +162,10 @@ def main():
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
-    stat_names = {"max": radial_max,
-                  "min": radial_min,
-                  "mean": radial_mean,
-                  "median": radial_median,
-                  "var": radial_variance,
+    stat_names = {"max": max,
+                  "min": min,
+                  "mean": np.mean,
+                  "median": np.median,
+                  "var": np.var
                   }
     main()
