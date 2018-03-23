@@ -1,18 +1,151 @@
 import numpy as np
-import glob
+import cv2 as cv
 import os
 import sys
-import cv2 as cv
+import glob
 import logging
+
 from matplotlib import pyplot as plt
+from sklearn.metrics.pairwise import cosine_similarity
+from math import sin, cos
 
 import preprocess
 import util
 
 
-#TODO https://pdfs.semanticscholar.org/9729/61e8fdc619464b5ee25f870c5e24871e9370.pdf ?
-def calculate_center(im): #FIXME
-    return im.shape[1]//2, im.shape[0]//2
+def get_radii_coordinates(img, center, num_samples=20, offset=0):
+
+    """
+    Example:
+    ------
+    >>> sampling_vectors(img, (3, 3), 4, 0)
+    [[(3, 3), (4, 3), (5, 3), (6, 3)],
+     [(3, 3), (3, 4), (3, 5), (3, 6)],
+     [(3, 3), (2, 3), (1, 3), (0, 3)],
+     [(3, 3), (3, 2), (3, 1), (3, 0)]]
+
+    """
+    x, y = center
+    if not 0 < x < img.shape[1] or not 0 < y < img.shape[0]:
+        return []
+
+    angles = np.linspace(0 + offset, 360 + offset, num_samples + 1)
+    radius = np.min([img.shape[1] - x - 1, x, img.shape[0] - y - 1, y])
+
+    vectors = []
+    for angle in angles:
+        point = (round(x + (radius * cos(np.radians(angle)))),  round(y + (radius * sin(np.radians(angle)))))
+        vectors.append(bresenham_line_points(*center, *point))
+
+    return vectors[:-1]
+
+
+#http://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise.cosine_similarity.html
+def vector_variability(vectors=[]):
+    pairwise_cosine_similarity_matrix = cosine_similarity(vectors)
+    flattened = []
+    for i, row in enumerate(pairwise_cosine_similarity_matrix):
+        print(row)
+        flattened.append(row[i+1:])
+    print(np.median(flattened))
+    return np.median(flattened)
+
+
+def center_of_mass(img):
+    m = cv.moments(img);
+    if m['m00'] != 0:
+        x = m['m10'] / m['m00']
+        y = m['m01'] / m['m00']
+    else:
+        return img.shape[0]/2, img.shape[1]/2
+    return x, y
+
+
+def negative(img):
+    return 255 - img
+
+
+def bresenham_line_points(x1, y1, x2, y2):
+    """
+    Zwraca listę punktów, przez które przechodzić będzie prosta
+    o zadanym początku i końcu
+
+    Parametry
+    ----------
+    x1, y1, x2, y2 : int
+        (x1, y1) - punkt poczatkowy
+        (x2, y2) - punkt końcowy
+
+    """
+    # Zmienne pomocnicze
+    d = dx = dy = ai = bi = xi = yi = 0
+    x = x1
+    y = y1
+    points = []
+
+    # Ustalenie kierunku rysowania
+    xi = 1 if x < x2 else -1
+    dx = abs(x1 - x2)
+
+    # Ustalenie kierunku rysowania
+    yi = 1 if y1 < y2 else -1
+    dy = abs(y1 - y2)
+
+    # Pierwszy piksel
+    points.append((x, y))
+
+    ai = -1 * abs(dy - dx) * 2
+    bi = min(dx, dy) * 2
+    d = bi - max(dx, dy)
+
+    # Oś wiodąca OX
+    if dx > dy:
+        while x != x2:
+            if d >= 0:
+                x += xi
+                y += yi
+                d += ai
+            else:
+                d += bi
+                x += xi
+
+            points.append((x, y))
+
+    # Oś wiodąca OY
+    else:
+        while y != y2:
+            if d >= 0:
+                x += xi
+                y += yi
+                d += ai
+            else:
+                d += bi
+                y += yi
+
+            points.append((x, y))
+
+    return points
+
+
+def calculate_center(im):
+    img = im.copy()
+    candidate1 = center_of_mass(img)
+    candidate2 = center_of_mass(negative(img))
+    candidate_coordinate_set = bresenham_line_points(*candidate1, *candidate2)
+    best_candidate = candidate1
+    min_variability = vector_variability(get_radii_coordinates(img, best_candidate, n=20))
+    for candidate_coords in candidate_coordinate_set[1:]:
+        radii_coordinates = get_radii_coordinates(img, best_candidate, n=20, offset=4)
+        for radius in radii_coordinates:
+            for pixel in radius:
+                img[pixel] = 255
+        radii = [[img[xy] for xy in radius_coords]
+                 for radius_coords in radii_coordinates]
+        current_variability = vector_variability(radii)
+        if current_variability < min_variability:
+            min_variability = current_variability
+            best_candidate = candidate_coords
+    return img, best_candidate
 
 
 #return discrete coordinates of pixels on circle of radius r, given the center of the circle
@@ -80,9 +213,8 @@ def color_layers(img, layers, color_alpha=0.1, gamma=0):
     return cv.addWeighted(color, color_alpha, img, 1-color_alpha, gamma)
 
 
-#TODO read img as 2d grayscale rather than 3d pseudoRGB monster
 def apply_aggregate_fcn(img, stat_fcn, irrelevant, layers=[]):
-    values = [[img[coord][0] for coord in coords if not irrelevant[coord][0]] for coords in layers]
+    values = [[img[coord] for coord in coords if not irrelevant[coord]] for coords in layers]
     aggregated = [stat_fcn(layer) if layer else None for layer in values]
     if aggregated[0] is None:
         aggregated[0] = 0 #FIXME dunno what to do if first result is empty
@@ -123,13 +255,12 @@ def parse_command_line_options():
 def main():
     file_names, chosen_stats, col_width = parse_command_line_options()
     for im_name in file_names:
-        original_image = cv.imread(im_name) #TODO read grayscale
+        original_image = cv.imread(im_name, cv.IMREAD_GRAYSCALE)
         #im = preprocess.narrow_gaps(original_image) #FIXME
         im = original_image #FIXME ^
         irrelevant = preprocess.radial_mark_irrelevant(im)
-        #irrelevant = np.zeros_like(im)
 
-        center = calculate_center(im)
+        center_visualization, center = calculate_center(im)
         logger.debug(im_name.ljust(col_width) + str(center))
 
         layers = get_layers(im, center)
@@ -138,22 +269,22 @@ def main():
             vector = apply_aggregate_fcn(im, stat_names[s], irrelevant, layers)
             compressed_1d_images.append(vector)
             vector = np.array(vector)
-            cv.imwrite("./1d_" + im_name[2:-4] + s + ".png", np.vstack((vector, vector, vector)))
+            cv.imwrite("./1d_" + im_name[2:-4] + s + ".png", vector)
 
         if logging.getLogger().isEnabledFor(logging.INFO):
-            colored = color_layers(im, layers)
             fig, axs = plt.subplots(nrows=int(np.ceil((len(compressed_1d_images)+3)/3)), ncols=3)
             axs[0][0].imshow(original_image)
             axs[0][0].set_title("Original")
             axs[0][1].imshow(irrelevant)
             axs[0][1].set_title("Marked irrelevant")
-            axs[0][2].imshow(colored)
+            axs[0][2].imshow(center_visualization)
             axs[0][2].set_title("Detected center")
             for i,v in enumerate(compressed_1d_images):
                 axs[1+i//3][i%3].imshow(np.vstack(15 * (v,)))
                 axs[1+i//3][i%3].set_title(chosen_stats[i])
             plt.axis('off')
             plt.savefig("./info_" + im_name[2:-4] + "_info.png")
+            plt.close()
 
     logger.info("Finished")
     cv.destroyAllWindows()

@@ -2,16 +2,18 @@ import cv2 as cv
 import numpy as np
 
 
+#asumes square image
 def radial_mark_irrelevant(im=np.zeros((1, 1)),
-                           min_line_length=20,
-                           max_line_gap=3,
+                           min_line_length_coeff=0.4,
+                           max_line_gap_coeff=0.03,
                            rho=1,
                            theta=np.pi/180,
-                           threshold=80): #TODO smarter params, as fcn of imsize ?
-
+                           threshold=100):
+    min_line_length = min_line_length_coeff*im.shape[0]
+    max_line_gap = max_line_gap_coeff*im.shape[0]
     img = np.zeros_like(im)
-    gray = cv.cvtColor(im, cv.COLOR_BGR2GRAY)
-    edges = cv.Canny(gray, 50, 150, apertureSize=3, L2gradient=True) #TODO adjust thresholds, apertureSize; L2gradient ?
+    thresh, gray = cv.threshold(im, 0, 255, cv.THRESH_OTSU)
+    edges = cv.Canny(gray, threshold1=10, threshold2=100) # apertureSize=3, L2gradient=True
     lines = cv.HoughLines(edges, rho, theta, threshold, min_line_length, max_line_gap)
     if lines is not None:
         for line in lines:
@@ -25,7 +27,7 @@ def radial_mark_irrelevant(im=np.zeros((1, 1)),
             x2 = int(x0 - 1000 * (-b))
             y2 = int(y0 - 1000 * (a))
             cv.line(img, (x1, y1), (x2, y2), (255, 0, 255), 2)
-    return img
+    return edges
 
 
 def show_img(image):
