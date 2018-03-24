@@ -30,14 +30,6 @@ def radial_mark_irrelevant(im=np.zeros((1, 1)),
     return edges
 
 
-def show_img(image):
-    cv.namedWindow('image', cv.WINDOW_NORMAL)
-    cv.resizeWindow('image', 600, 600)
-    cv.imshow('image', image)
-    cv.waitKey(0)
-    cv.destroyAllWindows()
-
-
 def narrow_gaps(img):
 
     # image = cv2.imread(file, cv2.IMREAD_GRAYSCALE) !

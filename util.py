@@ -2,6 +2,7 @@
 
 import warnings
 import numpy as np
+import cv2 as cv
 from itertools import chain
 from sklearn.model_selection import _split
 from scipy.misc import imsave, imread, imresize
@@ -135,3 +136,18 @@ def hsv2rgb(h, s, v):
 
 def linear_interpolation(val, lb, ub, nlb, nub):
     return nlb + (val-lb)/(ub-lb) * (nub-nlb)
+
+
+def show_img(image, window_name='image', width=600, height=600):
+    cv.namedWindow(window_name, cv.WINDOW_NORMAL)
+    cv.resizeWindow(window_name, width, height)
+    cv.imshow(window_name, image)
+    cv.waitKey(0)
+    cv.destroyAllWindows()
+
+def normalize_gray_image(img, base=8):
+    base = pow(2, base) - 1
+    float_array = np.array(img, dtype=np.float64)
+    float_array -= float_array.min()
+    float_array *= float(base) / float_array.max()
+    return np.array(np.around(float_array), dtype=np.uint8)

@@ -4,13 +4,17 @@ import os
 import sys
 import glob
 import logging
-
 from matplotlib import pyplot as plt
-from sklearn.metrics.pairwise import cosine_similarity
-from math import sin, cos
+from sklearn.metrics.pairwise import cosine_distances
+from math import sin, cos, log
 
 import preprocess
 import util
+
+
+def closest_pixel(coord):
+    fx, fy = coord
+    return int(round(fx)), int(round(fy))
 
 
 def get_radii_coordinates(img, center, num_samples=20, offset=0):
@@ -18,7 +22,7 @@ def get_radii_coordinates(img, center, num_samples=20, offset=0):
     """
     Example:
     ------
-    >>> sampling_vectors(img, (3, 3), 4, 0)
+    >> sampling_vectors(img, (3, 3), 4, 0)
     [[(3, 3), (4, 3), (5, 3), (6, 3)],
      [(3, 3), (3, 4), (3, 5), (3, 6)],
      [(3, 3), (2, 3), (1, 3), (0, 3)],
@@ -29,40 +33,76 @@ def get_radii_coordinates(img, center, num_samples=20, offset=0):
     if not 0 < x < img.shape[1] or not 0 < y < img.shape[0]:
         return []
 
-    angles = np.linspace(0 + offset, 360 + offset, num_samples + 1)
+    angles = np.linspace(0 + offset, 360 + offset, num_samples + 1)[:-1]
     radius = np.min([img.shape[1] - x - 1, x, img.shape[0] - y - 1, y])
 
     vectors = []
     for angle in angles:
-        point = (round(x + (radius * cos(np.radians(angle)))),  round(y + (radius * sin(np.radians(angle)))))
-        vectors.append(bresenham_line_points(*center, *point))
+        vector = []
+        distances = np.linspace(1, radius)
+        for dist in distances:
+            floating_point = (x + (dist * cos(np.radians(angle))),  y + (dist * sin(np.radians(angle))))
+            #FIXME points notation? ^
+            vector.append(closest_pixel(floating_point))
+        vectors.append(vector)
 
-    return vectors[:-1]
+    return vectors
 
 
 #http://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise.cosine_similarity.html
 def vector_variability(vectors=[]):
-    pairwise_cosine_similarity_matrix = cosine_similarity(vectors)
-    flattened = []
+    v = np.asmatrix(vectors)
+    pairwise_cosine_similarity_matrix = cosine_distances(v)
+    flattened = np.array([], dtype=np.float64)
     for i, row in enumerate(pairwise_cosine_similarity_matrix):
-        print(row)
-        flattened.append(row[i+1:])
-    print(np.median(flattened))
+        flattened = np.concatenate((flattened, row[i+1:]), axis=0)
+
     return np.median(flattened)
 
 
 def center_of_mass(img):
-    m = cv.moments(img);
-    if m['m00'] != 0:
+    if True:    #FIXME remove
+        row_centers = []
+        for row in img:
+            s0 = sum(row)
+            s1 = 0
+            for i, pixel in enumerate(row):
+                s1 += i
+                if s1 > s0:
+                    row_centers.append([i, s0])
+                    break
+        s0 = sum([i[1] for i in row_centers])
+        s1 = 0
+        for y, (x, w) in enumerate(row_centers):
+            s1 += w
+            if s1 > s0:
+                #FIXME Point notation?
+                return y, x
+
+    # TODO
+    if cv.moments(img)['m00'] != 0:
+        m = cv.moments(img)
         x = m['m10'] / m['m00']
         y = m['m01'] / m['m00']
     else:
         return img.shape[0]/2, img.shape[1]/2
-    return x, y
+    return round(x), round(y) # OK
 
 
 def negative(img):
     return 255 - img
+
+
+def logarithmize(img):
+    l_img = np.zeros_like(img)
+    for i, row in enumerate(img):
+        for j, pixel in enumerate(row):
+            if pixel == 0:
+                l_img[i, j] = 255
+            else:
+                l_img[i, j] = round(255*-log(pixel/255))
+    #util.show_img(l_img)
+    return l_img
 
 
 def bresenham_line_points(x1, y1, x2, y2):
@@ -127,25 +167,25 @@ def bresenham_line_points(x1, y1, x2, y2):
     return points
 
 
-def calculate_center(im):
-    img = im.copy()
-    candidate1 = center_of_mass(img)
-    candidate2 = center_of_mass(negative(img))
+def calculate_center(img):
+    l_img = logarithmize(util.normalize_gray_image(img))
+    candidate1 = center_of_mass(l_img)[::-1]
+    candidate2 = center_of_mass(negative(l_img))[::-1]
+    logger.debug("Candidates are: " + str(candidate1) + " and " + str(candidate2))
     candidate_coordinate_set = bresenham_line_points(*candidate1, *candidate2)
-    best_candidate = candidate1
-    min_variability = vector_variability(get_radii_coordinates(img, best_candidate, n=20))
-    for candidate_coords in candidate_coordinate_set[1:]:
-        radii_coordinates = get_radii_coordinates(img, best_candidate, n=20, offset=4)
-        for radius in radii_coordinates:
-            for pixel in radius:
-                img[pixel] = 255
+    logger.debug("Number of candidates: " + str(len(candidate_coordinate_set)))
+
+    best_candidate = None
+    min_variability = None
+    for candidate_coords in candidate_coordinate_set:
+        radii_coordinates = get_radii_coordinates(img, candidate_coords, num_samples=40, offset=6)
         radii = [[img[xy] for xy in radius_coords]
                  for radius_coords in radii_coordinates]
         current_variability = vector_variability(radii)
-        if current_variability < min_variability:
+        if best_candidate is None or current_variability < min_variability:
             min_variability = current_variability
             best_candidate = candidate_coords
-    return img, best_candidate
+    return candidate_coordinate_set, candidate1, candidate2, best_candidate #FIXME remove redundant returns
 
 
 #return discrete coordinates of pixels on circle of radius r, given the center of the circle
@@ -189,7 +229,6 @@ def circle_points(center, r, last_layer=[]):
             if potentially_unfilled not in last_layer:
                 points.append(potentially_unfilled)
 
-    logger.debug(points)
     return points
 
 
@@ -252,15 +291,40 @@ def parse_command_line_options():
     return file_names, chosen_stats, col_width
 
 
+def center_visualization(img, candidates, candidate1, candidate2, center):
+    img = cv.cvtColor(img, cv.COLOR_GRAY2BGR)
+
+    vectors = get_radii_coordinates(img, center, num_samples=40, offset=6)
+
+    for vector in vectors:
+        for pixel in vector:
+            img[pixel] = [0, 200, 255]
+
+    for candidate in candidates:
+        img[candidate] = [0, 255, 0]
+
+    cv.circle(img, center[::-1], 3, (255, 0, 0), thickness=-1)
+    cv.circle(img, candidate1, 2, (255, 255, 255), thickness=-1)
+    cv.circle(img, candidate2, 2, (0, 0, 0), thickness=-1)
+    return img
+
+
 def main():
     file_names, chosen_stats, col_width = parse_command_line_options()
     for im_name in file_names:
+
+        logger.debug("Processing " + im_name)
         original_image = cv.imread(im_name, cv.IMREAD_GRAYSCALE)
+        logger.debug("Image " + im_name + " read successfully")
+
         #im = preprocess.narrow_gaps(original_image) #FIXME
         im = original_image #FIXME ^
         irrelevant = preprocess.radial_mark_irrelevant(im)
+        logger.debug(im_name + " preprocessed successfully")
 
-        center_visualization, center = calculate_center(im)
+        candidates, candidate1, candidate2, center = calculate_center(im)
+        logger.info("Center in: " + str(center))
+        logger.debug("Found center: ")
         logger.debug(im_name.ljust(col_width) + str(center))
 
         layers = get_layers(im, center)
@@ -272,12 +336,12 @@ def main():
             cv.imwrite("./1d_" + im_name[2:-4] + s + ".png", vector)
 
         if logging.getLogger().isEnabledFor(logging.INFO):
-            fig, axs = plt.subplots(nrows=int(np.ceil((len(compressed_1d_images)+3)/3)), ncols=3)
+            fig, axs = plt.subplots(nrows=int(np.ceil((len(compressed_1d_images)+3)/3)), ncols=3, figsize=(20, 10))
             axs[0][0].imshow(original_image)
             axs[0][0].set_title("Original")
             axs[0][1].imshow(irrelevant)
             axs[0][1].set_title("Marked irrelevant")
-            axs[0][2].imshow(center_visualization)
+            axs[0][2].imshow(center_visualization(im, candidates, candidate1, candidate2, center))
             axs[0][2].set_title("Detected center")
             for i,v in enumerate(compressed_1d_images):
                 axs[1+i//3][i%3].imshow(np.vstack(15 * (v,)))
@@ -289,6 +353,19 @@ def main():
     logger.info("Finished")
     cv.destroyAllWindows()
 
+#FIXME remove
+def test():
+    file_names, chosen_stats, col_width = parse_command_line_options()
+    for im_name in file_names:
+        original_image = cv.imread(im_name, cv.IMREAD_COLOR)
+        values = bresenham_line_points(30, 10, 10, 80)
+
+        for x in values:
+            original_image[x] = [0, 0, 255]
+
+        cv.imshow('title', original_image)
+        cv.waitKey(0)
+        cv.destroyAllWindows()
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
@@ -300,3 +377,6 @@ if __name__ == "__main__":
                   "var": np.var
                   }
     main()
+    # test() #FIXME remove
+
+

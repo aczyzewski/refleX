@@ -4,20 +4,6 @@ import glob
 from math import sin, cos, pow, atan2
 import operator
 
-def normalize_gray_image(img, base=8):
-    base = pow(2, base) - 1
-    float_array = np.array(img, dtype=np.float64)
-    float_array -= float_array.min()
-    float_array *= float(base) / float_array.max()
-    return np.array(np.around(float_array), dtype=np.uint8)
-
-def show_img(image, width=600, height=600):
-    cv.namedWindow('image', cv.WINDOW_NORMAL)
-    cv.resizeWindow('image', width, height)
-    cv.moveWindow('image', 10, 10)
-    cv.imshow('image', image)
-    cv.waitKey(0)
-    cv.destroyAllWindows()
 
 def draw_circle(x0, y0, r):
     x, y, p = [0, r, 1-r]
