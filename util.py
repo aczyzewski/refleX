@@ -1,8 +1,12 @@
 # coding: utf-8
 
 import warnings
+import os
+import csv
+
 import numpy as np
 import cv2 as cv
+
 from itertools import chain
 from sklearn.model_selection import _split
 from scipy.misc import imsave, imread, imresize
@@ -145,9 +149,120 @@ def show_img(image, window_name='image', width=600, height=600):
     cv.waitKey(0)
     cv.destroyAllWindows()
 
+
 def normalize_gray_image(img, base=8):
     base = pow(2, base) - 1
     float_array = np.array(img, dtype=np.float64)
     float_array -= float_array.min()
     float_array *= float(base) / float_array.max()
     return np.array(np.around(float_array), dtype=np.uint8)
+
+
+def negative(img):
+    return 255 - img
+
+
+def closest_pixel(coord):
+    fx, fy = coord
+    return int(round(fx)), int(round(fy))
+
+
+def bresenham_line_points(x1, y1, x2, y2):
+    """
+    Zwraca listę punktów, przez które przechodzić będzie prosta
+    o zadanym początku i końcu
+
+    Parametry
+    ----------
+    x1, y1, x2, y2 : int
+        (x1, y1) - punkt poczatkowy
+        (x2, y2) - punkt końcowy
+
+    """
+    # Zmienne pomocnicze
+    d = dx = dy = ai = bi = xi = yi = 0
+    x = x1
+    y = y1
+    points = []
+
+    # Ustalenie kierunku rysowania
+    xi = 1 if x < x2 else -1
+    dx = abs(x1 - x2)
+
+    # Ustalenie kierunku rysowania
+    yi = 1 if y1 < y2 else -1
+    dy = abs(y1 - y2)
+
+    # Pierwszy piksel
+    points.append((x, y))
+
+    ai = -1 * abs(dy - dx) * 2
+    bi = min(dx, dy) * 2
+    d = bi - max(dx, dy)
+
+    # Oś wiodąca OX
+    if dx > dy:
+        while x != x2:
+            if d >= 0:
+                x += xi
+                y += yi
+                d += ai
+            else:
+                d += bi
+                x += xi
+
+            points.append((x, y))
+
+    # Oś wiodąca OY
+    else:
+        while y != y2:
+            if d >= 0:
+                x += xi
+                y += yi
+                d += ai
+            else:
+                d += bi
+                y += yi
+
+            points.append((x, y))
+
+    return points
+
+
+def center_of_mass(img):
+    if True:    #FIXME remove
+        row_centers = []
+        for row in img:
+            s0 = sum(row)
+            s1 = 0
+            for i, pixel in enumerate(row):
+                s1 += i
+                if s1 > s0:
+                    row_centers.append([i, s0])
+                    break
+        s0 = sum([i[1] for i in row_centers])
+        s1 = 0
+        for y, (x, w) in enumerate(row_centers):
+            s1 += w
+            if s1 > s0:
+                #FIXME Point notation?
+                return y, x
+
+    # TODO
+    if cv.moments(img)['m00'] != 0:
+        m = cv.moments(img)
+        x = m['m10'] / m['m00']
+        y = m['m01'] / m['m00']
+    else:
+        return img.shape[0]/2, img.shape[1]/2
+    return round(x), round(y) # OK
+
+
+def write_to_csv(filename, values):
+    flag = 'w' if not os.path.isfile(filename) else 'a'
+    with open(filename, flag) as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=list(values.keys()))
+        if flag == 'w':
+            writer.writeheader()
+        writer.writerow(values)
+
