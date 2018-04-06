@@ -166,25 +166,44 @@ def bresenham_line_points(x1, y1, x2, y2):
 
     return points
 
+def extend_bresenham_line(original_image, candidate_coordinate_set, multipler = 1, border=25):
+
+    extend = [candidate_coordinate_set[0][0] - candidate_coordinate_set[-1][0], candidate_coordinate_set[0][1] - candidate_coordinate_set[-1][1]]
+    reference_point = candidate_coordinate_set[0]
+    first_end = (np.array(reference_point) + (multipler * np.array(extend))).tolist()
+    second_end = (np.array(reference_point) - (multipler * np.array(extend))).tolist()
+
+    extended_can_cord_set = bresenham_line_points(*first_end, *second_end)
+    validated_extended_can_cord_set = [point for point in extended_can_cord_set if border < point[0] < original_image.shape[0] - border and border < point[1] < original_image.shape[0] - border]
+    return validated_extended_can_cord_set
 
 def calculate_center(img):
     l_img = logarithmize(util.normalize_gray_image(img))
     candidate1 = center_of_mass(l_img)[::-1]
     candidate2 = center_of_mass(negative(l_img))[::-1]
     logger.debug("Candidates are: " + str(candidate1) + " and " + str(candidate2))
-    candidate_coordinate_set = bresenham_line_points(*candidate1, *candidate2)
+    candidate_coordinate_set = extend_bresenham_line(img, bresenham_line_points(*candidate1, *candidate2), border=50)
     logger.debug("Number of candidates: " + str(len(candidate_coordinate_set)))
 
     best_candidate = None
     min_variability = None
+    values = []
+    cords = []
     for candidate_coords in candidate_coordinate_set:
-        radii_coordinates = get_radii_coordinates(img, candidate_coords, num_samples=40, offset=6)
+        radii_coordinates = get_radii_coordinates(img, candidate_coords, num_samples=80, offset=0)
         radii = [[img[xy] for xy in radius_coords]
                  for radius_coords in radii_coordinates]
-        current_variability = vector_variability(radii)
-        if best_candidate is None or current_variability < min_variability:
+
+        #current_variability = vector_variability(radii)
+        current_variability = max([(sum(radius) / len(radius)) for radius in radii])
+
+        values.append(current_variability)
+        cords.append(candidate_coords)
+
+        if best_candidate is None or current_variability > min_variability:
             min_variability = current_variability
             best_candidate = candidate_coords
+
     return candidate_coordinate_set, candidate1, candidate2, best_candidate #FIXME remove redundant returns
 
 
@@ -266,7 +285,7 @@ def apply_aggregate_fcn(img, stat_fcn, irrelevant, layers=[]):
 
 def parse_command_line_options():
     usage = "Usage: radial_compressor.py [input_directory='./data')] [-s compression statistics separated by spaces]"
-    dir_name = "./data/" if len(sys.argv) == 1 or sys.argv[1] == "-s" else sys.argv[1]
+    dir_name = "./center_data/" if len(sys.argv) == 1 or sys.argv[1] == "-s" else sys.argv[1]
     if dir_name[-1] != '/':
         dir_name += '/'
     file_names = [fn for fn in glob.glob(dir_name + "*.png")]
@@ -294,7 +313,8 @@ def parse_command_line_options():
 def center_visualization(img, candidates, candidate1, candidate2, center):
     img = cv.cvtColor(img, cv.COLOR_GRAY2BGR)
 
-    vectors = get_radii_coordinates(img, center, num_samples=40, offset=6)
+    # OMG? WHY?
+    vectors = get_radii_coordinates(img, center, num_samples=80, offset=0)
 
     for vector in vectors:
         for pixel in vector:
@@ -357,15 +377,17 @@ def main():
 def test():
     file_names, chosen_stats, col_width = parse_command_line_options()
     for im_name in file_names:
-        original_image = cv.imread(im_name, cv.IMREAD_COLOR)
-        values = bresenham_line_points(30, 10, 10, 80)
+        original_image = cv.imread(im_name, cv.IMREAD_GRAYSCALE)
 
-        for x in values:
-            original_image[x] = [0, 0, 255]
+        candidate_coordinate_set, candidate1, candidate2, best_candidate = calculate_center(original_image)
+        result = center_visualization(original_image, candidate_coordinate_set, candidate1[::-1], candidate2[::-1], best_candidate)
 
-        cv.imshow('title', original_image)
-        cv.waitKey(0)
-        cv.destroyAllWindows()
+        color_img = cv.cvtColor(original_image, cv.COLOR_GRAY2BGR)
+        for i in candidate_coordinate_set:
+            color_img[i] = [0, 255, 0]
+
+        from util import show_img
+        show_img(result)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
@@ -376,7 +398,7 @@ if __name__ == "__main__":
                   "median": np.median,
                   "var": np.var
                   }
-    main()
-    # test() #FIXME remove
+    #main()
+    test() #FIXME remove
 
 
