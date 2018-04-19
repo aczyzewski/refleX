@@ -6,6 +6,7 @@ import sys
 import glob
 import logging
 from matplotlib import pyplot as plt
+from joblib import Parallel, delayed
 
 import preprocess
 import util
@@ -115,48 +116,57 @@ def parse_command_line_options():
     return file_names, chosen_stats, col_width
 
 
+def process_image(center_dict, computed_centers, col_width, im_name, chosen_stats):
+
+    if im_name[im_name.rfind('/') + 1:] not in computed_centers:
+        return
+
+    logger.debug("Processing " + im_name)
+    original_image = cv.imread(im_name, cv.IMREAD_GRAYSCALE)
+    logger.debug("Image " + im_name + " read successfully")
+
+    # im = preprocess.narrow_gaps(original_image) #FIXME
+    im = original_image  # FIXME ^
+    irrelevant = preprocess.radial_mark_irrelevant(im)
+    logger.debug(im_name + " preprocessed successfully")
+
+    center = (center_dict[im_name[39:]]['x'], center_dict[im_name[39:]]['y'])
+    logger.info("Center in: " + str(center))
+    logger.debug("Found center: ")
+    logger.debug(im_name.ljust(col_width) + str(center))
+
+    layers = get_layers(im, center)
+    compressed_1d_images = []
+    for s in chosen_stats:
+        vector = apply_aggregate_fcn(im, stat_names[s], irrelevant, layers)
+        compressed_1d_images.append(vector)
+        vector = np.array(vector)
+        cv.imwrite("./1d_" + im_name[2:-4] + s + ".png", vector)
+
+    if logging.getLogger().isEnabledFor(logging.DEBUG):
+        fig, axs = plt.subplots(nrows=int(np.ceil((len(compressed_1d_images) + 3) / 3)), ncols=3, figsize=(20, 10))
+        axs[0][0].imshow(original_image)
+        axs[0][0].set_title("Original")
+        axs[0][1].imshow(irrelevant)
+        axs[0][1].set_title("Marked irrelevant")
+        axs[0][2].imshow(find_center.center_visualization(im, [], None, None, center[::-1]))
+        axs[0][2].set_title("Detected center")
+        for i, v in enumerate(compressed_1d_images):
+            axs[1 + i // 3][i % 3].imshow(np.vstack(15 * (v,)))
+            axs[1 + i // 3][i % 3].set_title(chosen_stats[i])
+        plt.axis('off')
+        plt.savefig("./info_" + im_name[2:-4] + "_info.png")
+        plt.close()
+
+
 def main():
     file_names, chosen_stats, col_width = parse_command_line_options()
     center_dict = pd.read_csv("centers.csv").set_index('image_name').to_dict('index')
-    print(center_dict)
-    for im_name in file_names:
+    computed_centers = list(center_dict.keys())
 
-        logger.debug("Processing " + im_name)
-        original_image = cv.imread(im_name, cv.IMREAD_GRAYSCALE)
-        logger.debug("Image " + im_name + " read successfully")
-
-        #im = preprocess.narrow_gaps(original_image) #FIXME
-        im = original_image #FIXME ^
-        irrelevant = preprocess.radial_mark_irrelevant(im)
-        logger.debug(im_name + " preprocessed successfully")
-
-        center = (center_dict[im_name[39:]]['x'], center_dict[im_name[39:]]['y'])
-        logger.info("Center in: " + str(center))
-        logger.debug("Found center: ")
-        logger.debug(im_name.ljust(col_width) + str(center))
-
-        layers = get_layers(im, center)
-        compressed_1d_images = []
-        for s in chosen_stats:
-            vector = apply_aggregate_fcn(im, stat_names[s], irrelevant, layers)
-            compressed_1d_images.append(vector)
-            vector = np.array(vector)
-            cv.imwrite("./1d_" + im_name[2:-4] + s + ".png", vector)
-
-        if logging.getLogger().isEnabledFor(logging.INFO):
-            fig, axs = plt.subplots(nrows=int(np.ceil((len(compressed_1d_images)+3)/3)), ncols=3, figsize=(20, 10))
-            axs[0][0].imshow(original_image)
-            axs[0][0].set_title("Original")
-            axs[0][1].imshow(irrelevant)
-            axs[0][1].set_title("Marked irrelevant")
-            axs[0][2].imshow(find_center.center_visualization(im, [], None, None, center[::-1]))
-            axs[0][2].set_title("Detected center")
-            for i,v in enumerate(compressed_1d_images):
-                axs[1+i//3][i%3].imshow(np.vstack(15 * (v,)))
-                axs[1+i//3][i%3].set_title(chosen_stats[i])
-            plt.axis('off')
-            plt.savefig("./info_" + im_name[2:-4] + "_info.png")
-            plt.close()
+    Parallel(n_jobs=8)(delayed(process_image)
+                       (center_dict, computed_centers, col_width, im_name, chosen_stats)
+                       for im_name in file_names)
 
     logger.info("Finished")
     cv.destroyAllWindows()
@@ -165,10 +175,10 @@ def main():
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
-    stat_names = {"max": max,
-                  "min": min,
-                  "mean": np.mean,
-                  "median": np.median,
-                  "var": np.var
+    stat_names = {"max": lambda x: np.nanpercentile(x, 95),
+                  "min": lambda x: np.nanpercentile(x, 5),
+                  "mean": np.nanmean,
+                  "median": np.nanmedian,
+                  "var": np.nanvar
                   }
     main()
