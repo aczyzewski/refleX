@@ -7,6 +7,13 @@ import logging
 
 #TODO: Documentation!
 
+#TODO: Logger
+# https://stackoverflow.com/questions/34940302/should-i-use-logging-module-or-logging-class
+# https://fangpenlin.com/posts/2012/08/26/good-logging-practice-in-python/
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 class RawDataFile():
 
     def __init__(self, path, data_ext='.npy.bz2', info_ext='.info', load_data=True):
@@ -100,7 +107,6 @@ class RawDataFile():
             return 255 - data.astype(np.uint8)
         return None
 
-
 def convert_files(input_dir, output_dir, size=None, input_ext = '.npy.bz2', output_ext = '.png', overwrite=False):
     files = [file for file in os.listdir(input_dir) if file.endswith(input_ext) and not file.startswith('.')]
 
@@ -118,6 +124,33 @@ def convert_files(input_dir, output_dir, size=None, input_ext = '.npy.bz2', outp
         except:
             print("Cannot convert file: " + file)
 
+def parameters_in_file(DIR, filename, parameters):
 
-if __name__ == '__main__':
-    convert_files('/Volumes/DATA/reflex_data/pd_image_dumps/', './reflex_img_512_inter_nearest/', size=512)
+    with open(DIR + filename + ".info") as file:
+        data = file.read()
+        if all([param in data for param in parameters]):
+            return True
+
+    return False
+
+def get_files_without_params(files, params, debug=False):
+    results = []
+    for file in files:
+        if not parameters_in_file(file, params):
+            results.append(file)
+            if debug:
+                print(f"Set of parameters: {params} not found in {file}.info")
+    return results
+
+def get_params_from_file(filename, params):
+
+    if type(params) is not list: params = [params]
+    results = {key: None for key in params}
+
+    with open(filename) as file:
+        data = file.read().split()
+        for param in params:
+            if param in data:
+                results[param] = data[data.index(param) + 1]
+
+    return results

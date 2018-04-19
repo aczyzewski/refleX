@@ -1,6 +1,7 @@
 import numpy as np
 import cv2 as cv
 import pandas as pd
+import sys
 
 from math import cos, sin, log
 from sklearn.metrics.pairwise import cosine_distances
@@ -43,7 +44,7 @@ def get_radii_coordinates(img, center, num_samples=20, offset=0):
     return vectors
 
 
-def extend_bresenham_line(original_image, candidate_coordinate_set, multipler = 1, border=25):
+def extend_bresenham_line(original_image, candidate_coordinate_set, multipler = 2, border=25):
 
     extend = [candidate_coordinate_set[0][0] - candidate_coordinate_set[-1][0], candidate_coordinate_set[0][1] - candidate_coordinate_set[-1][1]]
     reference_point = candidate_coordinate_set[0]
@@ -71,16 +72,16 @@ def calculate_center(img):
     l_img = logarithmize(util.normalize_gray_image(img))
     candidate1 = util.center_of_mass(l_img)[::-1]
     candidate2 = util.center_of_mass(util.negative(l_img))[::-1]
-    logger.debug("Candidates are: " + str(candidate1) + " and " + str(candidate2))
+    #logger.debug("Candidates are: " + str(candidate1) + " and " + str(candidate2))
     candidate_coordinate_set = extend_bresenham_line(img, util.bresenham_line_points(*candidate1, *candidate2), border=50)
-    logger.debug("Number of candidates: " + str(len(candidate_coordinate_set)))
+    #logger.debug("Number of candidates: " + str(len(candidate_coordinate_set)))
 
     best_candidate = None
     min_variability = None
     values = []
     cords = []
     for candidate_coords in candidate_coordinate_set:
-        radii_coordinates = get_radii_coordinates(img, candidate_coords, num_samples=80, offset=0)
+        radii_coordinates = get_radii_coordinates(img, candidate_coords, num_samples=512, offset=0)
         radii = [[img[xy] for xy in radius_coords]
                  for radius_coords in radii_coordinates]
 
@@ -143,22 +144,25 @@ def test(dirname):
         show_img(result)
 
 
-def main(dirname):
+def main(dirname="./data/"):
     file_names = [fn for fn in glob.glob(dirname + "*.png")]
     labeled_image_names = pd.read_csv("reflex.csv").iloc[:, 0].str.slice(7, -4).values
-    for im_name in file_names:
-        if im_name[39:-4] not in labeled_image_names:
+    for im_name in file_names[::-1]:
+        if im_name[len(dirname):-4] not in labeled_image_names:
             continue
         print(im_name)
         img = cv.imread(im_name, cv.IMREAD_GRAYSCALE)
         logger.debug("Image " + im_name + " read successfully")
         candidate_coordinate_set, candidate1, candidate2, best_candidate = calculate_center(img)
         print(best_candidate)
-        data = {"image_name": im_name[39:], "x": best_candidate[1], "y": best_candidate[0]}
-        util.write_to_csv("centers.csv", data)
+        data = {"image_name": im_name[len(dirname):], "x": best_candidate[1], "y": best_candidate[0]}
+        util.write_to_csv("centers_ac.csv", data)
 
 
 if __name__ == "__main__":
+    dirname = '/Users/adam/Desktop/ref/512/no_grid/' if len(sys.argv) == 1 else sys.argv[1]
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
-    main("/Volumes/Alice/reflex-data/no_grid_512/")
+
+    #main(dirname)
+    test('./center_data/')
