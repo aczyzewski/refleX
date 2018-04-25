@@ -3,12 +3,15 @@
 import warnings
 import os
 import csv
+import glob
+
 
 import numpy as np
 import cv2 as cv
 
 from itertools import chain
 from sklearn.model_selection import _split
+from math import pi, atan2
 from scipy.misc import imsave, imread, imresize
 
 __author__ = "Dariusz Brzezinski"
@@ -150,14 +153,6 @@ def show_img(image, window_name='image', width=600, height=600):
     cv.destroyAllWindows()
 
 
-def normalize_gray_image(img, base=8):
-    base = pow(2, base) - 1
-    float_array = np.array(img, dtype=np.float64)
-    float_array -= float_array.min()
-    float_array *= float(base) / float_array.max()
-    return np.array(np.around(float_array), dtype=np.uint8)
-
-
 def negative(img):
     return 255 - img
 
@@ -167,6 +162,7 @@ def closest_pixel(coord):
     return int(round(fx)), int(round(fy))
 
 
+'''returns list of (x,y) coordinates'''
 def bresenham_line_points(x1, y1, x2, y2):
     """
     Zwraca listę punktów, przez które przechodzić będzie prosta
@@ -229,33 +225,54 @@ def bresenham_line_points(x1, y1, x2, y2):
     return points
 
 
-def center_of_mass(img):
-    if True:    #FIXME remove
-        row_centers = []
-        for row in img:
-            s0 = sum(row)
-            s1 = 0
-            for i, pixel in enumerate(row):
-                s1 += i
-                if s1 > s0:
-                    row_centers.append([i, s0])
-                    break
-        s0 = sum([i[1] for i in row_centers])
-        s1 = 0
-        for y, (x, w) in enumerate(row_centers):
-            s1 += w
-            if s1 > s0:
-                #FIXME Point notation?
-                return y, x
+def t_bresenham_line_points():
+    img = np.zeros((100,100), dtype=np.uint8)
+    points = bresenham_line_points(50,0,50,99)
+    for p in points:
+        img[p[::-1]] = 255
+    show_img(img)
 
-    # TODO
+
+def center_of_mass(img):
     if cv.moments(img)['m00'] != 0:
         m = cv.moments(img)
         x = m['m10'] / m['m00']
         y = m['m01'] / m['m00']
+        return round(x), round(y)
     else:
-        return img.shape[0]/2, img.shape[1]/2
-    return round(x), round(y) # OK
+        return img.shape[1]/2, img.shape[0]/2
+
+
+'''both circle_center and p must be in (x,y) format, where 0 is top-left and y increases downwards'''
+def sort_circle_points(points, center):
+    points.sort(key=lambda p: radial_angle(center, p))
+    return points
+
+
+'''both circle_center and p must be in (x,y) format, where 0 is top-left and y increases downwards
+returns clockwise angle that the ray from circle_center to p forms with north'''
+def radial_angle(circle_center, p):
+    a = 180 * atan2(p[1] - circle_center[1], p[0] - circle_center[0]) / pi + 90
+    if a < 0:
+        a += 360
+    return a
+
+
+def t_radial_angle(): #TODO assert answers
+    print(radial_angle((0,0), (0,-50))) #0
+    print(radial_angle((0,0), (50,0))) #90
+    print(radial_angle((0,0), (50,50))) #135
+    print(radial_angle((0,0), (0,50))) #180
+
+
+def test_center_of_mass():
+    for im_name in ["166551_1_E1_0001.png", "93315_1_E1_001.png", "166551_1_E2_0001.png", "60603_2_001.png",
+                    "166551_2_0001.png", "50086_1_001.png", "62581_1_001.png", "166670_1_E1_0001.png",
+                    "166670_1_E2_0001.png", "94590_2_E2.png", "165323_1_00001.png", "166697_1_E1_0001.png",
+                    "18596_1_E1_001.png", "166697_1_E2_0001.png (256, 255)"]:#glob.glob("/Volumes/Alice/reflex-data/reflex_img_512_inter_nearest/*.png"):
+        img = cv.imread("/Volumes/Alice/reflex-data/reflex_img_512_inter_nearest/"+im_name, cv.IMREAD_GRAYSCALE) #FIXME hardcoded path
+        #TODO compare to truth
+        print(im_name, "     ", center_of_mass(img))
 
 
 def write_to_csv(filename, values):
@@ -265,4 +282,3 @@ def write_to_csv(filename, values):
         if flag == 'w':
             writer.writeheader()
         writer.writerow(values)
-

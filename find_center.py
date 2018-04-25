@@ -69,7 +69,7 @@ def logarithmize(img):
 
 
 def calculate_center(img):
-    l_img = logarithmize(util.normalize_gray_image(img))
+    l_img = logarithmize(img)
     candidate1 = util.center_of_mass(l_img)[::-1]
     candidate2 = util.center_of_mass(util.negative(l_img))[::-1]
     #logger.debug("Candidates are: " + str(candidate1) + " and " + str(candidate2))
@@ -146,10 +146,8 @@ def test(dirname):
 
 def main(dirname="./data/"):
     file_names = [fn for fn in glob.glob(dirname + "*.png")]
-    labeled_image_names = pd.read_csv("reflex.csv").iloc[:, 0].str.slice(7, -4).values
+    #labeled_image_names = pd.read_csv("reflex.csv").iloc[:, 0].str.slice(7, -4).values
     for im_name in file_names[::-1]:
-        if im_name[len(dirname):-4] not in labeled_image_names:
-            continue
         print(im_name)
         img = cv.imread(im_name, cv.IMREAD_GRAYSCALE)
         logger.debug("Image " + im_name + " read successfully")
@@ -160,9 +158,12 @@ def main(dirname="./data/"):
 
 
 if __name__ == "__main__":
-    dirname = '/Users/adam/Desktop/ref/512/no_grid/' if len(sys.argv) == 1 else sys.argv[1]
+    if len(sys.argv) < 2:
+        print("Usage: <python3 find_center.py image_directory_name>")
+        exit(-1)
+    dirname = sys.argv[1]
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
 
-    #main(dirname)
-    test('./center_data/')
+    main(dirname)
+    #test('./center_data/')

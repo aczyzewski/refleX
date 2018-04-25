@@ -7,8 +7,8 @@ import glob
 import logging
 from matplotlib import pyplot as plt
 from joblib import Parallel, delayed
+from modules.preprocessinglib import find_ray_angle
 
-import preprocess
 import util
 import find_center
 
@@ -91,7 +91,7 @@ def apply_aggregate_fcn(img, stat_fcn, irrelevant, layers=[]):
 
 def parse_command_line_options():
     usage = "Usage: radial_compressor.py [input_directory='./data')] [-s compression statistics separated by spaces]"
-    dir_name = "./center_data/" if len(sys.argv) == 1 or sys.argv[1] == "-s" else sys.argv[1]
+    dir_name = "./data/" if len(sys.argv) == 1 or sys.argv[1] == "-s" else sys.argv[1]
     if dir_name[-1] != '/':
         dir_name += '/'
     file_names = [fn for fn in glob.glob(dir_name + "*.png")]
@@ -107,30 +107,30 @@ def parse_command_line_options():
         os.makedirs(compressed_dir_name)
     logger.info("Saving results in " + compressed_dir_name)
 
-    if logging.getLogger().isEnabledFor(logging.INFO):
+    if logging.getLogger().isEnabledFor(logging.DEBUG):
         info_dir_name = "./info_" + dir_name[2:]
         if not os.path.exists(info_dir_name):
             os.makedirs(info_dir_name)
-
     col_width = max([len(i) for i in file_names]) + 3
     return file_names, chosen_stats, col_width
 
 
-def process_image(center_dict, computed_centers, col_width, im_name, chosen_stats):
+def process_image(center_dict, computed_centers, col_width, im_name_with_dir, chosen_stats):
 
-    if im_name[im_name.rfind('/') + 1:] not in computed_centers:
+    im_name = im_name_with_dir[im_name_with_dir.rfind('/')+1:]
+    if im_name not in computed_centers:
         return
 
     logger.debug("Processing " + im_name)
-    original_image = cv.imread(im_name, cv.IMREAD_GRAYSCALE)
+    original_image = cv.imread(im_name_with_dir, cv.IMREAD_GRAYSCALE)
     logger.debug("Image " + im_name + " read successfully")
+    print(im_name)
 
-    # im = preprocess.narrow_gaps(original_image) #FIXME
-    im = original_image  # FIXME ^
-    irrelevant = preprocess.radial_mark_irrelevant(im)
+    im = original_image
+    irrelevant = [] #FIXME
     logger.debug(im_name + " preprocessed successfully")
-
-    center = (center_dict[im_name[39:]]['x'], center_dict[im_name[39:]]['y'])
+    center = (center_dict[im_name]['x'], center_dict[im_name]['y'])
+    print(center)
     logger.info("Center in: " + str(center))
     logger.debug("Found center: ")
     logger.debug(im_name.ljust(col_width) + str(center))
@@ -161,7 +161,7 @@ def process_image(center_dict, computed_centers, col_width, im_name, chosen_stat
 
 def main():
     file_names, chosen_stats, col_width = parse_command_line_options()
-    center_dict = pd.read_csv("centers.csv").set_index('image_name').to_dict('index')
+    center_dict = pd.read_csv("centers.csv").set_index('image_name').to_dict('index') #TODO hardcoded path
     computed_centers = list(center_dict.keys())
 
     Parallel(n_jobs=8)(delayed(process_image)
@@ -173,7 +173,7 @@ def main():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger(__name__)
     stat_names = {"max": lambda x: np.nanpercentile(x, 95),
                   "min": lambda x: np.nanpercentile(x, 5),
