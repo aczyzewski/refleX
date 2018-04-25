@@ -1,30 +1,28 @@
 # coding: utf-8
 
-import glob
-import numpy as np
-import pandas as pd
-import logging
-import sys
-import getopt
-import os
 import gc
+import getopt
+import glob
+import logging
+import os
+import random as rn
+import sys
 import time
 
-from sklearn import metrics as sk_metrics
-from scipy import misc
-import metrics
-import util
-
+import numpy as np
+import pandas as pd
+import tensorflow as tf
 from keras import backend as K
+from keras.callbacks import TensorBoard
 from keras.models import load_model
 from keras.optimizers import Adam
-from keras.callbacks import TensorBoard
 from keras.preprocessing import image
+from scipy import misc
+from sklearn import metrics as sk_metrics
 
-import tensorflow as tf
-import random as rn
-
-from models import DropoutModel, VggModel, PoolingModel, BatchNormPoolingModel
+import metrics
+from models import BatchNormPoolingModel
+from modules import util
 
 __author__ = "Dariusz Brzezinski"
 

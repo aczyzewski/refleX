@@ -1,16 +1,12 @@
-import numpy as np
-import cv2 as cv
-import pandas as pd
-import os
-import sys
+import argparse
 import glob
 import logging
-from matplotlib import pyplot as plt
-from joblib import Parallel, delayed
-from modules.preprocessinglib import find_ray_angle
+import os
 
-import util
-import find_center
+import cv2 as cv
+import numpy as np
+import pandas as pd
+from joblib import Parallel, delayed
 
 
 #return discrete coordinates of pixels on circle of radius r, given the center of the circle
@@ -67,16 +63,6 @@ def get_layers(img, center):
             layers.append([center])
     return layers
 
-
-def color_layers(img, layers, color_alpha=0.1, gamma=0):
-    r_max = len(layers)
-    color = np.zeros_like(img)
-    for r, l in enumerate(layers):
-        for coord in l:
-            color[coord] = util.hsv2rgb(util.linear_interpolation(r, 0, r_max, 0, 360), 1, 1)
-    return cv.addWeighted(color, color_alpha, img, 1-color_alpha, gamma)
-
-
 def apply_aggregate_fcn(img, stat_fcn, irrelevant, layers=[]):
     values = [[img[coord] for coord in coords if not irrelevant[coord]] for coords in layers]
     aggregated = [stat_fcn(layer) if layer else None for layer in values]
@@ -89,33 +75,7 @@ def apply_aggregate_fcn(img, stat_fcn, irrelevant, layers=[]):
 #TODO taking last non-empty result might not be the best idea
 
 
-def parse_command_line_options():
-    usage = "Usage: radial_compressor.py [input_directory='./data')] [-s compression statistics separated by spaces]"
-    dir_name = "./data/" if len(sys.argv) == 1 or sys.argv[1] == "-s" else sys.argv[1]
-    if dir_name[-1] != '/':
-        dir_name += '/'
-    file_names = [fn for fn in glob.glob(dir_name + "*.png")]
-    chosen_stats = sys.argv[sys.argv.index("-s") + 1:] if "-s" in sys.argv else list(stat_names.keys())
-    for s in chosen_stats:
-        if s not in stat_names.keys():
-            logger.error(usage)
-            logger.error("Available statistics: ", stat_names.keys())
-            exit(0)
-    logger.info("Processing " + str(len(file_names)) + " png files from " + dir_name)
-    compressed_dir_name = "./1d_" + dir_name[2:]
-    if not os.path.exists(compressed_dir_name):
-        os.makedirs(compressed_dir_name)
-    logger.info("Saving results in " + compressed_dir_name)
-
-    if logging.getLogger().isEnabledFor(logging.DEBUG):
-        info_dir_name = "./info_" + dir_name[2:]
-        if not os.path.exists(info_dir_name):
-            os.makedirs(info_dir_name)
-    col_width = max([len(i) for i in file_names]) + 3
-    return file_names, chosen_stats, col_width
-
-
-def process_image(center_dict, computed_centers, col_width, im_name_with_dir, chosen_stats):
+def process_image(center_dict, computed_centers, col_width, im_name_with_dir, chosen_stat_names, compressed_dirname):
 
     im_name = im_name_with_dir[im_name_with_dir.rfind('/')+1:]
     if im_name not in computed_centers:
@@ -124,48 +84,76 @@ def process_image(center_dict, computed_centers, col_width, im_name_with_dir, ch
     logger.debug("Processing " + im_name)
     original_image = cv.imread(im_name_with_dir, cv.IMREAD_GRAYSCALE)
     logger.debug("Image " + im_name + " read successfully")
-    print(im_name)
 
     im = original_image
-    irrelevant = [] #FIXME
+    irrelevant = np.zeros_like(im) #FIXME
     logger.debug(im_name + " preprocessed successfully")
     center = (center_dict[im_name]['x'], center_dict[im_name]['y'])
-    print(center)
     logger.info("Center in: " + str(center))
     logger.debug("Found center: ")
     logger.debug(im_name.ljust(col_width) + str(center))
 
     layers = get_layers(im, center)
     compressed_1d_images = []
-    for s in chosen_stats:
-        vector = apply_aggregate_fcn(im, stat_names[s], irrelevant, layers)
+    for s in chosen_stat_names:
+        vector = apply_aggregate_fcn(im, stat_functions[s], irrelevant, layers)
         compressed_1d_images.append(vector)
         vector = np.array(vector)
-        cv.imwrite("./1d_" + im_name[2:-4] + s + ".png", vector)
+        cv.imwrite(compressed_dirname + s + "/" + im_name, vector)
 
-    if logging.getLogger().isEnabledFor(logging.DEBUG):
-        fig, axs = plt.subplots(nrows=int(np.ceil((len(compressed_1d_images) + 3) / 3)), ncols=3, figsize=(20, 10))
-        axs[0][0].imshow(original_image)
-        axs[0][0].set_title("Original")
-        axs[0][1].imshow(irrelevant)
-        axs[0][1].set_title("Marked irrelevant")
-        axs[0][2].imshow(find_center.center_visualization(im, [], None, None, center[::-1]))
-        axs[0][2].set_title("Detected center")
-        for i, v in enumerate(compressed_1d_images):
-            axs[1 + i // 3][i % 3].imshow(np.vstack(15 * (v,)))
-            axs[1 + i // 3][i % 3].set_title(chosen_stats[i])
-        plt.axis('off')
-        plt.savefig("./info_" + im_name[2:-4] + "_info.png")
-        plt.close()
+
+def configure_parser(parser):
+    parser.add_argument("image_dirname", help="Path to directory containing images for compression.")
+    parser.add_argument("centers_csv_filename",
+                        help="Filename of csv containing image filenames and x and y coordinates the image centers")
+    parser.add_argument("-var", "--var", action="store_true", help="Use variance for compression.")
+    parser.add_argument("-mean", "--mean", action="store_true", help="Use mean for compression.")
+    parser.add_argument("-median", "--median", action="store_true", help="Use median for compression.")
+    parser.add_argument("-min", "--min", action="store_true", help="Use min for compression.")
+    parser.add_argument("-max", "--max", action="store_true", help="Use max for compression.")
+    parser.add_argument("-5th", "--5th", action="store_true", help="Use 5th percentile for compression.")
+    parser.add_argument("-95th", "--95th", action="store_true", help="Use 95th percentile for compression.") #TODO allow numeric percentile arg?
+    parser.add_argument("-allstats", "--allstats", action="store_true",
+                        help="Run all methods of compression (" + " ".join([str(s) for s in stat_functions.keys()]) + ").")
+    parser.add_argument("-nj", "--n_jobs", type=int, nargs="?", const=1, help="Number of threads. Default 1 thread.")
 
 
 def main():
-    file_names, chosen_stats, col_width = parse_command_line_options()
-    center_dict = pd.read_csv("centers.csv").set_index('image_name').to_dict('index') #TODO hardcoded path
+    parser = argparse.ArgumentParser()
+    configure_parser(parser)
+    args = parser.parse_args()
+
+    file_names = [fn for fn in glob.glob(args.image_dirname + "*.png")]
+    logger.info("Processing " + str(len(file_names)) + " png files from " + args.image_dirname)
+    compressed_dir_name = args.image_dirname[:-1] + "_compressed/"
+    if not os.path.exists(compressed_dir_name):
+        os.makedirs(compressed_dir_name)
+    logger.info("Saving results in " + compressed_dir_name)
+    col_width = max([len(i) for i in file_names]) + 3
+
+    chosen_stat_names = []
+    if args.allstats:
+        chosen_stat_names = list(stat_functions.keys())
+    else:
+        for stat_name in stat_functions.keys():
+            if args.stat_name:
+                chosen_stat_names.append(stat_name)
+    if len(chosen_stat_names) == 0:
+        print("Must choose at least one compression statistic")
+        parser.print_help()
+        exit(-1)
+
+    for stat_name in chosen_stat_names:
+        os.makedirs(compressed_dir_name + stat_name)
+
+    center_dict = pd.read_csv(args.centers_csv_filename).set_index('image_name').to_dict('index')
     computed_centers = list(center_dict.keys())
 
-    Parallel(n_jobs=8)(delayed(process_image)
-                       (center_dict, computed_centers, col_width, im_name, chosen_stats)
+    #for im_name in file_names:
+    #    process_image(center_dict, computed_centers, col_width, im_name, chosen_stat_names, compressed_dir_name)
+
+    Parallel(n_jobs=args.n_jobs)(delayed(process_image)
+                       (center_dict, computed_centers, col_width, im_name, chosen_stat_names, compressed_dir_name)
                        for im_name in file_names)
 
     logger.info("Finished")
@@ -173,10 +161,12 @@ def main():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
-    stat_names = {"max": lambda x: np.nanpercentile(x, 95),
-                  "min": lambda x: np.nanpercentile(x, 5),
+    stat_functions = {"max": np.nanmax,
+                    "95th_percentile": lambda x: np.nanpercentile(x, 95),
+                  "min": np.nanmin,
+                    "5th_percentile": lambda x: np.nanpercentile(x, 5),
                   "mean": np.nanmean,
                   "median": np.nanmedian,
                   "var": np.nanvar

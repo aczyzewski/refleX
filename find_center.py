@@ -1,15 +1,13 @@
-import numpy as np
-import cv2 as cv
-import pandas as pd
+import glob
+import logging
 import sys
-
 from math import cos, sin, log
+
+import cv2 as cv
+import numpy as np
 from sklearn.metrics.pairwise import cosine_distances
 
-import logging
-import glob
-
-import util
+from modules import util
 
 
 def get_radii_coordinates(img, center, num_samples=20, offset=0):
@@ -140,7 +138,7 @@ def test(dirname):
         for i in candidate_coordinate_set:
             color_img[i] = [0, 255, 0]
 
-        from util import show_img
+        from modules.util import show_img
         show_img(result)
 
 

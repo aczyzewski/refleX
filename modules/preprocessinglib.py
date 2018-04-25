@@ -1,12 +1,14 @@
 #TODO clean up
 
-import cv2 as cv
-import numpy as np
 import glob
 import operator
 
-import util
-from util import radial_angle
+import cv2 as cv
+import numpy as np
+
+from modules import util
+from modules.util import radial_angle
+
 
 def draw_circle(x0, y0, r):
     x, y, p = [0, r, 1-r]

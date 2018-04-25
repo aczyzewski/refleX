@@ -1,15 +1,15 @@
 # coding: utf-8
 
-import glob
-import util
-import logging
-import subprocess
-import os
-import sys
-import signal
 import csv
-import pandas as pd
+import glob
+import logging
+import os
+import signal
+import subprocess
+import sys
 from collections import OrderedDict
+
+import pandas as pd
 
 __author__ = "Dariusz Brzezinski"
 
