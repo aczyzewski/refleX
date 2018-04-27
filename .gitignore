@@ -110,3 +110,4 @@ logs/*
 
 # Apple metadata files
 **/.DS_Store
+**/__pycache__

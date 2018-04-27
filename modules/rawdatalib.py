@@ -21,6 +21,7 @@ class RawDataFile():
         self.__info_ext = info_ext
         self.__parse_path(path)
         self.clear_data()
+        self.data = None
 
         if load_data:
             self.load_data()
@@ -72,7 +73,7 @@ class RawDataFile():
 
     def npy_to_img(self, size=None, delete_grid=True, padding=25, interpolation=cv.INTER_NEAREST):
 
-        if self.data != np.array([]):
+        if self.data:
             data = self.data.copy()
             data = data[padding:-padding, padding:-padding]
             mn, mx = self.__autoscale_legacy(data)
