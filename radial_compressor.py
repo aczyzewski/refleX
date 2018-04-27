@@ -102,7 +102,7 @@ def process_image(center_dict, computed_centers, col_width, im_name_with_dir, ch
         cv.imwrite(compressed_dirname + s + "/" + im_name, vector)
 
 
-def configure_parser(parser):
+def configure_parser(parser): #TODO allow numeric percentile arg?
     parser.add_argument("image_dirname", help="Path to directory containing images for compression.")
     parser.add_argument("centers_csv_filename",
                         help="Filename of csv containing image filenames and x and y coordinates the image centers")
@@ -112,7 +112,7 @@ def configure_parser(parser):
     parser.add_argument("-min", "--min", action="store_true", help="Use min for compression.")
     parser.add_argument("-max", "--max", action="store_true", help="Use max for compression.")
     parser.add_argument("-5th", "--5th", action="store_true", help="Use 5th percentile for compression.")
-    parser.add_argument("-95th", "--95th", action="store_true", help="Use 95th percentile for compression.") #TODO allow numeric percentile arg?
+    parser.add_argument("-95th", "--95th", action="store_true", help="Use 95th percentile for compression.")
     parser.add_argument("-allstats", "--allstats", action="store_true",
                         help="Run all methods of compression (" + " ".join([str(s) for s in stat_functions.keys()]) + ").")
     parser.add_argument("-nj", "--n_jobs", type=int, nargs="?", const=1, help="Number of threads. Default 1 thread.")
