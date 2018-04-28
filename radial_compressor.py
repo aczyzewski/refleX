@@ -149,9 +149,6 @@ def main():
     center_dict = pd.read_csv(args.centers_csv_filename).set_index('image_name').to_dict('index')
     computed_centers = list(center_dict.keys())
 
-    #for im_name in file_names:
-    #    process_image(center_dict, computed_centers, col_width, im_name, chosen_stat_names, compressed_dir_name)
-
     Parallel(n_jobs=args.n_jobs)(delayed(process_image)
                        (center_dict, computed_centers, col_width, im_name, chosen_stat_names, compressed_dir_name)
                        for im_name in file_names)
@@ -163,12 +160,15 @@ def main():
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
-    stat_functions = {"max": np.nanmax,
-                    "95th_percentile": lambda x: np.nanpercentile(x, 95),
-                  "min": np.nanmin,
-                    "5th_percentile": lambda x: np.nanpercentile(x, 5),
-                  "mean": np.nanmean,
-                  "median": np.nanmedian,
-                  "var": np.nanvar
-                  }
+
+    stat_functions = {
+        "max": np.nanmax,
+        "95th_percentile": lambda x: np.nanpercentile(x, 95),
+        "min": np.nanmin,
+        "5th_percentile": lambda x: np.nanpercentile(x, 5),
+        "mean": np.nanmean,
+        "median": np.nanmedian,
+        "var": np.nanvar
+    }
+
     main()

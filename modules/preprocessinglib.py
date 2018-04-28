@@ -1,58 +1,17 @@
-import cv2 as cv
-import numpy as np
-import operator
-import logging
+# -*- coding: utf-8 -*-
+
 import glob
-import ntpath
-import sys
 import ntpath
 
 import numpy as np
 import cv2 as cv
-import pandas as pd
+import modules.util as util
 
 from math import cos, sin, log
 from sklearn.metrics.pairwise import cosine_distances
 
-import util
-from util import radial_angle
-
-def draw_circle(x0, y0, r):
-    x, y, p = [0, r, 1-r]
-    L = []
-    L.append((x, y))
-
-    for x in range(int(r)):
-        if p < 0:
-            p = p + 2 * x + 3
-        else:
-            y -= 1
-            p = p + 2 * x + 3 - 2 * y
-
-        L.append((x, y))
-
-        if x >= y:
-            break
-
-    N = L[:]
-    for i in L:
-        N.append((i[1], i[0]))
-
-    L = N[:]
-    for i in N:
-        L.append((-i[0], i[1]))
-        L.append((i[0], -i[1]))
-        L.append((-i[0], -i[1]))
-
-    N = []
-    for i in L:
-        N.append((x0+i[0], y0+i[1]))
-
-    return N
-
-
+# TODO: Documentation
 def downscale_gray_image(img, tolerance=25, kernel=3, iterations=1, skip=True):
-
     y, x = img.shape
     step = kernel if skip else 1
     for _ in range(iterations):
@@ -63,7 +22,7 @@ def downscale_gray_image(img, tolerance=25, kernel=3, iterations=1, skip=True):
                     img[yi: yi + kernel, xi: xi + kernel] = block.max()
     return img
 
-
+# TODO: Documentation
 def logarithmize(img):
     l_img = np.zeros_like(img)
     for i, row in enumerate(img):
@@ -74,31 +33,70 @@ def logarithmize(img):
                 l_img[i, j] = round(255*-log(pixel/255))
     return l_img
 
-def sort_dict(dict, by_value=False, sort_reversed=False):
-    result = sorted(dict.items(), key=operator.itemgetter(int(by_value)))
-    return result[::-1] if sort_reversed else result
 
+def extend_bresenham_line(image, line_segment, multipler=2, border=25):
+    """ Rozszerza podany odcinek złożony z puntów o podany współczynnik mnożący.
 
-def extend_bresenham_line(original_image, candidate_coordinate_set, multipler = 2, border=25):
+    Funkcja przymuje listę punktów, które tworzą odcinek. Wyznacza następnie
+    nowe punkty, które będą stanowiły końce nowego odcinka (zawierającego w sobie
+    odcinek początkowy). Punkty (linia) pomiędzy nowym końcami wyznaczana jest
+    za pomocą algorytmu Bresenhama.
 
-    extend = [candidate_coordinate_set[0][0] - candidate_coordinate_set[-1][0], candidate_coordinate_set[0][1] - candidate_coordinate_set[-1][1]]
-    reference_point = candidate_coordinate_set[0]
+    Funckcja docelowo została napisane w celu łatwego rozszerzania zbioru kandydatów
+    na środek obrazu, stąd dodatkowe parametry takie jak `image` oraz `border`, które
+    nakładały ograniczenia na odcinek, tak, aby spełniał wymagania projektu.
+
+    Odcinek nie jest powiekszany równomiernie, a jedynie do do pierwszego punktu podanego
+    odcinka dobudowywane są jego wielokrotnosci. Dla przykładu: `multipler=2` spowoduje
+    dodanie 4 odcinkow (po 2 z kazdej strony) o dlugosciach odcinka poczatkowego, gdzie
+    pierwszy punkt podanego początkowego odcinka będzie leżał na środku nowego odcinka.
+
+    Args:
+        image (numpy array):    Obraz, na który nakładany będzie nowy odcinek.
+        line_segment (list):    Lista punktów tworzących odcinek.
+        multipler (int):        Wyznacza ilukrotnie ma zostać powiększony podany odcinek
+        border (int):           Określa najmniejszą dozwoloną odległość między końcem odcinka,
+                                a krawędzią obrazu.
+
+    Returns:
+        (list):                 Lista punktów tworzących nowy odcinek
+
+    """
+
+    extend = [line_segment[0][0] - line_segment[-1][0], line_segment[0][1] - line_segment[-1][1]]
+    reference_point = line_segment[0]
+
     first_end = (np.array(reference_point) + (multipler * np.array(extend))).tolist()
     second_end = (np.array(reference_point) - (multipler * np.array(extend))).tolist()
 
     extended_can_cord_set = util.bresenham_line_points(*first_end, *second_end)
-    validated_extended_can_cord_set = [point for point in extended_can_cord_set if border < point[0] < original_image.shape[0] - border and border < point[1] < original_image.shape[0] - border]
+    validated_extended_can_cord_set = [point for point in extended_can_cord_set if border < point[0] < image.shape[0] - border and border < point[1] < image.shape[0] - border]
     return validated_extended_can_cord_set
 
 
-'''img must be grayscale. 
-num_samples in number of circles drawn. 
-angle is the width of the detected ray
-center must be in (x,y) format
-Returns angle of ray, where 0 is at North, angle increases clockwise. When no ray detected, returns None'''
 def find_ray_angle(img, center):
+    """ Na podstawie podanego obrazu wyznacza kąt padającego promienia rentegnowskiego.
 
-    # Wyznaczanie promienia na podstawie najlepszego kandydata
+    Na podstawie podanego środka zdjęcia, funkcja analizuje wszystkie wektory pixeli,
+    które z niego wychodzą pod każdym możliwym kątem (domyślnie przypada 512 promieni
+    na 360 stopni), a następnie wyznacza z nich najjaśniejszy i jeżeli jego średnia jasność 
+    przekracza 4 odchylenia standardowe to zwracany jest jako ten, który pokrywa się
+    z padającym promieniem rentgenowskim.
+
+    Args:
+        img (numpy array):      Obraz - w skali szarości.
+        center (list):          Środek badanego obrazy w formacie (X, Y)
+
+    Returns:
+        (int):                  Wyznaczony kąt pod którym pada promien rentgenowski.
+                                Wartość `0` wskazuje na kierunek północny. Wartości rosną
+                                zgodnie ze wskazówkami zegara.
+
+        None:                   Jeżeli nie istnieje wektor pixeli spełniajacy warunku
+                                z czterema odchyleniami stadardowymi.
+
+    """
+
     radii_coordinates = get_radii_coordinates(img, center, num_samples=512, offset=0)
     radii_pixels = [[img[xy] for xy in radius_coords] for radius_coords in radii_coordinates]
     v_means = np.array([(sum(radius) / len(radius)) for radius in radii_pixels])
@@ -110,11 +108,35 @@ def find_ray_angle(img, center):
     ray_angle = None
     if v_means[best_ray_i] > 4 * std:
         ray_angle = util.radial_angle(center, radii_coordinates[best_ray_i][-1][::-1])
+        print(center, radii_coordinates[best_ray_i][-1][::-1])
 
     return ray_angle
 
-
+# TODO: Uwzględnić `vector_variability(radii)`
 def calculate_center(img, padding=10):
+    """ Wyznacza środek obrazu dyfrakcyjnego.
+
+    Funcja na podstawie puntów wyznaczonych za pomocą środka masy podanego zdjęcia
+    oraz jego negatywu wyznacza odcinek, którego każdy punkt jest może być
+    potencjalnym środkiem obrazu. Następnie dla każdego z tych puntków generuje się
+    i analizuje wychodzące wektory pod każdym kątem o możliwe jak nawiększej długości.
+    Punkt, który zebrał najwięcej "puntów" jest prawdopodobnie środkiem obrazu.
+
+
+    Args:
+        img (numpy array):          Obraz - w skali szarości.
+        padding (int):              Określa procentowo ile najbliższych pikseli każdego wektora
+                                    jest ignorowanych
+
+    Returns:
+
+        candidate_coordinate_set (list):    Zbiór kandydatów na środek
+        candidate1 (tuple):                 Srodek masy obrazu
+        candidate2  (tuple):                Srodek masy negacji obrazu
+        best_candidate (tuple):             Rzeczywisty środek obrazu
+
+    """
+
     l_img = logarithmize(img)
     candidate1 = util.center_of_mass(l_img)[::-1]
     candidate2 = util.center_of_mass(util.negative(l_img))[::-1]
@@ -136,26 +158,13 @@ def calculate_center(img, padding=10):
         #current_variability = vector_variability(radii)
         x, y = candidate_coords
 
-        # TODO: Wyznaczyć odpowiadnią wielkość powierzchni dookoła punktu centralnego
-        #       Na podstawie ktorej będziemy liczyć wartość średnią i sprawdzać jak mocno
-        #       Odbiega ona od ustalonego optimum w metodzie oceniania kandydatów na środek
+        # TODO: Minimalizacja wariancji
         border_size = int(img.shape[0] / 512)
-
-        # TODO: Pole brane pod uwagę powinno kształtem odwzorowywać koło, a nie kwadrat.
-        #       Powinno poprawić to wynik, gdyż będzie zgodne z samą naturą zdjeć.
         fileds = img[x - border_size : x + border_size, y - border_size : y + border_size].flatten()
         mean_center_pixel_border = sum(fileds) / len(fileds)
-
-        # TODO: Czy dlugosc wektora jest zawsze taka sama? Dlaczego?
         padding_value = round(padding * len(radii_pixels[0]) / 100)
-
-        # TODO: Ustalić kolor, które będzie optimum, od które będzie nam ważyć ilość punktow dla kandydata
-        #       Na podstawie obserwacji zdjęć punkt centralny zdjęcia zawsze znajduje się albo na białym tle albo na czarnym.
-        #       Wszystko obok tego punktu jest szare. Więc jeżeli na naszej lini leży kandydat, który znajduje się na czarnym badź
-        #       białym tle to dostaje on więcej "punktów". Szare tło jest powszechne i nie dostaje za nie dodatkowych puntów.
-        #       Oczywiście branie jednego pixela nie jest reprezentatywne dlatego pod uwagę bierze się obszar dookoła środka,
-        #       którego rozmiar powinien zostać wyznaczony kilka linii wyżej przez zmienną "border_size"
         current_variability = max([(sum(radius[padding_value:]) / len(radius[padding_value:])) for radius in radii_pixels]) * (abs(90 - (mean_center_pixel_border)) / 255)
+        # TODO: Koniec -> Minimalizacja wariancji
 
         values.append(current_variability)
         cords.append(candidate_coords)
@@ -190,8 +199,20 @@ def get_radii_coordinates(img, center, num_samples=20, offset=0):
     return vectors
 
 
-def t_ray_detector(): #TODO
+def t_get_radii_coordinates(result=np.zeros((500,500)), center=(250, 250)):
+    ray_coords = get_radii_coordinates(result, center, 1, 10)[0]
+    cv.line(result, center[::-1], ray_coords[-1][::-1], (255, 255, 255))
+    ray_coords = get_radii_coordinates(result, center, 1, 30)[0]
+    cv.line(result, center[::-1], ray_coords[-1][::-1], (0, 0, 255))
+    ray_coords = get_radii_coordinates(result, center, 1, 45)[0]
+    cv.line(result, center[::-1], ray_coords[-1][::-1], (0, 255, 0))
+    ray_coords = get_radii_coordinates(result, center, 1, 120)[0]
+    cv.line(result, center[::-1], ray_coords[-1][::-1], (255, 0, 0))
+    ray_coords = get_radii_coordinates(result, center, 1, 150)[0]
+    cv.line(result, center[::-1], ray_coords[-1][::-1], (255, 0, 255))
 
+
+def t_ray_detector(): #TODO
     DATA_PATH = "/Volumes/Alice/reflex-data/reflex_img_512_inter_nearest/"
     all_examples = [fn for fn in glob.glob(DATA_PATH + "*.png")]
 
@@ -202,6 +223,8 @@ def t_ray_detector(): #TODO
         print(angle)
         #cv.imwrite("./xray_test/test_" + str(i + offset) + ".png", np.hstack((original, image)))
 
+
+# TODO: Documentation
 #http://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise.cosine_similarity.html
 def vector_variability(vectors=[]):
     v = np.asmatrix(vectors)
@@ -213,23 +236,26 @@ def vector_variability(vectors=[]):
     return np.median(flattened)
 
 
+# TODO: Documentation
 def center_visualization(img, candidates, candidate1, candidate2, center, angle, padding=10):
     img = cv.cvtColor(img, cv.COLOR_GRAY2BGR)
 
     vectors = get_radii_coordinates(img, center, num_samples=512, offset=0)
     padding_value = round(padding * len(vectors[0]) / 100)
 
-    for vector in vectors:
-        for pixel in vector[padding_value:]:
-            img[pixel] = [0, 155, 0]
+    #for vector in vectors:
+      #  for pixel in vector[padding_value:]:
+       #     img[pixel] = [0, 155, 0]
 
     for candidate in candidates:
         img[candidate] = [0, 255, 0]
 
     if angle:
         ray_coords = get_radii_coordinates(img, center, 1, angle)[0]
-        for coord in ray_coords:
-            img[coord] = [0,0,255]
+        cv.line(img, center[::-1], ray_coords[-1][::-1], (0, 0, 255))
+        #for coord in ray_coords:
+            #img[coord] = [0,0,255]
+
 
     cv.circle(img, center[::-1], 3, (255, 0, 0), thickness=-1)
     cv.circle(img, candidate1, 2, (255, 255, 255), thickness=-1)
@@ -249,14 +275,24 @@ def test(dirname, sourcedir, padding=10):
             original_image = cv.imread(im_name, cv.IMREAD_GRAYSCALE)
 
             candidate_coordinate_set, candidate1, candidate2, center = calculate_center(original_image, padding)
-            angle = find_ray_angle(original_image, center)
+            angle, temp, best_pixels = find_ray_angle(original_image, center)
+
             result = center_visualization(original_image, candidate_coordinate_set, candidate1[::-1], candidate2[::-1], center, angle, padding)
+
+            for vec in temp:
+                for pixel in vec:
+                    result[pixel] = [255, 0, 0]
+
+            for pixel in best_pixels:
+                result[pixel] = [0, 255, 0]
+
+            result = draw_grid(result, center)
 
             filename = ntpath.split(im_name)[1]
             print(filename)
-            #cv.imwrite('./test_img/' + filename, result)
+            #cv.imwrite('./test_ray/' + filename, result)
 
-            from util import show_img
+            from modules.util import show_img
             show_img(result)
 
 
@@ -277,12 +313,9 @@ def main(dirname="./data/"):
 
 
 if __name__ == "__main__":
-
-    #rays = [[1, 5], [2, 10], [3, 15], [4, 16]]
-    #rays.sort(key=lambda x: np.mean(x), reverse=True)
-    #print(rays)
-
-    test('/Volumes/DATA/reflex_data/best/', '/Volumes/DATA/reflex_data/reflex_img_512_inter_nearest/', padding=20) ## TODO: REMOVE
+    pass
+    
+    #test('/Volumes/DATA/reflex_data/best/', '/Volumes/DATA/reflex_data/reflex_img_512_inter_nearest/', padding=20) ## TODO: REMOVE
     #if len(sys.argv) < 2:
      #   print("Usage: <python3 find_center.py image_directory_name>")
      #   exit(-1)
@@ -292,3 +325,4 @@ if __name__ == "__main__":
 
     #main(dirname)
     #test('./center_data/')
+

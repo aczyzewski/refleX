@@ -3,8 +3,7 @@
 import warnings
 import os
 import csv
-import glob
-
+import operator
 
 import numpy as np
 import cv2 as cv
@@ -255,8 +254,19 @@ def radial_angle(circle_center, p):
     a = 180 * atan2(p[1] - circle_center[1], p[0] - circle_center[0]) / pi + 90
     if a < 0:
         a += 360
+    print(a)
     return a
 
+def draw_grid(img, center):
+    X, Y = center
+    img[Y,:] = [255, 255, 255]
+    img[:,X] = [255, 255, 255]
+
+    y, x, _ = img.shape
+    img[int(round(y/2)), :] = [0, 0, 0]
+    img[:, int(round(x/2))] = [0, 0, 0]
+
+    return img
 
 def t_radial_angle(): #TODO assert answers
     print(radial_angle((0,0), (0,-50))) #0
@@ -264,6 +274,10 @@ def t_radial_angle(): #TODO assert answers
     print(radial_angle((0,0), (50,50))) #135
     print(radial_angle((0,0), (0,50))) #180
 
+
+def sort_dict(dict, by_value=False, sort_reversed=False):
+    result = sorted(dict.items(), key=operator.itemgetter(int(by_value)))
+    return result[::-1] if sort_reversed else result
 
 def test_center_of_mass():
     for im_name in ["166551_1_E1_0001.png", "93315_1_E1_001.png", "166551_1_E2_0001.png", "60603_2_001.png",
