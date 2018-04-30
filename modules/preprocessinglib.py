@@ -85,7 +85,7 @@ def find_ray_angle(img, center):
 
     Args:
         img (numpy array):      Obraz - w skali szarości.
-        center (list):          Środek badanego obrazy w formacie (X, Y)
+        center (list):          Środek badanego obrazu w formacie (X, Y)
 
     Returns:
         (int):                  Wyznaczony kąt pod którym pada promien rentgenowski.
@@ -108,7 +108,6 @@ def find_ray_angle(img, center):
     ray_angle = None
     if v_means[best_ray_i] > 4 * std:
         ray_angle = util.radial_angle(center, radii_coordinates[best_ray_i][-1][::-1])
-        print(center, radii_coordinates[best_ray_i][-1][::-1])
 
     return ray_angle
 
@@ -212,18 +211,6 @@ def t_get_radii_coordinates(result=np.zeros((500,500)), center=(250, 250)):
     cv.line(result, center[::-1], ray_coords[-1][::-1], (255, 0, 255))
 
 
-def t_ray_detector(): #TODO
-    DATA_PATH = "/Volumes/Alice/reflex-data/reflex_img_512_inter_nearest/"
-    all_examples = [fn for fn in glob.glob(DATA_PATH + "*.png")]
-
-    for example in all_examples:
-        print(example)
-        image = cv.imread(example, cv.IMREAD_GRAYSCALE)
-        angle = find_ray_angle(image, (255, 255), visualise=True)
-        print(angle)
-        #cv.imwrite("./xray_test/test_" + str(i + offset) + ".png", np.hstack((original, image)))
-
-
 # TODO: Documentation
 #http://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise.cosine_similarity.html
 def vector_variability(vectors=[]):
@@ -237,61 +224,69 @@ def vector_variability(vectors=[]):
 
 
 # TODO: Documentation
-def center_visualization(img, candidates, candidate1, candidate2, center, angle, padding=10):
-    img = cv.cvtColor(img, cv.COLOR_GRAY2BGR)
+def center_visualization(img, padding=10, additional_grid=False):
 
+    # Obie wersje tego samego obrazu
+    color_img = img.copy()
+    color_img = cv.cvtColor(color_img, cv.COLOR_GRAY2BGR)
+
+    # Wyznaczanie środka
+    candidate_coordinate_set, candidate1, candidate2, center = calculate_center(img, padding)
     vectors = get_radii_coordinates(img, center, num_samples=512, offset=0)
+
+    # Obliczanie ile % punktow poczatkowym punktow promieni odrzucamy
+    # Wartosc ta musi byc zgodna z parametrem funkcji wyzej, gdyz ona
+    # rowniez wycina tyle samo i na tej podstawie wyznacza srodek
     padding_value = round(padding * len(vectors[0]) / 100)
 
-    #for vector in vectors:
-      #  for pixel in vector[padding_value:]:
-       #     img[pixel] = [0, 155, 0]
+    # Rysowywanie wektorow wychodzacych z punktu
+    for vector in vectors:
+        for pixel in vector[padding_value:]:
+            color_img[pixel] = [0, 155, 0]
 
-    for candidate in candidates:
-        img[candidate] = [0, 255, 0]
+    # Rysowanie zbioru kondydatow (linia prosta)
+    for candidate in candidate_coordinate_set:
+        color_img[candidate] = [0, 255, 0]
 
+    # Wyrysowywanie srodkow
+    cv.circle(color_img, center[::-1], 3, (255, 0, 0), thickness=-1)      # Wyznaczony srodek obrazu
+    cv.circle(color_img, candidate1, 2, (255, 255, 255), thickness=-1)    # Wyznaczony srodek masy obrazu bez negacji
+    cv.circle(color_img, candidate2, 2, (0, 0, 0), thickness=-1)          # Wyznaczony srodek masy obrazu po negacji
+
+    # Rysowanie dodatkowego gridu
+    # Kolor bialy: wyznaczony srodek obrazu
+    # Kolor czarny: srodek obrazu (shape / 2)
+    # Kolejnosc rysowania: bialy, czary
+    if additional_grid:
+        color_img = util.draw_grid(color_img, center)
+
+    # Rysowanie lini pokrywającej się z padajacym promieniem o ile został wykryty
+    angle = find_ray_angle(img, center)
     if angle:
         ray_coords = get_radii_coordinates(img, center, 1, angle)[0]
-        cv.line(img, center[::-1], ray_coords[-1][::-1], (0, 0, 255))
-        #for coord in ray_coords:
-            #img[coord] = [0,0,255]
+        cv.line(color_img, center[::-1], ray_coords[-1][::-1], (0, 0, 255))
 
-
-    cv.circle(img, center[::-1], 3, (255, 0, 0), thickness=-1)
-    cv.circle(img, candidate1, 2, (255, 255, 255), thickness=-1)
-    cv.circle(img, candidate2, 2, (0, 0, 0), thickness=-1)
-    return img
+    return color_img
 
 
 #FIXME remove
-def test(dirname, sourcedir, padding=10):
+def test(testcasesdir, rawsourcedir):
 
-    testcases = [ntpath.split(fn)[1] for fn in glob.glob(dirname + "*.png")]
-    allfiles = [fn for fn in glob.glob(sourcedir + "*.png")]
+    testcases = [ntpath.split(fn)[1] for fn in glob.glob(testcasesdir + "*.png")]
+    allfiles = [fn for fn in glob.glob(rawsourcedir + "*.png")]
     all = True
 
     for im_name in allfiles:
         if ntpath.split(im_name)[1] in testcases or all:
+
             original_image = cv.imread(im_name, cv.IMREAD_GRAYSCALE)
-
-            candidate_coordinate_set, candidate1, candidate2, center = calculate_center(original_image, padding)
-            angle, temp, best_pixels = find_ray_angle(original_image, center)
-
-            result = center_visualization(original_image, candidate_coordinate_set, candidate1[::-1], candidate2[::-1], center, angle, padding)
-
-            for vec in temp:
-                for pixel in vec:
-                    result[pixel] = [255, 0, 0]
-
-            for pixel in best_pixels:
-                result[pixel] = [0, 255, 0]
-
-            result = draw_grid(result, center)
+            result = center_visualization(original_image, padding=10, additional_grid=True)
 
             filename = ntpath.split(im_name)[1]
             print(filename)
-            #cv.imwrite('./test_ray/' + filename, result)
 
+            # cv.imwrite('./test_ray/' + filename, result)
+            # --- OR ---
             from modules.util import show_img
             show_img(result)
 
@@ -313,16 +308,6 @@ def main(dirname="./data/"):
 
 
 if __name__ == "__main__":
-    pass
-    
-    #test('/Volumes/DATA/reflex_data/best/', '/Volumes/DATA/reflex_data/reflex_img_512_inter_nearest/', padding=20) ## TODO: REMOVE
-    #if len(sys.argv) < 2:
-     #   print("Usage: <python3 find_center.py image_directory_name>")
-     #   exit(-1)
-    #dirname = sys.argv[1]
-    #logging.basicConfig(level=logging.INFO)
-    #logger = logging.getLogger(__name__)
+    test('/Volumes/DATA/reflex_data/best/', '/Volumes/DATA/reflex_data/reflex_img_512_inter_nearest/')
 
-    #main(dirname)
-    #test('./center_data/')
 

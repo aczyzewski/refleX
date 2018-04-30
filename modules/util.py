@@ -258,7 +258,7 @@ def radial_angle(circle_center, p):
     return a
 
 def draw_grid(img, center):
-    X, Y = center
+    X, Y = center[::-1]
     img[Y,:] = [255, 255, 255]
     img[:,X] = [255, 255, 255]
 
