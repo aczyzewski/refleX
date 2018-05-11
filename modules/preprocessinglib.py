@@ -101,42 +101,70 @@ def extend_bresenham_line(image, line_segment, multipler=2, border=25):
     return validated_extended_can_cord_set
 
 
-def find_ray_angle(img, center):
-    """ Na podstawie podanego obrazu wyznacza kąt padającego promienia rentegnowskiego.
+def find_ray_angle(img, center, num_samples=1024):
+    """ Na podstawie podanego obrazu wyznacza kąt początkowy i końcowy padającego promienia.
 
     Na podstawie podanego środka zdjęcia, funkcja analizuje wszystkie wektory pixeli,
     które z niego wychodzą pod każdym możliwym kątem (domyślnie przypada 512 promieni
-    na 360 stopni), a następnie wyznacza z nich najjaśniejszy i jeżeli jego średnia jasność 
-    przekracza 4 odchylenia standardowe to zwracany jest jako ten, który pokrywa się
-    z padającym promieniem rentgenowskim.
+    na 360 stopni), a następnie wyznacza z te wektory, których średnia jasność 
+    przekracza 4 odchylenia standardowe. Zwracane są kąty skrajnych wyznaczonych wektorów.
 
     Args:
         img (numpy array):      Obraz - w skali szarości.
         center (list):          Środek badanego obrazu w formacie (X, Y)
+        num_samples:            Liczba rozpatrywanych wektorów-promieni.
 
     Returns:
-        (int):                  Wyznaczony kąt pod którym pada promien rentgenowski.
-                                Wartość `0` wskazuje na kierunek północny. Wartości rosną
-                                zgodnie ze wskazówkami zegara.
+        (int, int):             Wyznaczony kąt początkowy i końcowy. Między kątęm początkowym i końcowym (zgodnie ze
+                                wskazówkami zegara) znajduje się promień.
+                                Wartość `0` wskazuje na kierunek północny.
+                                Kąt rośnie zgodnie ze wskazówkami zegara.
 
         None:                   Jeżeli nie istnieje wektor pixeli spełniajacy warunku
                                 z czterema odchyleniami stadardowymi.
 
     """
 
-    radii_coordinates = get_radii_coordinates(img, center, num_samples=512, offset=0)
-    radii_pixels = [[img[xy] for xy in radius_coords] for radius_coords in radii_coordinates]
-    v_means = np.array([(sum(radius) / len(radius)) for radius in radii_pixels])
+    radii_coordinates = get_radii_coordinates(img, center, num_samples=num_samples, offset=0)
+    radii_pixels = [[img[rc] for rc in radius_coords] for radius_coords in radii_coordinates]
+    v_means = np.array([np.mean(radius) for radius in radii_pixels])
 
     mean, std = np.mean(v_means), np.std(v_means)
     v_means -= mean
 
-    best_ray_i, _ = max(enumerate(radii_pixels), key=lambda x: np.mean(x[1]))
-    ray_angle = None
-    if v_means[best_ray_i] > 4 * std:
-        ray_angle = util.radial_angle(center, radii_coordinates[best_ray_i][-1][::-1])
+    ray_angles = []
+    for i in range(num_samples):
+        if v_means[i] > 4 * std:
+            ray_angles.append(360 * i / num_samples)
 
-    return ray_angle
+    if len(ray_angles) == 0:
+        return None
+
+    if ray_angles[-1] - ray_angles[0] > 360 - 3 * 360 / num_samples:
+        return min(filter(lambda a: a > 180, ray_angles)), max(filter(lambda a: a <= 180, ray_angles))
+
+    return ray_angles[0], ray_angles[-1]
+
+
+def t_find_ray_angle(filenames, centers):
+    from modules.util import show_img
+    for fn, center in zip(filenames, centers):
+        img = cv.imread(fn, cv.IMREAD_GRAYSCALE)
+        fra = find_ray_angle(img, center)
+        img = cv.cvtColor(img, cv.COLOR_GRAY2RGB)
+        cv.circle(img, center, radius=3, color=(0,0,255), thickness=-1)
+        if fra:
+            sa, ea = fra
+            print("Angles", sa, ea)
+            p1 = get_radii_coordinates(img, center, 1, sa)[0][-1][::-1]
+            p2 = get_radii_coordinates(img, center, 1, ea)[0][-1][::-1]
+            print('Points:', p1, p2)
+            cv.line(img, center, p1, color=(255, 0, 0))
+            cv.line(img, center, p2, color=(0, 255, 0))
+        else:
+            print("No ray")
+        show_img(img)
+
 
 # TODO: Uwzględnić `vector_variability(radii)`
 def calculate_center(img, padding=10):
@@ -203,6 +231,7 @@ def calculate_center(img, padding=10):
 
 
 '''Returns vector of radii, starting with north and going clockwise.
+Args: center(x,y)
 Returns numpy-style (y,x) format'''
 def get_radii_coordinates(img, center, num_samples=20, offset=0):
 
@@ -288,7 +317,9 @@ def center_visualization(img, padding=10, additional_grid=False):
         color_img = util.draw_grid(color_img, center)
 
     # Rysowanie lini pokrywającej się z padajacym promieniem o ile został wykryty
-    angle = find_ray_angle(img, center)
+    start_angle, end_angle = find_ray_angle(img, center) #TODO check - zmiana sposobu wyznaczania zmiennej angle po zmianie wartosci zwracanych przez funkcje find_ray_angle
+    angle = start_angle + (end_angle - start_angle)/2 if start_angle < end_angle \
+        else (start_angle + (360 + end_angle - start_angle)/2) % 360
     if angle:
         ray_coords = get_radii_coordinates(img, center, 1, angle)[0]
         cv.line(color_img, center[::-1], ray_coords[-1][::-1], (0, 0, 255))
@@ -328,7 +359,6 @@ def main(dirname="./data/"):
         img = cv.imread(im_name, cv.IMREAD_GRAYSCALE)
         #logger.debug("Image " + im_name + " read successfully")
         candidate_coordinate_set, candidate1, candidate2, center = calculate_center(img)
-        angle = find_ray_angle(img, center)
         print(center)
         data = {"image_name": im_name[len(dirname):], "x": center[1], "y": center[0]}
         util.write_to_csv("centers_ac.csv", data)
@@ -336,9 +366,12 @@ def main(dirname="./data/"):
 
 if __name__ == "__main__":
     #test('/Volumes/DATA/reflex_data/best/', '/Volumes/DATA/reflex_data/reflex_img_512_inter_nearest/')
-    #t_logarithmize(["/Volumes/Alice/reflex-data/data_512/zza1-8_1_001.512x512.png",
-    #                "/Volumes/Alice/reflex-data/data_512/YUP_6_1_001.512x512.png",
-    #                "/Volumes/Alice/reflex-data/data_512/x1-high.0001.512x512.png",
-    #                "/Volumes/Alice/reflex-data/data_512/ProlWT_Mut0_HR_1_00001.512x512.png",
-    #                "/Volumes/Alice/reflex-data/data_512/bjp_plate2-b3_LR_8_001.512x512.png"])
+    t_filenames = ["/Volumes/Alice/reflex-data/data_512/zza1-8_1_001.512x512.png",
+                    "/Volumes/Alice/reflex-data/data_512/YUP_6_1_001.512x512.png",
+                    "/Volumes/Alice/reflex-data/data_512/x1-high.0001.512x512.png",
+                    "/Volumes/Alice/reflex-data/data_512/ProlWT_Mut0_HR_1_00001.512x512.png",
+                    "/Volumes/Alice/reflex-data/data_512/bjp_plate2-b3_LR_8_001.512x512.png"]
+    t_centers = [(254, 253), (255, 257), (266, 248), (261, 251), (261, 254)]
+    #t_logarithmize(t_filenames)
+    t_find_ray_angle(t_filenames, t_centers)
     pass
