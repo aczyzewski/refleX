@@ -6,6 +6,7 @@ import ntpath
 import numpy as np
 import cv2 as cv
 import modules.util as util
+import pandas as pd
 
 from math import cos, sin, log
 from sklearn.metrics.pairwise import cosine_distances
@@ -150,15 +151,17 @@ def t_find_ray_angle(filenames, centers):
     from modules.util import show_img
     for fn, center in zip(filenames, centers):
         img = cv.imread(fn, cv.IMREAD_GRAYSCALE)
+        print(img)
         fra = find_ray_angle(img, center)
         img = cv.cvtColor(img, cv.COLOR_GRAY2RGB)
         cv.circle(img, center, radius=3, color=(0,0,255), thickness=-1)
         if fra:
+            print("Found ray!")
             sa, ea = fra
-            print("Angles", sa, ea)
+            print("   Angles", sa, ea)
             p1 = get_radii_coordinates(img, center, 1, sa)[0][-1][::-1]
             p2 = get_radii_coordinates(img, center, 1, ea)[0][-1][::-1]
-            print('Points:', p1, p2)
+            print('   Points:', p1, p2)
             cv.line(img, center, p1, color=(255, 0, 0))
             cv.line(img, center, p2, color=(0, 255, 0))
         else:
@@ -366,12 +369,9 @@ def main(dirname="./data/"):
 
 if __name__ == "__main__":
     #test('/Volumes/DATA/reflex_data/best/', '/Volumes/DATA/reflex_data/reflex_img_512_inter_nearest/')
-    t_filenames = ["/Volumes/Alice/reflex-data/data_512/zza1-8_1_001.512x512.png",
-                    "/Volumes/Alice/reflex-data/data_512/YUP_6_1_001.512x512.png",
-                    "/Volumes/Alice/reflex-data/data_512/x1-high.0001.512x512.png",
-                    "/Volumes/Alice/reflex-data/data_512/ProlWT_Mut0_HR_1_00001.512x512.png",
-                    "/Volumes/Alice/reflex-data/data_512/bjp_plate2-b3_LR_8_001.512x512.png"]
-    t_centers = [(254, 253), (255, 257), (266, 248), (261, 251), (261, 254)]
+    df = pd.read_csv("../centers.csv")
+    t_filenames = ["/Volumes/Alice/reflex-data/reflex_img_512_inter_nearest/" + fn[:-11] + "png" for fn in df['image']]
+    t_centers = [(x, y) for x, y in zip(df['x'], df['y'])]
     #t_logarithmize(t_filenames)
-    t_find_ray_angle(t_filenames, t_centers)
+    #t_find_ray_angle(t_filenames, t_centers)
     pass
