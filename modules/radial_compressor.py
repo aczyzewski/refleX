@@ -11,16 +11,6 @@ from joblib import Parallel, delayed
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-stat_functions = {
-    "max": np.nanmax,
-    "95th_percentile": lambda x: np.nanpercentile(x, 95),
-    "min": np.nanmin,
-    "5th_percentile": lambda x: np.nanpercentile(x, 5),
-    "mean": np.nanmean,
-    "median": np.nanmedian,
-    "var": np.nanvar
-}
-
 #return discrete coordinates of pixels on circle of radius r, given the center of the circle
 #Inspired by https://en.wikipedia.org/wiki/Midpoint_circle_algorithm, but without gaps between circles
 #TODO this could be smoother (see 100x100)
@@ -79,12 +69,23 @@ def apply_aggregate_fcn(img, stat_fcn, irrelevant, layers=[]):
     values = [[img[coord] for coord in coords if not irrelevant[coord]] for coords in layers]
     aggregated = [stat_fcn(layer) if layer else None for layer in values]
     if aggregated[0] is None:
-        aggregated[0] = 0 #FIXME dunno what to do if first result is empty
+        aggregated[0] = 0 # TODO find smarter solution when first result is empty?
     for i in range(len(aggregated)):
         if aggregated[i] is None:
             aggregated[i] = aggregated[i - 1]
     return aggregated
-#TODO taking last non-empty result might not be the best idea
+
+
+'''center must be in np/opencv (x,y) format
+fills mask with 255 between start_angle -> end_angle clockwise. rest of the returned mask is 0'''
+def make_ray_mask(img, xy_center, start_angle, end_angle):
+    radius = int(min(xy_center[0], xy_center[1], img.shape[0]-xy_center[1], img.shape[1]-xy_center[0]))
+    bg = np.zeros_like(img)
+    np_center=(int(xy_center[1]), int(xy_center[0]))
+    cv.ellipse(bg, np_center, axes=(radius, radius), angle=90, startAngle=-end_angle, endAngle=-start_angle,
+               color=255, thickness=-1)
+    print(start_angle, end_angle)
+    return bg
 
 
 def process_image(center_dict, computed_centers, col_width, im_name_with_dir, chosen_stat_names, compressed_dirname):
@@ -94,13 +95,15 @@ def process_image(center_dict, computed_centers, col_width, im_name_with_dir, ch
         return
 
     logger.debug("Processing " + im_name)
-    original_image = cv.imread(im_name_with_dir, cv.IMREAD_GRAYSCALE)
+    im = cv.imread(im_name_with_dir, cv.IMREAD_GRAYSCALE)
     logger.debug("Image " + im_name + " read successfully")
 
-    im = original_image
-    irrelevant = np.zeros_like(im) #FIXME
-    logger.debug(im_name + " preprocessed successfully")
     center = (center_dict[im_name]['x'], center_dict[im_name]['y'])
+    irrelevant = make_ray_mask(im, center,
+                               start_angle=center_dict[im_name]['mask_start'],
+                               end_angle=center_dict[im_name]['mask_end'])
+    from modules.util import show_img
+    show_img(np.hstack((im, irrelevant)))
     logger.info("Center in: " + str(center))
     logger.debug("Found center: ")
     logger.debug(im_name.ljust(col_width) + str(center))
@@ -127,47 +130,8 @@ def configure_parser(parser): #TODO allow numeric percentile arg?
     parser.add_argument("-95th", "--95th", action="store_true", help="Use 95th percentile for compression.")
     parser.add_argument("-allstats", "--allstats", action="store_true",
                         help="Run all methods of compression (" + " ".join([str(s) for s in stat_functions.keys()]) + ").")
-    parser.add_argument("-nj", "--n_jobs", type=int, nargs="?", const=1, help="Number of threads. Default 1 thread.")
+    parser.add_argument("-nj", "--n_jobs", type=int, help="Number of threads. Default 1 thread.", default=1)
 
-
-
-def main():
-    parser = argparse.ArgumentParser()
-    configure_parser(parser)
-    args = parser.parse_args()
-
-    file_names = [fn for fn in glob.glob(args.image_dirname + "*.png")]
-    logger.info("Processing " + str(len(file_names)) + " png files from " + args.image_dirname)
-    compressed_dir_name = args.image_dirname[:-1] + "_compressed/"
-    if not os.path.exists(compressed_dir_name):
-        os.makedirs(compressed_dir_name)
-    logger.info("Saving results in " + compressed_dir_name)
-    col_width = max([len(i) for i in file_names]) + 3
-
-    chosen_stat_names = []
-    if args.allstats:
-        chosen_stat_names = list(stat_functions.keys())
-    else:
-        for stat_name in stat_functions.keys():
-            if args.stat_name:
-                chosen_stat_names.append(stat_name)
-    if len(chosen_stat_names) == 0:
-        print("Must choose at least one compression statistic")
-        parser.print_help()
-        exit(-1)
-
-    for stat_name in chosen_stat_names:
-        os.makedirs(compressed_dir_name + stat_name)
-
-    center_dict = pd.read_csv(args.centers_csv_filename).set_index('image_name').to_dict('index')
-    computed_centers = list(center_dict.keys())
-
-    Parallel(n_jobs=args.n_jobs)(delayed(process_image)
-                       (center_dict, computed_centers, col_width, im_name, chosen_stat_names, compressed_dir_name)
-                       for im_name in file_names)
-
-    logger.info("Finished")
-    cv.destroyAllWindows()
 
 def main_external_call(image_dirname, target_dirname, centers_csv_filename, n_jobs):
 
@@ -211,8 +175,48 @@ def main_external_call(image_dirname, target_dirname, centers_csv_filename, n_jo
                        (center_dict, computed_centers, col_width, im_name, chosen_stat_names, compressed_dir_name)
                        for im_name in file_names)
 
-if __name__ == "__main__":
 
+def main():
+    parser = argparse.ArgumentParser()
+    configure_parser(parser)
+    args = parser.parse_args()
+
+    file_names = [fn for fn in glob.glob(args.image_dirname + "*.png")]
+    logger.info("Processing " + str(len(file_names)) + " png files from " + args.image_dirname)
+    compressed_dir_name = args.image_dirname[:-1] + "_compressed/"
+    if not os.path.exists(compressed_dir_name):
+        os.makedirs(compressed_dir_name)
+    logger.info("Saving results in " + compressed_dir_name)
+    col_width = max([len(i) for i in file_names]) + 3
+
+    chosen_stat_names = []
+    if args.allstats:
+        chosen_stat_names = list(stat_functions.keys())
+    else:
+        for stat_name in stat_functions.keys():
+            if stat_name in vars(args):
+                chosen_stat_names.append(stat_name)
+    if len(chosen_stat_names) == 0:
+        print("Must choose at least one compression statistic")
+        parser.print_help()
+        exit(-1)
+
+    for stat_name in chosen_stat_names:
+        if not os.path.exists(compressed_dir_name + stat_name):
+            os.makedirs(compressed_dir_name + stat_name)
+
+    center_dict = pd.read_csv(args.centers_csv_filename).set_index('image').to_dict('index')
+    computed_centers = list(center_dict.keys())
+
+    Parallel(n_jobs=args.n_jobs)(delayed(process_image)
+                       (center_dict, computed_centers, col_width, im_name, chosen_stat_names, compressed_dir_name)
+                       for im_name in file_names)
+
+    logger.info("Finished")
+    cv.destroyAllWindows()
+
+
+if __name__ == "__main__":
     stat_functions = {
         "max": np.nanmax,
         "95th_percentile": lambda x: np.nanpercentile(x, 95),
@@ -222,5 +226,5 @@ if __name__ == "__main__":
         "median": np.nanmedian,
         "var": np.nanvar
     }
-
     main()
+

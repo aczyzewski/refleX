@@ -10,6 +10,7 @@ import modules.util as util
 from math import cos, sin, log
 from sklearn.metrics.pairwise import cosine_distances
 
+
 # TODO: Documentation
 def downscale_gray_image(img, tolerance=25, kernel=3, iterations=1, skip=True):
     y, x = img.shape
@@ -22,8 +23,9 @@ def downscale_gray_image(img, tolerance=25, kernel=3, iterations=1, skip=True):
                     img[yi: yi + kernel, xi: xi + kernel] = block.max()
     return img
 
-# TODO: Documentation
-def logarithmize(img):
+
+'''Ta funkcja w teorii ma błąd, ale w praktyce ładnie działa, więc byc może będziemy chcieli do niej wrócić'''
+def logarithmize_old(img):
     l_img = np.zeros_like(img)
     for i, row in enumerate(img):
         for j, pixel in enumerate(row):
@@ -32,6 +34,31 @@ def logarithmize(img):
             else:
                 l_img[i, j] = round(255*-log(pixel/255))
     return l_img
+
+
+'''Maps each pixel of the input image to the negative of its logarithm, 
+Args: img - grayscale image
+Returns - grayscale image of the same shape as input img'''
+def logarithmize(img):
+    l_img = np.zeros_like(img)
+    for i, row in enumerate(img):
+        for j, pixel in enumerate(row):
+            if pixel:
+                l_img[i, j] = round(255 * log(pixel, 255))
+    return l_img
+
+
+def t_logarithmize(img_filenames):
+
+    for fn in img_filenames:
+        print(fn)
+        img = cv.imread(fn, cv.IMREAD_GRAYSCALE)
+        util.show_img(np.hstack((img, logarithmize(img))))
+
+    img = np.zeros((256, 256), dtype=np.uint8)
+    for i in range(256):
+        img[i, :] = i
+    util.show_img(np.hstack((img, logarithmize(img))))
 
 
 def extend_bresenham_line(image, line_segment, multipler=2, border=25):
@@ -308,6 +335,10 @@ def main(dirname="./data/"):
 
 
 if __name__ == "__main__":
-    test('/Volumes/DATA/reflex_data/best/', '/Volumes/DATA/reflex_data/reflex_img_512_inter_nearest/')
-
-
+    #test('/Volumes/DATA/reflex_data/best/', '/Volumes/DATA/reflex_data/reflex_img_512_inter_nearest/')
+    #t_logarithmize(["/Volumes/Alice/reflex-data/data_512/zza1-8_1_001.512x512.png",
+    #                "/Volumes/Alice/reflex-data/data_512/YUP_6_1_001.512x512.png",
+    #                "/Volumes/Alice/reflex-data/data_512/x1-high.0001.512x512.png",
+    #                "/Volumes/Alice/reflex-data/data_512/ProlWT_Mut0_HR_1_00001.512x512.png",
+    #                "/Volumes/Alice/reflex-data/data_512/bjp_plate2-b3_LR_8_001.512x512.png"])
+    pass
