@@ -150,7 +150,7 @@ def calculate_center(img, padding=10):
 
     for candidate_coords in candidate_coordinate_set:
 
-        radii_coordinates = get_radii_coordinates(img, candidate_coords, num_samples=512, offset=0)
+        radii_coordinates = get_radii_coordinates(img, candidate_coords, num_samples=256, offset=0)
         radii_pixels = [[img[xy] for xy in radius_coords]
                  for radius_coords in radii_coordinates]
 

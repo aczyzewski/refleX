@@ -8,6 +8,18 @@ import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+stat_functions = {
+    "max": np.nanmax,
+    "95th_percentile": lambda x: np.nanpercentile(x, 95),
+    "min": np.nanmin,
+    "5th_percentile": lambda x: np.nanpercentile(x, 5),
+    "mean": np.nanmean,
+    "median": np.nanmedian,
+    "var": np.nanvar
+}
 
 #return discrete coordinates of pixels on circle of radius r, given the center of the circle
 #Inspired by https://en.wikipedia.org/wiki/Midpoint_circle_algorithm, but without gaps between circles
@@ -55,7 +67,7 @@ def circle_points(center, r, last_layer=[]):
 
 def get_layers(img, center):
     layers = []
-    r_max = min(center[0], center[1], img.shape[0]-center[1], img.shape[1]-center[0])
+    r_max = int(min(center[0], center[1], img.shape[0]-center[1], img.shape[1]-center[0]))
     for r in range(r_max):
         if r != 0:
             layers.append(circle_points(center, r, layers[-1]))
@@ -118,6 +130,7 @@ def configure_parser(parser): #TODO allow numeric percentile arg?
     parser.add_argument("-nj", "--n_jobs", type=int, nargs="?", const=1, help="Number of threads. Default 1 thread.")
 
 
+
 def main():
     parser = argparse.ArgumentParser()
     configure_parser(parser)
@@ -156,10 +169,49 @@ def main():
     logger.info("Finished")
     cv.destroyAllWindows()
 
+def main_external_call(image_dirname, target_dirname, centers_csv_filename, n_jobs):
+
+    """ Kompresja obrazów do wektorów
+
+        Funckcja dziala podobnie jak podstawowy main, jednak argumenty pobierane sa sa jako arguemnty
+        funkcji, a nie jako argumenty parsera linii polecen.
+
+    Args:
+        image_dirname(string):          Sciezka do folderu, gdzie znajduja sie obrazy do kompresji
+        target_dirname (string):        Sciezka do folderu, gdzie stworzona zostanie strukutra folderow
+                                        na podstawie wprowadzonych statystyk i zapisane zostana wyniki
+        centers_csv_filename(string):   Sciezka do pliku .csv, w ktorym przechowywane sa dane o obrazach
+                                        (nazwa, srodek_x, srodek_y, maska_kat_a, maskta_kat_b)
+        n_jobs                          Ile watkow ma zostac uruchomionych
+
+    Returns:
+        None
+    """
+
+    if not image_dirname.endswith('/'):
+        image_dirname += '/'
+
+    file_names = [fn for fn in glob.glob(image_dirname + "*.png")]
+    compressed_dir_name = target_dirname if target_dirname.endswith('/') else target_dirname + '/'
+
+    if not os.path.exists(compressed_dir_name):
+        os.makedirs(compressed_dir_name)
+
+    col_width = max([len(i) for i in file_names]) + 3
+    chosen_stat_names = list(stat_functions.keys())
+
+    for stat_name in chosen_stat_names:
+        if not os.path.exists(compressed_dir_name + stat_name):
+            os.makedirs(compressed_dir_name + stat_name)
+
+    center_dict = pd.read_csv(centers_csv_filename).set_index('image').to_dict('index')
+    computed_centers = list(center_dict.keys())
+
+    Parallel(n_jobs=n_jobs)(delayed(process_image)
+                       (center_dict, computed_centers, col_width, im_name, chosen_stat_names, compressed_dir_name)
+                       for im_name in file_names)
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger(__name__)
 
     stat_functions = {
         "max": np.nanmax,

@@ -20,8 +20,8 @@ from keras.preprocessing import image
 from scipy import misc
 from sklearn import metrics as sk_metrics
 
-import metrics
-from models import BatchNormPoolingModel
+from legacy import metrics
+from legacy.models import BatchNormPoolingModel
 from modules import util
 
 __author__ = "Dariusz Brzezinski"

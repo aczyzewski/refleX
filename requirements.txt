@@ -6,4 +6,5 @@ Keras
 scikit_learn
 h5py
 Pillow
-cv2
+opencv-python
+joblib

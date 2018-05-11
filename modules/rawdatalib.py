@@ -71,9 +71,9 @@ class RawDataFile():
         mx = 5 * s / (2 * n * data.shape[1])
         return (mn, mx)
 
-    def npy_to_img(self, size=None, delete_grid=True, padding=25, interpolation=cv.INTER_NEAREST):
+    def to_img(self, size=None, delete_grid=True, padding=25, interpolation=cv.INTER_NEAREST):
 
-        if self.data:
+        if type(self.data) is np.ndarray:
             data = self.data.copy()
             data = data[padding:-padding, padding:-padding]
             mn, mx = self.__autoscale_legacy(data)
@@ -87,7 +87,7 @@ class RawDataFile():
                 cols_to_del, rows_to_del = [], []
 
                 for i in range(data.shape[0]):
-                    if np.all(lookuptable[i,:]):
+                    if np.all(lookuptable[i, :]):
                         rows_to_del.append(i)
 
                 for i in range(data.shape[1]):
@@ -107,6 +107,7 @@ class RawDataFile():
 
             return 255 - data.astype(np.uint8)
         return None
+
 
 def convert_files(input_dir, output_dir, size=None, input_ext = '.npy.bz2', output_ext = '.png', overwrite=False):
     files = [file for file in os.listdir(input_dir) if file.endswith(input_ext) and not file.startswith('.')]
