@@ -76,7 +76,7 @@ def get_layers(img, center):
     return layers
 
 def apply_aggregate_fcn(img, stat_fcn, irrelevant, layers=[]):
-    values = [[img[coord] for coord in coords if not irrelevant[coord]] for coords in layers]
+    values = [[img[int(coord[0]), int(coord[1])] for coord in coords if not irrelevant[int(coord[0]), int(coord[1])]] for coords in layers]
     aggregated = [stat_fcn(layer) if layer else None for layer in values]
     if aggregated[0] is None:
         aggregated[0] = 0 # TODO find smarter solution when first result is empty?
