@@ -112,8 +112,7 @@ def process_image(center_dict, computed_centers, col_width, im_name_with_dir, ch
     irrelevant = make_ray_mask(im, center,
                                start_angle=center_dict[im_name]['mask_start'],
                                end_angle=center_dict[im_name]['mask_end'])
-    from modules.util import show_img
-    show_img(np.hstack((im, irrelevant)))
+
     logger.info("Center in: " + str(center))
     logger.debug("Found center: ")
     logger.debug(im_name.ljust(col_width) + str(center))
