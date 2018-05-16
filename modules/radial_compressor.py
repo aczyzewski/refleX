@@ -11,6 +11,16 @@ from joblib import Parallel, delayed
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+stat_functions = {
+    "max": np.nanmax,
+    "95th_percentile": lambda x: np.nanpercentile(x, 95),
+    "min": np.nanmin,
+    "5th_percentile": lambda x: np.nanpercentile(x, 5),
+    "mean": np.nanmean,
+    "median": np.nanmedian,
+    "var": np.nanvar
+}
+
 #return discrete coordinates of pixels on circle of radius r, given the center of the circle
 #Inspired by https://en.wikipedia.org/wiki/Midpoint_circle_algorithm, but without gaps between circles
 #TODO this could be smoother (see 100x100)
@@ -217,14 +227,5 @@ def main():
 
 
 if __name__ == "__main__":
-    stat_functions = {
-        "max": np.nanmax,
-        "95th_percentile": lambda x: np.nanpercentile(x, 95),
-        "min": np.nanmin,
-        "5th_percentile": lambda x: np.nanpercentile(x, 5),
-        "mean": np.nanmean,
-        "median": np.nanmedian,
-        "var": np.nanvar
-    }
     main()
 
