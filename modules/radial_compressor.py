@@ -100,8 +100,7 @@ def make_ray_mask(img, xy_center, start_angle=-1, end_angle=-1):
         raise ValueError("Angle cannot be negative!")
 
     radius = int(min(xy_center[0], xy_center[1], img.shape[0]-xy_center[1], img.shape[1]-xy_center[0]))
-    np_center = (int(xy_center[1]), int(xy_center[0]))
-    cv.ellipse(bg, np_center, axes=(radius, radius), angle=90, startAngle=-end_angle, endAngle=-start_angle,
+    cv.ellipse(bg, xy_center, axes=(radius, radius), angle=90, startAngle=-end_angle, endAngle=-start_angle,
                color=255, thickness=-1)
     print(start_angle, end_angle)
     return bg
