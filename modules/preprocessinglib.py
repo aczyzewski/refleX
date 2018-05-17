@@ -110,6 +110,8 @@ def find_ray_angle(img, center, num_samples=1024):
     na 360 stopni), a następnie wyznacza z te wektory, których średnia jasność 
     przekracza 4 odchylenia standardowe. Zwracane są kąty skrajnych wyznaczonych wektorów.
 
+    Uwaga: funkcja zadziała poprawnie tylko kiedy promień jest węższy niż 180 stopni.
+
     Args:
         img (numpy array):      Obraz - w skali szarości.
         center (list):          Środek badanego obrazu w formacie (X, Y)

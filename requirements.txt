@@ -8,3 +8,4 @@ h5py
 Pillow
 opencv-python
 joblib
+opencv-python

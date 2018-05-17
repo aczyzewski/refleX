@@ -11,6 +11,16 @@ from joblib import Parallel, delayed
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+stat_functions = {
+    "max": np.nanmax,
+    "95th_percentile": lambda x: np.nanpercentile(x, 95),
+    "min": np.nanmin,
+    "5th_percentile": lambda x: np.nanpercentile(x, 5),
+    "mean": np.nanmean,
+    "median": np.nanmedian,
+    "var": np.nanvar
+}
+
 #return discrete coordinates of pixels on circle of radius r, given the center of the circle
 #Inspired by https://en.wikipedia.org/wiki/Midpoint_circle_algorithm, but without gaps between circles
 #TODO this could be smoother (see 100x100)
@@ -65,8 +75,9 @@ def get_layers(img, center):
             layers.append([center])
     return layers
 
+
 def apply_aggregate_fcn(img, stat_fcn, irrelevant, layers=[]):
-    values = [[img[coord] for coord in coords if not irrelevant[coord]] for coords in layers]
+    values = [[img[int(coord[0]), int(coord[1])] for coord in coords if not irrelevant[int(coord[0]), int(coord[1])]] for coords in layers]
     aggregated = [stat_fcn(layer) if layer else None for layer in values]
     if aggregated[0] is None:
         aggregated[0] = 0 # TODO find smarter solution when first result is empty?
@@ -76,12 +87,20 @@ def apply_aggregate_fcn(img, stat_fcn, irrelevant, layers=[]):
     return aggregated
 
 
-'''center must be in np/opencv (x,y) format
-fills mask with 255 between start_angle -> end_angle clockwise. rest of the returned mask is 0'''
-def make_ray_mask(img, xy_center, start_angle, end_angle):
-    radius = int(min(xy_center[0], xy_center[1], img.shape[0]-xy_center[1], img.shape[1]-xy_center[0]))
+'''Center must be in (x,y) format
+Fills mask with 255 between start_angle -> end_angle clockwise. rest of the returned mask is 0.
+Set start_angle=-1 and end_angle=-1 if mask is supposed to be empty (no ray has been detected).
+'''
+def make_ray_mask(img, xy_center, start_angle=-1, end_angle=-1):
+
     bg = np.zeros_like(img)
-    np_center=(int(xy_center[1]), int(xy_center[0]))
+    if start_angle == -1 and end_angle == -1:
+        return bg
+    elif start_angle < 0 or end_angle < 0:
+        raise ValueError("Angle cannot be negative!")
+
+    radius = int(min(xy_center[0], xy_center[1], img.shape[0]-xy_center[1], img.shape[1]-xy_center[0]))
+    np_center = (int(xy_center[1]), int(xy_center[0]))
     cv.ellipse(bg, np_center, axes=(radius, radius), angle=90, startAngle=-end_angle, endAngle=-start_angle,
                color=255, thickness=-1)
     print(start_angle, end_angle)
@@ -102,8 +121,7 @@ def process_image(center_dict, computed_centers, col_width, im_name_with_dir, ch
     irrelevant = make_ray_mask(im, center,
                                start_angle=center_dict[im_name]['mask_start'],
                                end_angle=center_dict[im_name]['mask_end'])
-    from modules.util import show_img
-    show_img(np.hstack((im, irrelevant)))
+
     logger.info("Center in: " + str(center))
     logger.debug("Found center: ")
     logger.debug(im_name.ljust(col_width) + str(center))
@@ -217,14 +235,5 @@ def main():
 
 
 if __name__ == "__main__":
-    stat_functions = {
-        "max": np.nanmax,
-        "95th_percentile": lambda x: np.nanpercentile(x, 95),
-        "min": np.nanmin,
-        "5th_percentile": lambda x: np.nanpercentile(x, 5),
-        "mean": np.nanmean,
-        "median": np.nanmedian,
-        "var": np.nanvar
-    }
     main()
 
