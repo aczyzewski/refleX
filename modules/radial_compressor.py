@@ -94,13 +94,15 @@ Set start_angle=-1 and end_angle=-1 if mask is supposed to be empty (no ray has 
 def make_ray_mask(img, xy_center, start_angle=-1, end_angle=-1):
 
     bg = np.zeros_like(img)
-    if start_angle == -1 and end_angle == -1:
+    if start_angle == -1 and end_angle == -1: 
         return bg
     elif start_angle < 0 or end_angle < 0:
         raise ValueError("Angle cannot be negative!")
 
+    if start_angle > end_angle:
+      start_angle -= 360
     radius = int(min(xy_center[0], xy_center[1], img.shape[0]-xy_center[1], img.shape[1]-xy_center[0]))
-    cv.ellipse(bg, xy_center, axes=(radius, radius), angle=90, startAngle=-end_angle, endAngle=-start_angle,
+    cv.ellipse(bg, xy_center, axes=(radius, radius), angle=-90, startAngle=start_angle, endAngle=end_angle,
                color=255, thickness=-1)
     return bg
 
