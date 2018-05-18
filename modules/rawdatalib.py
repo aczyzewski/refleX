@@ -51,7 +51,7 @@ class RawDataFile():
 
     def load_info(self):
         try:
-            with open(self.fullpath + self.__info_ext, 'r') as file:
+            with open(self.fullpath + self.__info_ext, 'r', errors='ignore') as file:
                 for line in file.readlines():
                     parameters = line.split()
                     self.info[parameters[0]] = ' '.join(parameters[1:])
