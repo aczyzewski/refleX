@@ -65,9 +65,11 @@ def circle_points(center, r, last_layer=[]):
     return points
 
 
-def get_layers(img, center):
+def get_layers(img, center, vector_size=None):
     layers = []
-    r_max = int(min(center[0], center[1], img.shape[0]-center[1], img.shape[1]-center[0]))
+
+    # UPDATE
+    r_max = vector_size if vector_size else (min(center[0], center[1], img.shape[0]-center[1], img.shape[1]-center[0]))
     for r in range(r_max):
         if r != 0:
             layers.append(circle_points(center, r, layers[-1]))
@@ -77,7 +79,9 @@ def get_layers(img, center):
 
 
 def apply_aggregate_fcn(img, stat_fcn, irrelevant, layers=[]):
-    values = [[img[int(coord[0]), int(coord[1])] for coord in coords if not irrelevant[int(coord[0]), int(coord[1])]] for coords in layers]
+
+    #UPDATE
+    values = [[img[int(coord[0]), int(coord[1])] for coord in coords if 0 <= int(coord[0]) < img.shape[0] and 0 <= int(coord[1]) < img.shape[1] and not irrelevant[int(coord[0]), int(coord[1])]] for coords in layers]
     aggregated = [stat_fcn(layer) if layer else None for layer in values]
     if aggregated[0] is None:
         aggregated[0] = 0 # TODO find smarter solution when first result is empty?
@@ -102,12 +106,12 @@ def make_ray_mask(img, xy_center, start_angle=-1, end_angle=-1):
     if start_angle > end_angle:
       start_angle -= 360
     radius = int(min(xy_center[0], xy_center[1], img.shape[0]-xy_center[1], img.shape[1]-xy_center[0]))
-    cv.ellipse(bg, xy_center, axes=(radius, radius), angle=-90, startAngle=start_angle, endAngle=end_angle,
+    cv.ellipse(bg, (int(xy_center[0]), int(xy_center[1])), axes=(int(radius), int(radius)), angle=-90.0, startAngle=float(start_angle), endAngle=float(end_angle),
                color=255, thickness=-1)
     return bg
 
 
-def process_image(center_dict, computed_centers, col_width, im_name_with_dir, chosen_stat_names, compressed_dirname):
+def process_image(center_dict, computed_centers, col_width, im_name_with_dir, chosen_stat_names, compressed_dirname, vector_size=None):
 
     im_name = im_name_with_dir[im_name_with_dir.rfind('/')+1:]
     if im_name not in computed_centers:
@@ -126,7 +130,7 @@ def process_image(center_dict, computed_centers, col_width, im_name_with_dir, ch
     logger.debug("Found center: ")
     logger.debug(im_name.ljust(col_width) + str(center))
 
-    layers = get_layers(im, center)
+    layers = get_layers(im, center, vector_size)
     compressed_1d_images = []
     for s in chosen_stat_names:
         vector = apply_aggregate_fcn(im, stat_functions[s], irrelevant, layers)
@@ -151,7 +155,7 @@ def configure_parser(parser): #TODO allow numeric percentile arg?
     parser.add_argument("-nj", "--n_jobs", type=int, help="Number of threads. Default 1 thread.", default=1)
 
 
-def main_external_call(image_dirname, target_dirname, centers_csv_filename, n_jobs):
+def main_external_call(image_dirname, target_dirname, centers_csv_filename, n_jobs, vector_size=None):
 
     """ Kompresja obrazów do wektorów
 
@@ -190,7 +194,7 @@ def main_external_call(image_dirname, target_dirname, centers_csv_filename, n_jo
     computed_centers = list(center_dict.keys())
 
     Parallel(n_jobs=n_jobs)(delayed(process_image)
-                       (center_dict, computed_centers, col_width, im_name, chosen_stat_names, compressed_dir_name)
+                       (center_dict, computed_centers, col_width, im_name, chosen_stat_names, compressed_dir_name, vector_size)
                        for im_name in file_names)
 
 
