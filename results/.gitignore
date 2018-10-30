@@ -1,5 +1,7 @@
 *
-! *.log
-! *.csv
-! *.png
-! *.svg
+!*/
+!.gitignore
+!**.log
+!**.csv
+!**.png
+!**.svg
