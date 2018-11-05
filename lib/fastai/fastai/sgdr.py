@@ -355,25 +355,27 @@ class SaveBestModel(LossRecorder):
             For more details see http://forums.fast.ai/t/a-code-snippet-to-save-the-best-model-during-training/12066
  
     """
-    def __init__(self, model, layer_opt, metrics, name='best_model'):
+    def __init__(self, model, layer_opt, metrics, logger_name, name='best_model'):
         super().__init__(layer_opt)
         self.name = name
         self.model = model
         self.best_loss = None
         self.best_acc = None
+        self.logger = logging.getLogger(logger_name)
         self.save_method = self.save_when_only_loss
         
     def save_when_only_loss(self, metrics):
         loss = metrics[0][0]
-        if self.best_loss == None or loss < self.best_loss:
+        if self.best_loss is None or loss < self.best_loss:
+            # self.logger.info('[SaveBestModel] New *best* loss = %s' % loss)
             self.best_loss = loss
             self.model.save(f'{self.name}')
-        try:
-            output_log = open(self.name + "_metrics.log", 'w')
-            output_log.write(' '.join(list(map(str, metrics))))
-            output_log.close()
-        except:
-            print("[WARNING] Cannot write metrics to file!")
+            try:
+                output_log = open(self.name + "_metrics.log", 'w')
+                output_log.write(' '.join(list(map(str, metrics))))
+                output_log.close()
+            except:
+                self.logger.error('[SaveBestModel] Cannot write metrics to file!')
     
     def save_when_acc(self, metrics):
         loss, acc = metrics[0], metrics[1]

@@ -234,14 +234,14 @@ class Learner():
         elif not self.sched: self.sched=LossRecorder(layer_opt)
         callbacks+=[self.sched]
 
-        if best_save_name is not None:
-            callbacks+=[SaveBestModel(self, layer_opt, metrics, best_save_name)]
-
         if earlystopping:
             callbacks += [EarlyStopping(logger_name, earlystopping)]
 
         if logger_name:
             callbacks += [LogProgress(logger_name, metrics, dec=6, step=log_step)]
+
+        if best_save_name is not None:
+            callbacks+=[SaveBestModel(self, layer_opt, metrics, logger_name, best_save_name)]
 
         if use_swa:
             # make a copy of the model to track average weights
