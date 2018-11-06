@@ -39,7 +39,7 @@ if __name__ == '__main__':
     parser.add_argument('-r', '--reduce_to', default=None, help='Intersection between files in CSV and files in selected directory')
     args = parser.parse_args()
 
-    csv_data = open(args.input_file, 'r').read().split('\n')
+    csv_data = open(args.input_file, 'r').read().split('\n')[1:]
     csv_data_splitted = [line.split(',') for line in csv_data if len(line)]
     csv_size = len(csv_data)
     print("[INFO] Read %d files" % csv_size)
