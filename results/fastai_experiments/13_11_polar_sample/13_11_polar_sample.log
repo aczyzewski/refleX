@@ -1,0 +1,397 @@
+13-11-2018 07:38:48 AM - INFO -  [ ------ EXPERIMENT: 13_11_POLAR_SAMPLE ------ ] 
+
+13-11-2018 07:38:48 AM - INFO -  --- PARAMETERS: --- 
+13-11-2018 07:38:48 AM - INFO - Predefined metrics: [val_loss], f2, average_precision, average_recall, hamming_score
+13-11-2018 07:38:48 AM - INFO - Predefined architecutres: resnet34
+13-11-2018 07:38:48 AM - INFO - Predefined batch sizes: 8, 16, 32, 64
+13-11-2018 07:38:48 AM - INFO - Predefined image sizes: 64, 128, 256, 512
+13-11-2018 07:38:48 AM - INFO - Dropout: 0.5
+13-11-2018 07:38:48 AM - INFO - Earlystopping after: 12 epochs.
+13-11-2018 07:38:48 AM - INFO - Log every 5 epochs.
+13-11-2018 07:38:48 AM - INFO - GPU: 0 | Available: 1 
+
+13-11-2018 07:38:48 AM - INFO -     ----- *** RESNET34 *** ----- 
+
+13-11-2018 07:44:00 AM - INFO -  Learning rate = 0.004191
+13-11-2018 07:44:00 AM - INFO -  Learning rates = [0.000524, 0.001048, 0.002095, 0.004191] 
+
+13-11-2018 07:44:00 AM - INFO -  --- Batch: 8 | Img size: 64 --- 
+ 
+13-11-2018 07:44:00 AM - INFO -  --- Type: FREEZE --- 
+13-11-2018 07:44:00 AM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 07:50:08 AM - ERROR - ERROR: A: resnet34 | IS: 64 | BS: 8
+13-11-2018 07:50:08 AM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 141, in fit
+    loss = model_stepper.step(V(x),V(y), epoch)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 50, in step
+    output = self.m(*xs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/module.py", line 357, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/container.py", line 67, in forward
+    input = module(input)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/module.py", line 357, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/batchnorm.py", line 37, in forward
+    self.training, self.momentum, self.eps)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/functional.py", line 1011, in batch_norm
+    raise ValueError('Expected more than 1 value per channel when training, got input size {}'.format(size))
+ValueError: Expected more than 1 value per channel when training, got input size [1, 1024]
+
+13-11-2018 07:50:08 AM - INFO -  --- Batch: 8 | Img size: 128 --- 
+ 
+13-11-2018 07:50:08 AM - INFO -  --- Type: FREEZE --- 
+13-11-2018 07:50:09 AM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 07:56:32 AM - ERROR - ERROR: A: resnet34 | IS: 128 | BS: 8
+13-11-2018 07:56:32 AM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 141, in fit
+    loss = model_stepper.step(V(x),V(y), epoch)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 50, in step
+    output = self.m(*xs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/module.py", line 357, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/container.py", line 67, in forward
+    input = module(input)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/module.py", line 357, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/batchnorm.py", line 37, in forward
+    self.training, self.momentum, self.eps)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/functional.py", line 1011, in batch_norm
+    raise ValueError('Expected more than 1 value per channel when training, got input size {}'.format(size))
+ValueError: Expected more than 1 value per channel when training, got input size [1, 1024]
+
+13-11-2018 07:56:32 AM - INFO -  --- Batch: 8 | Img size: 256 --- 
+ 
+13-11-2018 07:56:32 AM - INFO -  --- Type: FREEZE --- 
+13-11-2018 07:56:32 AM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 07:59:07 AM - ERROR - ERROR: A: resnet34 | IS: 256 | BS: 8
+13-11-2018 07:59:07 AM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 141, in fit
+    loss = model_stepper.step(V(x),V(y), epoch)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 50, in step
+    output = self.m(*xs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/module.py", line 357, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/container.py", line 67, in forward
+    input = module(input)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/module.py", line 357, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/batchnorm.py", line 37, in forward
+    self.training, self.momentum, self.eps)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/functional.py", line 1011, in batch_norm
+    raise ValueError('Expected more than 1 value per channel when training, got input size {}'.format(size))
+ValueError: Expected more than 1 value per channel when training, got input size [1, 1024]
+
+13-11-2018 07:59:07 AM - INFO -  --- Batch: 8 | Img size: 512 --- 
+ 
+13-11-2018 07:59:07 AM - INFO -  --- Type: FREEZE --- 
+13-11-2018 07:59:07 AM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 08:07:48 AM - ERROR - ERROR: A: resnet34 | IS: 512 | BS: 8
+13-11-2018 08:07:48 AM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 141, in fit
+    loss = model_stepper.step(V(x),V(y), epoch)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 50, in step
+    output = self.m(*xs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/module.py", line 357, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/container.py", line 67, in forward
+    input = module(input)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/module.py", line 357, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/batchnorm.py", line 37, in forward
+    self.training, self.momentum, self.eps)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/functional.py", line 1011, in batch_norm
+    raise ValueError('Expected more than 1 value per channel when training, got input size {}'.format(size))
+ValueError: Expected more than 1 value per channel when training, got input size [1, 1024]
+
+13-11-2018 08:07:48 AM - INFO -  --- INCREMENTING BATCH SIZE --- 
+
+13-11-2018 08:07:48 AM - INFO -  --- Batch: 16 | Img size: 64 --- 
+ 
+13-11-2018 08:07:48 AM - INFO -  --- Type: FREEZE --- 
+13-11-2018 08:07:48 AM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 08:11:00 AM - ERROR - ERROR: A: resnet34 | IS: 64 | BS: 16
+13-11-2018 08:11:00 AM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 141, in fit
+    loss = model_stepper.step(V(x),V(y), epoch)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 50, in step
+    output = self.m(*xs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/module.py", line 357, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/container.py", line 67, in forward
+    input = module(input)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/module.py", line 357, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/batchnorm.py", line 37, in forward
+    self.training, self.momentum, self.eps)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/functional.py", line 1011, in batch_norm
+    raise ValueError('Expected more than 1 value per channel when training, got input size {}'.format(size))
+ValueError: Expected more than 1 value per channel when training, got input size [1, 1024]
+
+13-11-2018 08:11:00 AM - INFO -  --- Batch: 16 | Img size: 128 --- 
+ 
+13-11-2018 08:11:00 AM - INFO -  --- Type: FREEZE --- 
+13-11-2018 08:11:00 AM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 08:14:37 AM - ERROR - ERROR: A: resnet34 | IS: 128 | BS: 16
+13-11-2018 08:14:37 AM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 141, in fit
+    loss = model_stepper.step(V(x),V(y), epoch)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 50, in step
+    output = self.m(*xs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/module.py", line 357, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/container.py", line 67, in forward
+    input = module(input)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/module.py", line 357, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/batchnorm.py", line 37, in forward
+    self.training, self.momentum, self.eps)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/functional.py", line 1011, in batch_norm
+    raise ValueError('Expected more than 1 value per channel when training, got input size {}'.format(size))
+ValueError: Expected more than 1 value per channel when training, got input size [1, 1024]
+
+13-11-2018 08:14:37 AM - INFO -  --- Batch: 16 | Img size: 256 --- 
+ 
+13-11-2018 08:14:37 AM - INFO -  --- Type: FREEZE --- 
+13-11-2018 08:14:37 AM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 08:17:28 AM - ERROR - ERROR: A: resnet34 | IS: 256 | BS: 16
+13-11-2018 08:17:28 AM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 141, in fit
+    loss = model_stepper.step(V(x),V(y), epoch)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 50, in step
+    output = self.m(*xs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/module.py", line 357, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/container.py", line 67, in forward
+    input = module(input)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/module.py", line 357, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/batchnorm.py", line 37, in forward
+    self.training, self.momentum, self.eps)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/functional.py", line 1011, in batch_norm
+    raise ValueError('Expected more than 1 value per channel when training, got input size {}'.format(size))
+ValueError: Expected more than 1 value per channel when training, got input size [1, 1024]
+
+13-11-2018 08:17:28 AM - INFO -  --- Batch: 16 | Img size: 512 --- 
+ 
+13-11-2018 08:17:28 AM - INFO -  --- Type: FREEZE --- 
+13-11-2018 08:17:28 AM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 08:24:42 AM - ERROR - ERROR: A: resnet34 | IS: 512 | BS: 16
+13-11-2018 08:24:42 AM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 141, in fit
+    loss = model_stepper.step(V(x),V(y), epoch)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 50, in step
+    output = self.m(*xs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/module.py", line 357, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/container.py", line 67, in forward
+    input = module(input)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/module.py", line 357, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/modules/batchnorm.py", line 37, in forward
+    self.training, self.momentum, self.eps)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/torch/nn/functional.py", line 1011, in batch_norm
+    raise ValueError('Expected more than 1 value per channel when training, got input size {}'.format(size))
+ValueError: Expected more than 1 value per channel when training, got input size [1, 1024]
+
+13-11-2018 08:24:42 AM - INFO -  --- INCREMENTING BATCH SIZE --- 
+
+13-11-2018 08:24:42 AM - INFO -  --- Batch: 32 | Img size: 64 --- 
+ 
+13-11-2018 08:24:42 AM - INFO -  --- Type: FREEZE --- 
+13-11-2018 08:24:42 AM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 08:25:52 AM - INFO - 0, 0.355756, 0.807731, 0.378085, 0.396104, 0.661199
+13-11-2018 08:31:41 AM - INFO - 5, 0.335985, 0.821441, 0.385247, 0.407768, 0.666554
+13-11-2018 08:37:30 AM - INFO - 10, 0.32823, 0.822897, 0.395832, 0.409082, 0.677753
+13-11-2018 08:43:19 AM - INFO - 15, 0.325341, 0.82524, 0.398361, 0.406962, 0.679288
+13-11-2018 08:49:08 AM - INFO - 20, 0.319816, 0.832307, 0.407621, 0.410163, 0.681124
+13-11-2018 08:54:57 AM - INFO - 25, 0.318051, 0.832013, 0.404075, 0.416155, 0.680375
+13-11-2018 09:00:46 AM - INFO - 30, 0.317975, 0.831392, 0.410189, 0.40925, 0.681311
+13-11-2018 09:06:33 AM - INFO - 35, 0.319009, 0.825003, 0.405674, 0.420528, 0.685618
+13-11-2018 09:12:22 AM - INFO - 40, 0.314431, 0.829312, 0.408626, 0.41568, 0.69161
+13-11-2018 09:18:11 AM - INFO - 45, 0.311028, 0.829325, 0.408345, 0.416951, 0.683933
+13-11-2018 09:24:00 AM - INFO - 50, 0.313947, 0.83537, 0.412164, 0.416455, 0.677191
+13-11-2018 09:29:48 AM - INFO - 55, 0.313242, 0.832228, 0.412662, 0.418828, 0.683933
+13-11-2018 09:33:17 AM - INFO - *** Earlystopping! ***
+13-11-2018 09:33:17 AM - INFO - [ Saved model: best_resnet34_imgsize64_batch32_freeze.h5 ] 
+13-11-2018 09:33:17 AM - INFO - [ Results: [0.31103] 0.8293252510236022 0.408344608701695 0.41695118139973153 0.6839325842696629 ]
+
+13-11-2018 09:33:17 AM - INFO -  --- Type: UNFREEZE --- 
+13-11-2018 09:33:17 AM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 09:35:28 AM - INFO - 0, 0.281434, 0.851926, 0.445, 0.439506, 0.739738
+13-11-2018 09:46:26 AM - INFO - 5, 0.24979, 0.868426, 0.477971, 0.466448, 0.75427
+13-11-2018 09:57:25 AM - INFO - 10, 0.272112, 0.858113, 0.493398, 0.511241, 0.77427
+13-11-2018 10:08:21 AM - INFO - 15, 0.289644, 0.869081, 0.494164, 0.529716, 0.771648
+13-11-2018 10:11:06 AM - INFO - *** Earlystopping! ***
+13-11-2018 10:11:06 AM - INFO - [ Saved model: best_resnet34_imgsize64_batch32_unfreeze.h5 ]
+13-11-2018 10:11:06 AM - INFO - [ Results: [0.24174] 0.8864219367615374 0.5031868559613609 0.462906649796949 0.7631086142322097 ]
+
+13-11-2018 10:11:06 AM - INFO -  --- Batch: 32 | Img size: 128 --- 
+ 
+13-11-2018 10:11:06 AM - INFO -  --- Type: FREEZE --- 
+13-11-2018 10:11:06 AM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 10:13:18 AM - INFO - 0, 0.364513, 0.794064, 0.409414, 0.399824, 0.635056
+13-11-2018 10:22:55 AM - INFO - 5, 0.299284, 0.843594, 0.415678, 0.438623, 0.694532
+13-11-2018 10:30:09 AM - INFO - 10, 0.289234, 0.852365, 0.42981, 0.445933, 0.713633
+13-11-2018 10:37:22 AM - INFO - 15, 0.28679, 0.859878, 0.430566, 0.445924, 0.703708
+13-11-2018 10:44:34 AM - INFO - 20, 0.284988, 0.859427, 0.433746, 0.441423, 0.705955
+13-11-2018 10:51:44 AM - INFO - 25, 0.280984, 0.859672, 0.427625, 0.445784, 0.714382
+13-11-2018 10:58:56 AM - INFO - 30, 0.28081, 0.861335, 0.432393, 0.445113, 0.711573
+13-11-2018 11:06:08 AM - INFO - 35, 0.275091, 0.863156, 0.444867, 0.450628, 0.722622
+13-11-2018 11:13:17 AM - INFO - 40, 0.272495, 0.868998, 0.469387, 0.451816, 0.727303
+13-11-2018 11:20:27 AM - INFO - 45, 0.27266, 0.866962, 0.456633, 0.449089, 0.723933
+13-11-2018 11:28:38 AM - INFO - 50, 0.275803, 0.864324, 0.432405, 0.444636, 0.720187
+13-11-2018 11:35:47 AM - INFO - 55, 0.274801, 0.868348, 0.443731, 0.440887, 0.712884
+13-11-2018 11:42:52 AM - INFO - 60, 0.274288, 0.865841, 0.447854, 0.443484, 0.71794
+13-11-2018 11:49:56 AM - INFO - 65, 0.273454, 0.862798, 0.465803, 0.452565, 0.730674
+13-11-2018 11:56:57 AM - INFO - 70, 0.269968, 0.868308, 0.466257, 0.445853, 0.72412
+13-11-2018 12:03:59 PM - INFO - 75, 0.268461, 0.868436, 0.470313, 0.450376, 0.728427
+13-11-2018 12:11:01 PM - INFO - 80, 0.269903, 0.866356, 0.468392, 0.451291, 0.732547
+13-11-2018 12:18:03 PM - INFO - 85, 0.267326, 0.871427, 0.461198, 0.447319, 0.724869
+13-11-2018 12:25:05 PM - INFO - 90, 0.268789, 0.86472, 0.469002, 0.451591, 0.731798
+13-11-2018 12:32:07 PM - INFO - 95, 0.266978, 0.865335, 0.468595, 0.453817, 0.731423
+13-11-2018 12:39:09 PM - INFO - 100, 0.266324, 0.870581, 0.479033, 0.453736, 0.736105
+13-11-2018 12:46:10 PM - INFO - 105, 0.267106, 0.869264, 0.472232, 0.449829, 0.73573
+13-11-2018 12:53:13 PM - INFO - 110, 0.266689, 0.871717, 0.474899, 0.452202, 0.734419
+13-11-2018 12:56:04 PM - INFO - *** Earlystopping! ***
+13-11-2018 12:56:04 PM - INFO - [ Saved model: best_resnet34_imgsize128_batch32_freeze.h5 ] 
+13-11-2018 12:56:04 PM - INFO - [ Results: [0.26455] 0.8706397201531478 0.4721181097559514 0.4531854202687757 0.7364794007490637 ]
+
+13-11-2018 12:56:04 PM - INFO -  --- Type: UNFREEZE --- 
+13-11-2018 12:56:04 PM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 12:58:59 PM - INFO - 0, 0.242654, 0.869252, 0.455071, 0.456955, 0.74603
+13-11-2018 01:13:38 PM - INFO - 5, 0.22744, 0.882685, 0.510041, 0.519088, 0.795768
+13-11-2018 01:28:18 PM - INFO - 10, 0.259488, 0.884221, 0.519043, 0.513801, 0.762772
+13-11-2018 01:42:55 PM - INFO - *** Earlystopping! ***
+13-11-2018 01:42:55 PM - INFO - [ Saved model: best_resnet34_imgsize128_batch32_unfreeze.h5 ]
+13-11-2018 01:42:55 PM - INFO - [ Results: [0.21616] 0.8898926463046198 0.5217618529420652 0.5074343040118152 0.7926591760299626 ]
+
+13-11-2018 01:42:55 PM - INFO -  --- Batch: 32 | Img size: 256 --- 
+ 
+13-11-2018 01:42:55 PM - INFO -  --- Type: FREEZE --- 
+13-11-2018 01:42:55 PM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 01:45:04 PM - INFO - 0, 0.369129, 0.794071, 0.420993, 0.42273, 0.651311
+13-11-2018 01:55:52 PM - INFO - 5, 0.295773, 0.847772, 0.422054, 0.427988, 0.695094
+13-11-2018 02:06:41 PM - INFO - 10, 0.289178, 0.854499, 0.412204, 0.430586, 0.694906
+13-11-2018 02:17:31 PM - INFO - 15, 0.285745, 0.85509, 0.418826, 0.432093, 0.705581
+13-11-2018 02:28:24 PM - INFO - 20, 0.282799, 0.856099, 0.42472, 0.428707, 0.702397
+13-11-2018 02:39:15 PM - INFO - 25, 0.281435, 0.854118, 0.418515, 0.432507, 0.70633
+13-11-2018 02:50:06 PM - INFO - 30, 0.280962, 0.851362, 0.417189, 0.437234, 0.707453
+13-11-2018 03:01:00 PM - INFO - 35, 0.278114, 0.853827, 0.418834, 0.433399, 0.704831
+13-11-2018 03:11:52 PM - INFO - 40, 0.279452, 0.850483, 0.416577, 0.439418, 0.711386
+13-11-2018 03:22:43 PM - INFO - 45, 0.277809, 0.854621, 0.418491, 0.443525, 0.710262
+13-11-2018 03:33:44 PM - INFO - 50, 0.275062, 0.852692, 0.417122, 0.44395, 0.714757
+13-11-2018 03:47:09 PM - INFO - 55, 0.275318, 0.855539, 0.420792, 0.437912, 0.712884
+13-11-2018 03:57:58 PM - INFO - 60, 0.276392, 0.854878, 0.417531, 0.441684, 0.711948
+13-11-2018 04:02:18 PM - INFO - *** Earlystopping! ***
+13-11-2018 04:02:18 PM - INFO - [ Saved model: best_resnet34_imgsize256_batch32_freeze.h5 ] 
+13-11-2018 04:02:18 PM - INFO - [ Results: [0.27344] 0.8587248374087001 0.42823118682796857 0.44437922500001215 0.715505617977528 ]
+
+13-11-2018 04:02:18 PM - INFO -  --- Type: UNFREEZE --- 
+13-11-2018 04:02:18 PM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 04:08:58 PM - INFO - 0, 0.225368, 0.879878, 0.505934, 0.480951, 0.776742
+13-11-2018 04:42:17 PM - INFO - 5, 0.23678, 0.884694, 0.523236, 0.493253, 0.773221
+13-11-2018 05:15:34 PM - INFO - 10, 0.280101, 0.891154, 0.50914, 0.522128, 0.779176
+13-11-2018 05:42:19 PM - INFO - *** Earlystopping! ***
+13-11-2018 05:42:19 PM - INFO - [ Saved model: best_resnet34_imgsize256_batch32_unfreeze.h5 ]
+13-11-2018 05:42:19 PM - INFO - [ Results: [0.20492] 0.9090492559584987 0.545594763295859 0.4989334322936537 0.7957303370786517 ]
+
+13-11-2018 05:42:19 PM - INFO -  --- Batch: 32 | Img size: 512 --- 
+ 
+13-11-2018 05:42:19 PM - INFO -  --- Type: FREEZE --- 
+13-11-2018 05:42:19 PM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 05:50:34 PM - INFO - 0, 0.340448, 0.820045, 0.474236, 0.434403, 0.686105
+13-11-2018 06:32:27 PM - INFO - 5, 0.270005, 0.850674, 0.444176, 0.446373, 0.721124
+13-11-2018 07:13:05 PM - INFO - 10, 0.264791, 0.855874, 0.443595, 0.447564, 0.721685
+13-11-2018 07:53:34 PM - INFO - 15, 0.2639, 0.853605, 0.446007, 0.448485, 0.729176
+13-11-2018 08:34:04 PM - INFO - 20, 0.25786, 0.859907, 0.464935, 0.453244, 0.730936
+13-11-2018 09:14:35 PM - INFO - 25, 0.256018, 0.85992, 0.463159, 0.455452, 0.732247
+13-11-2018 09:55:05 PM - INFO - 30, 0.256793, 0.85864, 0.45714, 0.449893, 0.734794
+13-11-2018 10:36:23 PM - INFO - 35, 0.256874, 0.854596, 0.456907, 0.456384, 0.739738
+13-11-2018 11:16:56 PM - INFO - 40, 0.254161, 0.857104, 0.45973, 0.457415, 0.747228
+13-11-2018 11:57:32 PM - INFO - 45, 0.251929, 0.858001, 0.461584, 0.454794, 0.743109
+14-11-2018 12:38:09 AM - INFO - 50, 0.252623, 0.859258, 0.459309, 0.45771, 0.744906
+14-11-2018 01:18:43 AM - INFO - 55, 0.25121, 0.864025, 0.469239, 0.459447, 0.745543
+14-11-2018 01:51:27 AM - INFO - *** Earlystopping! ***
+14-11-2018 01:51:27 AM - INFO - [ Saved model: best_resnet34_imgsize512_batch32_freeze.h5 ] 
+14-11-2018 01:51:27 AM - INFO - [ Results: [0.24892] 0.8627079037639269 0.4685097664405948 0.45623878382546623 0.7431086142322098 ]
+
+14-11-2018 01:51:27 AM - INFO -  --- Type: UNFREEZE --- 
+14-11-2018 01:51:27 AM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+14-11-2018 02:16:14 AM - INFO - 0, 0.211979, 0.896511, 0.540508, 0.498782, 0.78618
+14-11-2018 04:18:41 AM - INFO - 5, 0.241815, 0.874781, 0.518595, 0.523582, 0.797491
+14-11-2018 06:21:11 AM - INFO - 10, 0.293254, 0.886448, 0.505483, 0.534888, 0.786217
+14-11-2018 08:24:33 AM - INFO - *** Earlystopping! ***
+14-11-2018 08:24:33 AM - INFO - [ Saved model: best_resnet34_imgsize512_batch32_unfreeze.h5 ]
+14-11-2018 08:24:33 AM - INFO - [ Results: [0.21132] 0.8958236846312123 0.5280463110011578 0.5189528727101941 0.8037078651685393 ]
+
+14-11-2018 08:24:33 AM - INFO -  ************************** 
+14-11-2018 08:24:33 AM - INFO - COPYPASTE: resnet34 | IMS: 64 -> 512 | BS: 32
+14-11-2018 08:24:33 AM - INFO - COPYPASTE: [0.21132] 0.8958236846312123 0.5280463110011578 0.5189528727101941 0.8037078651685393 
+14-11-2018 08:24:33 AM - INFO -  ************************** 
+
+14-11-2018 08:24:33 AM - INFO -  --- INCREMENTING BATCH SIZE --- 
+
+14-11-2018 08:24:33 AM - INFO -  --- Batch: 64 | Img size: 64 --- 
+ 
+14-11-2018 08:24:33 AM - INFO -  --- Type: FREEZE --- 
+14-11-2018 08:24:33 AM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+14-11-2018 08:25:45 AM - INFO - 0, 0.516838, 0.755423, 0.435579, 0.390758, 0.591236
+14-11-2018 08:31:49 AM - INFO - 5, 0.354746, 0.79236, 0.419217, 0.430516, 0.68236
+14-11-2018 08:37:51 AM - INFO - 10, 0.333682, 0.814429, 0.40137, 0.430942, 0.681049
+14-11-2018 08:43:52 AM - INFO - 15, 0.327571, 0.817273, 0.405907, 0.433092, 0.694719
+14-11-2018 08:49:55 AM - INFO - 20, 0.316723, 0.826158, 0.427598, 0.438134, 0.702397
+14-11-2018 08:55:56 AM - INFO - 25, 0.313399, 0.825068, 0.430791, 0.437531, 0.7097
+14-11-2018 09:01:57 AM - INFO - 30, 0.313128, 0.828823, 0.430485, 0.437368, 0.707266
+14-11-2018 09:07:59 AM - INFO - 35, 0.307241, 0.834677, 0.431378, 0.440999, 0.708951
+14-11-2018 09:14:01 AM - INFO - 40, 0.304707, 0.837156, 0.433222, 0.438596, 0.714944
+14-11-2018 09:20:02 AM - INFO - 45, 0.302114, 0.842322, 0.4336, 0.44166, 0.714757
+14-11-2018 09:26:02 AM - INFO - 50, 0.299909, 0.840863, 0.434115, 0.438871, 0.715693
+14-11-2018 09:32:03 AM - INFO - 55, 0.300095, 0.839636, 0.432163, 0.443475, 0.717753
