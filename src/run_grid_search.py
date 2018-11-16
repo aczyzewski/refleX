@@ -25,7 +25,7 @@ def save_lr_chart(lrs, losses, filename, n_skip=10, n_skip_end=5):
 def get_data (model, PATHS, img_size, custom_transformations, batch_size, val_idxs):
     tfms = tfms_from_model(model, img_size, aug_tfms=custom_transformations, max_zoom=1.1)
     return ImageClassifierData.from_csv(PATHS['DATA_PATH'], PATHS['DATA_FOLDER'], PATHS['CSV_PATH'], tfms=tfms,
-                    suffix='.png', val_idxs=val_idxs, bs=batch_size, num_workers=workers)
+                    suffix='.png', val_idxs=val_idxs, bs=batch_size, num_workers=2)
 
 
 def grid_search(PATHS, CONFIG, val_idxs, experiment_name, PARAMS, output_csv='results.csv'):   
@@ -130,14 +130,15 @@ def grid_search(PATHS, CONFIG, val_idxs, experiment_name, PARAMS, output_csv='re
                 
 
 def polar_configuration():
-    paths = {'DATA_FOLDER' : 'polar512'}
+    paths = {'CSV_PATH': '/home/reflex/refleX/metadata/csv/augmented_sample_reflex.csv',
+             'DATA_FOLDER' : 'augmented_polar512_sample'} # PARAMETER
     params = {'transformations' : None}
     config = {
-        'image_sizes': [512],
+        'image_sizes': [64, 128, 256, 512],
         'predefined_metrics': [f2, average_precision, average_recall, hamming_score],
-        'batch_sizes': [32],
+        'batch_sizes': [8, 16, 32, 64], # PARAMETER
         'architectures' : {
-            'resnet18' : resnet18
+            'resnet34' : resnet34 # PARAMETER
         }
     }
 

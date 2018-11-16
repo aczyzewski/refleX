@@ -1,0 +1,14 @@
+06-11-2018 01:26:15 PM - INFO -  [ ------ EXPERIMENT: AUGMENTED_POLAR_6_11 ------ ] 
+
+06-11-2018 01:26:15 PM - INFO -  --- PARAMETERS: --- 
+06-11-2018 01:26:15 PM - INFO - Predefined metrics: [val_loss], f2, average_precision, average_recall, hamming_score
+06-11-2018 01:26:15 PM - INFO - Predefined architecutres: resnet18
+06-11-2018 01:26:15 PM - INFO - Predefined batch sizes: 8
+06-11-2018 01:26:15 PM - INFO - Predefined image sizes: 512
+06-11-2018 01:26:15 PM - INFO - Dropout: 0.5
+06-11-2018 01:26:15 PM - INFO - Earlystopping after: 12 epochs.
+06-11-2018 01:26:15 PM - INFO - Log every 5 epochs.
+06-11-2018 01:26:15 PM - INFO - GPU: 0 | Available: 1 
+
+06-11-2018 01:26:15 PM - INFO -     ----- *** RESNET18 *** ----- 
+
