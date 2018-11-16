@@ -1,5 +1,6 @@
 import warnings
 import numpy as np
+import os
 from sklearn.metrics import fbeta_score, precision_score, recall_score
 
 def f2(preds, targs, start=0.17, end=0.24, step=0.01):
@@ -39,3 +40,14 @@ def hamming_score(y_pred, y_true, threshold=0.5):
                         float(len(set_true.union(set_pred)))
             acc_list.append(tmp_a)
         return np.mean(acc_list)
+
+def log_results(y_pred, y_true):
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        outputfile = open('custom_metrics.log', 'w')
+        outputfile.write("Y PRED: \n")
+        outputfile.write(str(y_pred) + "\n")
+        outputfile.write("Y TRUE: \n")
+        outputfile.write(str(y_true) + "\n")
+        outputfile.close()
+    return 0.0
