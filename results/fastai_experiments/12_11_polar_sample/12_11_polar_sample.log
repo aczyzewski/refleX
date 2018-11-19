@@ -1,0 +1,505 @@
+12-11-2018 11:08:12 PM - INFO -  [ ------ EXPERIMENT: 12_11_POLAR_SAMPLE ------ ] 
+
+12-11-2018 11:08:12 PM - INFO -  --- PARAMETERS: --- 
+12-11-2018 11:08:12 PM - INFO - Predefined metrics: [val_loss], f2, average_precision, average_recall, hamming_score
+12-11-2018 11:08:12 PM - INFO - Predefined architecutres: resnet34
+12-11-2018 11:08:12 PM - INFO - Predefined batch sizes: 8, 16, 32, 64
+12-11-2018 11:08:12 PM - INFO - Predefined image sizes: 64, 128, 256, 512
+12-11-2018 11:08:12 PM - INFO - Dropout: 0.5
+12-11-2018 11:08:12 PM - INFO - Earlystopping after: 12 epochs.
+12-11-2018 11:08:12 PM - INFO - Log every 5 epochs.
+12-11-2018 11:08:12 PM - INFO - GPU: 0 | Available: 1 
+
+12-11-2018 11:08:12 PM - INFO -     ----- *** RESNET34 *** ----- 
+
+12-11-2018 11:12:27 PM - INFO -  Learning rate = 1e-06
+12-11-2018 11:12:27 PM - INFO -  Learning rates = [0.0, 0.0, 1e-06, 1e-06] 
+
+12-11-2018 11:12:27 PM - INFO -  --- Batch: 8 | Img size: 64 --- 
+ 
+12-11-2018 11:12:27 PM - INFO -  --- Type: FREEZE --- 
+12-11-2018 11:12:27 PM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+12-11-2018 11:19:06 PM - ERROR - ERROR: A: resnet34 | IS: 64 | BS: 8
+12-11-2018 11:19:06 PM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 162, in fit
+    vals = validate(model_stepper, cur_data.val_dl, metrics, epoch, seq_first=seq_first, validate_skip = validate_skip)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in validate
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in <listcomp>
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in f2
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in <listcomp>
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 834, in fbeta_score
+    sample_weight=sample_weight)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 1031, in precision_recall_fscore_support
+    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 81, in _check_targets
+    "and {1} targets".format(type_true, type_pred))
+ValueError: Classification metrics can't handle a mix of binary and multilabel-indicator targets
+
+12-11-2018 11:19:06 PM - INFO -  --- Batch: 8 | Img size: 128 --- 
+ 
+12-11-2018 11:19:06 PM - INFO -  --- Type: FREEZE --- 
+12-11-2018 11:19:06 PM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+12-11-2018 11:25:57 PM - ERROR - ERROR: A: resnet34 | IS: 128 | BS: 8
+12-11-2018 11:25:57 PM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 162, in fit
+    vals = validate(model_stepper, cur_data.val_dl, metrics, epoch, seq_first=seq_first, validate_skip = validate_skip)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in validate
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in <listcomp>
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in f2
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in <listcomp>
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 834, in fbeta_score
+    sample_weight=sample_weight)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 1031, in precision_recall_fscore_support
+    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 81, in _check_targets
+    "and {1} targets".format(type_true, type_pred))
+ValueError: Classification metrics can't handle a mix of binary and multilabel-indicator targets
+
+12-11-2018 11:25:57 PM - INFO -  --- Batch: 8 | Img size: 256 --- 
+ 
+12-11-2018 11:25:57 PM - INFO -  --- Type: FREEZE --- 
+12-11-2018 11:25:57 PM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+12-11-2018 11:29:24 PM - ERROR - ERROR: A: resnet34 | IS: 256 | BS: 8
+12-11-2018 11:29:24 PM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 162, in fit
+    vals = validate(model_stepper, cur_data.val_dl, metrics, epoch, seq_first=seq_first, validate_skip = validate_skip)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in validate
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in <listcomp>
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in f2
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in <listcomp>
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 834, in fbeta_score
+    sample_weight=sample_weight)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 1031, in precision_recall_fscore_support
+    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 81, in _check_targets
+    "and {1} targets".format(type_true, type_pred))
+ValueError: Classification metrics can't handle a mix of binary and multilabel-indicator targets
+
+12-11-2018 11:29:25 PM - INFO -  --- Batch: 8 | Img size: 512 --- 
+ 
+12-11-2018 11:29:25 PM - INFO -  --- Type: FREEZE --- 
+12-11-2018 11:29:25 PM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+12-11-2018 11:38:53 PM - ERROR - ERROR: A: resnet34 | IS: 512 | BS: 8
+12-11-2018 11:38:53 PM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 162, in fit
+    vals = validate(model_stepper, cur_data.val_dl, metrics, epoch, seq_first=seq_first, validate_skip = validate_skip)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in validate
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in <listcomp>
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in f2
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in <listcomp>
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 834, in fbeta_score
+    sample_weight=sample_weight)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 1031, in precision_recall_fscore_support
+    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 81, in _check_targets
+    "and {1} targets".format(type_true, type_pred))
+ValueError: Classification metrics can't handle a mix of binary and multilabel-indicator targets
+
+12-11-2018 11:38:53 PM - INFO -  --- INCREMENTING BATCH SIZE --- 
+
+12-11-2018 11:38:53 PM - INFO -  --- Batch: 16 | Img size: 64 --- 
+ 
+12-11-2018 11:38:53 PM - INFO -  --- Type: FREEZE --- 
+12-11-2018 11:38:53 PM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+12-11-2018 11:42:48 PM - ERROR - ERROR: A: resnet34 | IS: 64 | BS: 16
+12-11-2018 11:42:48 PM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 162, in fit
+    vals = validate(model_stepper, cur_data.val_dl, metrics, epoch, seq_first=seq_first, validate_skip = validate_skip)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in validate
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in <listcomp>
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in f2
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in <listcomp>
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 834, in fbeta_score
+    sample_weight=sample_weight)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 1031, in precision_recall_fscore_support
+    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 81, in _check_targets
+    "and {1} targets".format(type_true, type_pred))
+ValueError: Classification metrics can't handle a mix of binary and multilabel-indicator targets
+
+12-11-2018 11:42:48 PM - INFO -  --- Batch: 16 | Img size: 128 --- 
+ 
+12-11-2018 11:42:48 PM - INFO -  --- Type: FREEZE --- 
+12-11-2018 11:42:48 PM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+12-11-2018 11:47:11 PM - ERROR - ERROR: A: resnet34 | IS: 128 | BS: 16
+12-11-2018 11:47:11 PM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 162, in fit
+    vals = validate(model_stepper, cur_data.val_dl, metrics, epoch, seq_first=seq_first, validate_skip = validate_skip)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in validate
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in <listcomp>
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in f2
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in <listcomp>
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 834, in fbeta_score
+    sample_weight=sample_weight)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 1031, in precision_recall_fscore_support
+    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 81, in _check_targets
+    "and {1} targets".format(type_true, type_pred))
+ValueError: Classification metrics can't handle a mix of binary and multilabel-indicator targets
+
+12-11-2018 11:47:11 PM - INFO -  --- Batch: 16 | Img size: 256 --- 
+ 
+12-11-2018 11:47:11 PM - INFO -  --- Type: FREEZE --- 
+12-11-2018 11:47:11 PM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+12-11-2018 11:50:55 PM - ERROR - ERROR: A: resnet34 | IS: 256 | BS: 16
+12-11-2018 11:50:55 PM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 162, in fit
+    vals = validate(model_stepper, cur_data.val_dl, metrics, epoch, seq_first=seq_first, validate_skip = validate_skip)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in validate
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in <listcomp>
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in f2
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in <listcomp>
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 834, in fbeta_score
+    sample_weight=sample_weight)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 1031, in precision_recall_fscore_support
+    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 81, in _check_targets
+    "and {1} targets".format(type_true, type_pred))
+ValueError: Classification metrics can't handle a mix of binary and multilabel-indicator targets
+
+12-11-2018 11:50:55 PM - INFO -  --- Batch: 16 | Img size: 512 --- 
+ 
+12-11-2018 11:50:55 PM - INFO -  --- Type: FREEZE --- 
+12-11-2018 11:50:55 PM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+12-11-2018 11:59:16 PM - ERROR - ERROR: A: resnet34 | IS: 512 | BS: 16
+12-11-2018 11:59:16 PM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 162, in fit
+    vals = validate(model_stepper, cur_data.val_dl, metrics, epoch, seq_first=seq_first, validate_skip = validate_skip)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in validate
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in <listcomp>
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in f2
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in <listcomp>
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 834, in fbeta_score
+    sample_weight=sample_weight)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 1031, in precision_recall_fscore_support
+    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 81, in _check_targets
+    "and {1} targets".format(type_true, type_pred))
+ValueError: Classification metrics can't handle a mix of binary and multilabel-indicator targets
+
+12-11-2018 11:59:16 PM - INFO -  --- INCREMENTING BATCH SIZE --- 
+
+12-11-2018 11:59:16 PM - INFO -  --- Batch: 32 | Img size: 64 --- 
+ 
+12-11-2018 11:59:17 PM - INFO -  --- Type: FREEZE --- 
+12-11-2018 11:59:17 PM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 12:00:35 AM - ERROR - ERROR: A: resnet34 | IS: 64 | BS: 32
+13-11-2018 12:00:35 AM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 162, in fit
+    vals = validate(model_stepper, cur_data.val_dl, metrics, epoch, seq_first=seq_first, validate_skip = validate_skip)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in validate
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in <listcomp>
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in f2
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in <listcomp>
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 834, in fbeta_score
+    sample_weight=sample_weight)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 1031, in precision_recall_fscore_support
+    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 81, in _check_targets
+    "and {1} targets".format(type_true, type_pred))
+ValueError: Classification metrics can't handle a mix of binary and multilabel-indicator targets
+
+13-11-2018 12:00:36 AM - INFO -  --- Batch: 32 | Img size: 128 --- 
+ 
+13-11-2018 12:00:36 AM - INFO -  --- Type: FREEZE --- 
+13-11-2018 12:00:36 AM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 12:02:25 AM - ERROR - ERROR: A: resnet34 | IS: 128 | BS: 32
+13-11-2018 12:02:25 AM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 162, in fit
+    vals = validate(model_stepper, cur_data.val_dl, metrics, epoch, seq_first=seq_first, validate_skip = validate_skip)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in validate
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in <listcomp>
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in f2
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in <listcomp>
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 834, in fbeta_score
+    sample_weight=sample_weight)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 1031, in precision_recall_fscore_support
+    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 81, in _check_targets
+    "and {1} targets".format(type_true, type_pred))
+ValueError: Classification metrics can't handle a mix of binary and multilabel-indicator targets
+
+13-11-2018 12:02:26 AM - INFO -  --- Batch: 32 | Img size: 256 --- 
+ 
+13-11-2018 12:02:26 AM - INFO -  --- Type: FREEZE --- 
+13-11-2018 12:02:26 AM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 12:05:31 AM - ERROR - ERROR: A: resnet34 | IS: 256 | BS: 32
+13-11-2018 12:05:31 AM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 162, in fit
+    vals = validate(model_stepper, cur_data.val_dl, metrics, epoch, seq_first=seq_first, validate_skip = validate_skip)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in validate
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in <listcomp>
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in f2
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in <listcomp>
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 834, in fbeta_score
+    sample_weight=sample_weight)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 1031, in precision_recall_fscore_support
+    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 81, in _check_targets
+    "and {1} targets".format(type_true, type_pred))
+ValueError: Classification metrics can't handle a mix of binary and multilabel-indicator targets
+
+13-11-2018 12:05:31 AM - INFO -  --- Batch: 32 | Img size: 512 --- 
+ 
+13-11-2018 12:05:31 AM - INFO -  --- Type: FREEZE --- 
+13-11-2018 12:05:31 AM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 12:14:32 AM - ERROR - ERROR: A: resnet34 | IS: 512 | BS: 32
+13-11-2018 12:14:32 AM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 162, in fit
+    vals = validate(model_stepper, cur_data.val_dl, metrics, epoch, seq_first=seq_first, validate_skip = validate_skip)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in validate
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in <listcomp>
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in f2
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in <listcomp>
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 834, in fbeta_score
+    sample_weight=sample_weight)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 1031, in precision_recall_fscore_support
+    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 81, in _check_targets
+    "and {1} targets".format(type_true, type_pred))
+ValueError: Classification metrics can't handle a mix of binary and multilabel-indicator targets
+
+13-11-2018 12:14:32 AM - INFO -  --- INCREMENTING BATCH SIZE --- 
+
+13-11-2018 12:14:32 AM - INFO -  --- Batch: 64 | Img size: 64 --- 
+ 
+13-11-2018 12:14:32 AM - INFO -  --- Type: FREEZE --- 
+13-11-2018 12:14:32 AM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 12:15:49 AM - ERROR - ERROR: A: resnet34 | IS: 64 | BS: 64
+13-11-2018 12:15:49 AM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 162, in fit
+    vals = validate(model_stepper, cur_data.val_dl, metrics, epoch, seq_first=seq_first, validate_skip = validate_skip)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in validate
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in <listcomp>
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in f2
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in <listcomp>
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 834, in fbeta_score
+    sample_weight=sample_weight)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 1031, in precision_recall_fscore_support
+    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 81, in _check_targets
+    "and {1} targets".format(type_true, type_pred))
+ValueError: Classification metrics can't handle a mix of binary and multilabel-indicator targets
+
+13-11-2018 12:15:50 AM - INFO -  --- Batch: 64 | Img size: 128 --- 
+ 
+13-11-2018 12:15:50 AM - INFO -  --- Type: FREEZE --- 
+13-11-2018 12:15:50 AM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 12:17:24 AM - ERROR - ERROR: A: resnet34 | IS: 128 | BS: 64
+13-11-2018 12:17:24 AM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 162, in fit
+    vals = validate(model_stepper, cur_data.val_dl, metrics, epoch, seq_first=seq_first, validate_skip = validate_skip)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in validate
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in <listcomp>
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in f2
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in <listcomp>
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 834, in fbeta_score
+    sample_weight=sample_weight)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 1031, in precision_recall_fscore_support
+    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 81, in _check_targets
+    "and {1} targets".format(type_true, type_pred))
+ValueError: Classification metrics can't handle a mix of binary and multilabel-indicator targets
+
+13-11-2018 12:17:24 AM - INFO -  --- Batch: 64 | Img size: 256 --- 
+ 
+13-11-2018 12:17:24 AM - INFO -  --- Type: FREEZE --- 
+13-11-2018 12:17:24 AM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 12:20:12 AM - ERROR - ERROR: A: resnet34 | IS: 256 | BS: 64
+13-11-2018 12:20:12 AM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 162, in fit
+    vals = validate(model_stepper, cur_data.val_dl, metrics, epoch, seq_first=seq_first, validate_skip = validate_skip)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in validate
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in <listcomp>
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in f2
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in <listcomp>
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 834, in fbeta_score
+    sample_weight=sample_weight)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 1031, in precision_recall_fscore_support
+    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 81, in _check_targets
+    "and {1} targets".format(type_true, type_pred))
+ValueError: Classification metrics can't handle a mix of binary and multilabel-indicator targets
+
+13-11-2018 12:20:12 AM - INFO -  --- Batch: 64 | Img size: 512 --- 
+ 
+13-11-2018 12:20:12 AM - INFO -  --- Type: FREEZE --- 
+13-11-2018 12:20:12 AM - INFO - epoch, val_loss, f2, average_precision, average_recall, hamming_score
+13-11-2018 12:27:52 AM - ERROR - ERROR: A: resnet34 | IS: 512 | BS: 64
+13-11-2018 12:27:52 AM - ERROR - Traceback (most recent call last):
+  File "run_grid_search.py", line 97, in grid_search
+    learn.fit(lr, 12, cycle_len=1, cycle_mult=2, best_save_name=f'{best_model_name}_freeze', earlystopping=earlystoping, logger_name=experiment_name, log_step=log_step)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 308, in fit
+    return self.fit_gen(self.model, self.data, layer_opt, n_cycle, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/learner.py", line 255, in fit_gen
+    swa_eval_freq=swa_eval_freq, **kwargs)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 162, in fit
+    vals = validate(model_stepper, cur_data.val_dl, metrics, epoch, seq_first=seq_first, validate_skip = validate_skip)
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in validate
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/lib/fastai/fastai/model.py", line 241, in <listcomp>
+    res.append([to_np(f(datafy(preds), datafy(y))) for f in metrics])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in f2
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/refleX/src/custom_metrics.py", line 10, in <listcomp>
+    for th in np.arange(start,end,step)])
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 834, in fbeta_score
+    sample_weight=sample_weight)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 1031, in precision_recall_fscore_support
+    y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+  File "/home/reflex/.conda/envs/fastai/lib/python3.6/site-packages/sklearn/metrics/classification.py", line 81, in _check_targets
+    "and {1} targets".format(type_true, type_pred))
+ValueError: Classification metrics can't handle a mix of binary and multilabel-indicator targets
+
+13-11-2018 12:27:53 AM - INFO -     ----- *** END: resnet34 *** ----- 
+
