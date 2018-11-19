@@ -1,18 +1,33 @@
-from . import forms
 from django.shortcuts import render
 
 from django.views.generic import CreateView
 from django.views.generic import UpdateView
 
 from mainPage.models import Person
-from mainPage.forms import PersonForm
+from mainPage.forms import PersonForm, ImageUploadForm
+from django.template import RequestContext
 from django.http import Http404
+from django.shortcuts import redirect, render, render_to_response
 
-class PersonCreateView(CreateView):
-    model = Person
-    #fields = ('name of file', 'your Email', 'Link To File')
-    fields = ('nameOfFile', 'yourEmail', 'linkToFile')
-    template_name = 'mainPage/person_form.html'
+from django.contrib.auth.models import User, Group
+from rest_framework import viewsets
+from mainPage.serializers import UserSerializer, GroupSerializer
+
+def post_new(request):
+    if request.method == "POST":
+        form = PersonForm(request.POST)
+        formimg = ImageUploadForm(request.POST, request.FILES)
+        if all([form.is_valid(), formimg.is_valid()]):
+            post = form.save(commit=False)
+            post2 = formimg.save(commit=False)
+            #handle_uploaded_file(request.POST['nameOfFile'],request.FILES['file'])
+            response = redirect('/mainPage/loading')
+            return response
+    else:
+        form = PersonForm()
+        formimg = ImageUploadForm()
+
+    return render(request, 'mainPage/form_page.html', {'form': form,'formimg': formimg})
 
 def index(request):
     return render(request,'mainPage/index.html')
@@ -21,40 +36,37 @@ def success(request):
     return render(request,'mainPage/success.html')
 
 def loading(request):
-        return render(request,'mainPage/progress_bar.html')
+        return render(request,'mainPage/loading.html')
 
 def credits(request):
         return render(request,'mainPage/credits.html')
 
-"""
-tut (3.3) 137?
-def form_name_view(request):
-    form = forms.FormName()
 
-    if request.method == 'POST':
-        form = forms.FormName(request.POST)
+def view404(request):
+    return render(request, '404.html')
 
-        if form.is_valid():
-            # DO STH
-            print("VALIDATION SUCCESSED !")
-            print("NAME:"+ form.cleaned_data['name'])
-            print("EMAIL:"+ form.cleaned_data['email'])
+def view500(request):
+    return render(request, '404.html')
 
-    return render(request,'mainPage/form_page.html',{'form':form})
-"""
+#function responsible for image handling
+def handle_uploaded_file(nameOFFile_,f):
+    with open('static/uploadedPhotos/'+nameOFFile_, 'wb+') as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+    return 0
 
 
-"""
-def handler404(request, *args, **argv):
-    response = render_to_response('404.html', {},
-                                  context_instance=RequestContext(request))
-    response.status_code = 404
-    return response
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    queryset = User.objects.all().order_by('-date_joined')
+    serializer_class = UserSerializer
 
 
-def handler500(request, *args, **argv):
-    response = render_to_response('500.html', {},
-                                  context_instance=RequestContext(request))
-    response.status_code = 500
-    return response
-"""
+class GroupViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer

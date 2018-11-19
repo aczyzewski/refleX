@@ -1,8 +1,20 @@
 <!DOCTYPE html>
 {% extends "error.html"%}
-  {% block content %}
+{% load static %}
 
+{% block content %}
 
+  <div class="container" id="cmb-content">
+          <div class="error-page-content text-center">
+              <img class="error-img" src="static/img/e404.svg" alt="CheckMyBlob">
+              <div class="error-info">The page you're looking for was not found.</div>
+              <div class="error-action">
+                <div id="browse_app">
+                  <a class="btn btn-large btn-info" href="mainPage/add">Back to main page</a>
+                </div>
 
-	  <h3>CUSTOM 404 error <a id="logo-anchor" href="#">
-    {% endblock %}
+              </div>
+          </div>
+       </div>
+
+{% endblock %}

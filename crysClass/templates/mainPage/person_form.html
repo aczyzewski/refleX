@@ -3,22 +3,17 @@
 {% load static %}
 {% load crispy_forms_tags %}
 
-**mainPage/person_form.html**
-
 {% block content %}
 
-  <form method="post" novalidate>
-    {% csrf_token %}
-    <div class="row">
-      <div class="col-6">
-        {{ form.nameOfFile|as_crispy_field }}
-      </div>
-      <div class="col-6">
-        {{ form.yourEmail|as_crispy_field }}
-      </div>
-    </div>
-    {{ form.linkToFile|as_crispy_field }}
-    <button type="submit" class="btn btn-success">Run</button>
+  <a href="{% url 'post_new' %}" class="top-menu"><span class="glyphicon glyphicon-plus"></span></a>
+
+  <div class="form-group">
+    <label for="exampleFormControlFile1">File input</label>
+    <input type="file" class="form-control-file" id="file1">
+  </div>
+
+  <button type="submit" class="btn btn-success">Run</button>
+
   </form>
 
 {% endblock %}

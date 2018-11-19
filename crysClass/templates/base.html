@@ -1,15 +1,22 @@
 <!doctype html>
+{% load static %}
 
   <html lang="en">
   <head>
     <meta charset="utf-8">
+
+
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" media="all" href="/static/css/main.css">
+    <link href="https://use.fontawesome.com/releases/v5.0.6/css/solid.css" rel="stylesheet">
+    <!--<link rel="stylesheet" href="/static/css/jquery.fileupload.css">
+    <link rel="stylesheet" href="/static/css/jquery.fileupload-ui.css">-->
     <title>Crystalography</title>
   </head>
   <body>
 
-    {% load staticfiles %}
+
 <link rel="stylesheet" href="{% static 'css/main.css' %}" />
 
 <!--
@@ -54,11 +61,13 @@
           {% block content %}
 
           {% endblock %}
+
+
         </div>
       </div>
     </div>
 
-<footer class="footer">
+<footer class="footer" style ="margin-top: 350px;">
     <div id="cmb-footer">
     <div class="container">
         <div class="row">
@@ -72,9 +81,9 @@
             <div class="col-sm-3 col-xs-6">
                 <h4>Contact</h4>
                 <p>
-                    Need help? Found a bug? Interested in a different set of ligands? Want to collaborate? Contact us at:
+                    Need help? Found a bug? Interested in a different set of ligands? Want to collaborate?
                     <script>document.write('');</script><a href="mailto:marcin.konieczny.poznan@gmail.com">marcin.konieczny.poznan@gmail.com</a><noscript>[Turn on JavaScript to see the email address]</noscript>
-                </p>
+                  </p>
             </div>
             <div class="col-sm-3 col-xs-6">
                 <h4>Citing</h4>
@@ -88,12 +97,10 @@
 </div>
 </footer>
 
-  </body>
-</html>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 
-<!--
-** dodac bootstrap js (mryganie przyciskow rozwiajnie menu) **
-** header - sticky, niesticky(recomended)(static) **
-** logo -> to managePAge ( randomLogo) **
-** menu -> linki
--->
+
+
+
+</body>
+</html>

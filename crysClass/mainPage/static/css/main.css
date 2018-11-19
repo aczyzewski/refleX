@@ -1,24 +1,3 @@
-
-
-
-.navbar navbar-default navbar-static-top{
-  margin-top: -40px;
-  padding-bottom: 15px;
-  font-family: 'Raleway', Helvetica, Arial, sans-serif;
-  border-top: solid 1px #eeeeee;
-  background-color: #fdfdfd;
-}
-
-
-.footer{
-  font-family: 'Raleway', Helvetica, Arial, sans-serif;
-  border-top: solid 1px #eeeeee;
-  background-color: #fdfdfd;
-  position: absolute;
-  height: 100px;
-}
-
-
 h4 {
     margin-top: 20px;
     border-bottom: 1px solid #eee;
@@ -94,7 +73,7 @@ h4 {
 }
 
 #cmb-footer {
-    margin-top: -40px;
+    margin-top: 40px;
     padding-bottom: 15px;
     font-family: 'Raleway', Helvetica, Arial, sans-serif;
     border-top: solid 1px #eeeeee;
@@ -112,11 +91,10 @@ h4 {
 }
 
 #cmb-footer.fixed {
-    position: static;
+    position: fixed;
     bottom: 0;
     width: 100%;
 }
-
 
 .error-page-content {
     padding-top: 50px;

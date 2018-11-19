@@ -19,16 +19,29 @@ from django.conf.urls import url, include
 
 from mainPage import views
 from mainPage.models import Person
-from mainPage.views import PersonCreateView
 
-#handler404 = 'mainPage.views.handler404'
-#handler500 = 'mainPage.views.handler500'
+from django.conf.urls import url, include
+from rest_framework import routers
+
+router = routers.DefaultRouter()
+router.register(r'users', views.UserViewSet)
+router.register(r'groups', views.GroupViewSet)
+
+
 
 urlpatterns = [
     #path('add/', PersonCreateView.as_view(model=Person, success_url="\success")),
     #url('formpage/',views.form_name_view, name='form_name'),
     #url(r'success', views.success, name='success'),
+
+    url(r'', include(router.urls)),
+    url(r'api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+
     url(r'^$',views.index, name='index'),
-    url(r'^admin/', admin.site.urls, name='admin'),
-    url(r'^mainPage/', include('mainPage.urls')),
+    url(r'admin/', admin.site.urls, name='admin'),
+    url(r'mainPage/', include('mainPage.urls')),
 ]
+
+
+handler404 = 'mainPage.views.view404'
+handler500 = 'mainPage.views.view500'

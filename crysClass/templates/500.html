@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 {% extends "error.html"%}
+{% load static %}
+
   {% block content %}
+  <div class="container" id="cmb-content">
+       <div class="error-page-content text-center">
+           <img class="error-img" src="/static/img/404.png" alt="CheckMyBlob">
+           <div class="error-info">The page you're looking for was not found.</div>
 
-
-  <h3>CUSTOM 500 error <a id="logo-anchor" href="#">
-
+       </div>
+    </div>
 
     {% endblock %}
