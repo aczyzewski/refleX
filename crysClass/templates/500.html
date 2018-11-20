@@ -5,9 +5,11 @@
   {% block content %}
   <div class="container" id="cmb-content">
        <div class="error-page-content text-center">
-           <img class="error-img" src="/static/img/404.png" alt="CheckMyBlob">
-           <div class="error-info">The page you're looking for was not found.</div>
 
+           <img class="error-img" src="/static/img/404.png" alt="CheckMyBlob">
+           <div class="error-info">ERROR 500</div>
+           <div class="error-info">Server connection error.</div>
+           <a class="btn btn-primary bts-lg btn-block" href={% url 'mainPage:add' %}>Back to the main page</a>
        </div>
     </div>
 

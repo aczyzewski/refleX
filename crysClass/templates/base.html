@@ -1,10 +1,10 @@
 <!doctype html>
+
 {% load static %}
 
   <html lang="en">
   <head>
     <meta charset="utf-8">
-
 
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
@@ -13,45 +13,29 @@
     <!--<link rel="stylesheet" href="/static/css/jquery.fileupload.css">
     <link rel="stylesheet" href="/static/css/jquery.fileupload-ui.css">-->
     <title>Crystalography</title>
+
+
+
   </head>
   <body>
 
 
 <link rel="stylesheet" href="{% static 'css/main.css' %}" />
-
-<!--
-
-<nav class="navbar navbar-default navbar-static-top">
-        <div class="container">
-            <div class="navbar-header" id="app-main-header">
-                <h2 id="header-panel">
-                    <a id="logo-anchor" href="/server/">
-                        <img src="/static/img/cloud-network.svg" id="main-logo" alt="CheckMyBlob logo">
-                        Crystalography Helper
-                    </a>
-                    <span class="small"></span>
-                </h2>
-        </div>
-        </div>
-    </nav>
--->
-
-
-<nav class="navbar navbar-default navbar-static-top">
+<nav class="navbar navbar-default navbar-static-top" style="background-color: #F8F8F8;">
   <div class="header">
         <div class="container">
             <ul class="nav navbar-nav">
-              <a id="logo-anchor" href="{% url 'mainPage:add'}">
+              <a id="logo-anchor" href={% url 'mainPage:add' %}>
                 <img src="/static/img/cloud-network.svg" id="main-logo" alt="CheckMyBlob logo"> Crystalography Helper </a>
                 <span class="small"></span>
-
-            <!--
-            <li><a class="navbar-link" href="#">BRAND2</a></li>
-                 <li><a class="navbar-link" href="#">BRAND3</a></li>
-            -->
           </ul>
         </div>
       </div>
+
+      <div class="container_right">
+
+        <img src="/static/img/question_blue.svg" data-toggle="modal" data-target="#myModal" style="width:8%;height: 8%;float: right;">
+</div>
   </nav>
 
     <div class="container">
@@ -97,9 +81,12 @@
 </div>
 </footer>
 
+<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.1.js"></script>
+<script src={% static "js/footer_repair.js" %}></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 
-
+{% block javascript %}
+{% endblock %}
 
 
 </body>

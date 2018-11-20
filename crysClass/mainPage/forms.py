@@ -1,29 +1,21 @@
 from django.forms import ModelForm
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
-from mainPage.models import Person, Img
+from .models import UserAdding, ExamineType
 from django.utils.translation import gettext_lazy as _
-
-class PersonForm(ModelForm):
-    class Meta:
-        model = Person
-        fields = ('nameOfFile', 'yourEmail','linkToFile')
-        labels = {'nameOfFile': 'Name of File:', 'yourEmail':'Email:','linkToFile':'Company:'}
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_method = 'post'
-        self.helper.add_input(Submit('submit', 'Save person'))
-
 
 class ImageUploadForm(ModelForm):
     class Meta:
-        model = Img
-        fields = ('pic',)
-        labels = {'pic':'Load image:'}
+        model = UserAdding
+        fields = ('examine_type','pic')
+        labels = {'examine_type': '1. Choose type of reserach: ' ,'pic':'2. Load image: '}
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.fields['examine_type'].queryset = ExamineType.objects.none()
 
 # tutorial lesson 137 (3.3)
+
 """
 class FormName(forms.Form):
     name = forms.CharField()
