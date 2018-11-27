@@ -17,9 +17,7 @@ class ExamineType(models.Model):
     def __str__(self):
         return self.examine_type
 
-    def __unicode__(self):
-        return smart_unicode(self.customer_type)
 
 class UserAdding(models.Model):
     examine_type = models.ForeignKey(ExamineType, on_delete='cascade')
-    pic = models.ImageField()
+    pic = models.ImageField(upload_to="test_photos/",default="test_photos/noname.jpg")

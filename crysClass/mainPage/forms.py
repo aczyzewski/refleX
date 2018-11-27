@@ -5,9 +5,6 @@ from .models import UserAdding, ExamineType
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator, MaxValueValidator
 
-
-
-
 class ImageUploadForm(ModelForm):
     class Meta:
         model = UserAdding
@@ -19,7 +16,6 @@ class ImageUploadForm(ModelForm):
             self.fields['examine_type'].queryset = ExamineType.objects.none()
 
 # tutorial lesson 137 (3.3)
-
 """
 class FormName(forms.Form):
     name = forms.CharField()
