@@ -8,6 +8,10 @@ from django.template import loader
 from .forms import ImageUploadForm
 from .models import UserAdding
 
+from .celery import app as celery_app
+from .tasks import long_task
+from celery.result import AsyncResult
+
 import time
 import random
 import string
@@ -41,8 +45,13 @@ def index(request):
         form = ImageUploadForm(request.POST, request.FILES)
         if form.is_valid():
             if save_uploaded_file(request.FILES['picture']):
+
+                long_task.delay(60)
+
                 template = loader.get_template('refleXWebApp/loading.html')
                 return HttpResponse(template.render({}, request))
+
+
                 # TODO: Generate key!
                 # TODO: Add task to the queue
             else:
@@ -57,6 +66,15 @@ def index(request):
         context = {'form': ImageUploadForm()}
         template = loader.get_template('refleXWebApp/useradding_form.html')
         return HttpResponse(template.render(context, request))
+
+def get_task_result(request, task_id):
+    # 93abbdf4-117a-4a46-9d5d-234d718bdb79
+    task_result = AsyncResult(task_id, app=celery_app)
+
+    if task_result.ready():
+        return HttpResponse('Task state: %s | Result: %s' % (task_result.state, task_result.get()))
+    else:
+        return HttpResponse("Not ready!")
 
 def credits(request):
     template = loader.get_template('refleXWebApp/credits.html')
