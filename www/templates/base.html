@@ -25,8 +25,8 @@
   <div class="header">
         <div class="container">
             <ul class="nav navbar-nav">
-              <a id="logo-anchor" href={% url 'mainPage:add' %}>
-                <img src="/static/img/cloud-network.svg" id="main-logo" alt="CheckMyBlob logo"> Crystalography Helper </a>
+              <a id="logo-anchor" href="/">
+                <img src="{% static '/img/cloud-network.svg' %}" id="main-logo" alt="logo"> Crystalography Helper </a>
                 <span class="small"></span>
           </ul>
         </div>
@@ -46,7 +46,7 @@
       </div>
     </div>
 
-<footer class="footer" style ="margin-top: 350px;">
+<footer class="footer" style="margin-top: 350px;">
     <div id="cmb-footer">
     <div class="container">
         <div class="row">
@@ -54,7 +54,7 @@
                 <h4>About</h4>
                 <p>
                     Crystalography project enables .....
-                    See here also <a href="{% url 'mainPage:credits' %}">credits page</a>.
+                    See here also <a href="{% url 'credits' %}">credits page</a>.
                 </p>
             </div>
             <div class="col-sm-3 col-xs-6">
