@@ -3,6 +3,11 @@
   {% block content %}
 
   {% block javascript %}
+  <script
+  src="https://code.jquery.com/jquery-3.3.1.js"
+  integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+  crossorigin="anonymous"></script>
+  
   <script>
   function updateFooter() {
       var footerH = $("#cmb-footer").height();
@@ -51,14 +56,41 @@
 
   </script>
 
+    <script>
+        function update_kolko() {
+
+            status_element = document.getElementById('kolko_status')
+            task_id = document.getElementById('task_id').innerHTML
+
+            $.ajax({
+                url: '/result/' + task_id,
+                success: function (data) {
+                    if(data.includes("SUCCESS"))
+                        status_element.innerHTML = 'NIE';
+                    else
+                        status_element.innerHTML = 'TAK';
+                }
+            });
+
+        };
+
+        $(function(){
+            setInterval(update_kolko, 1000);
+        });
+
+        </script>
+
   {% endblock %}
 
     <div class="progress progress-striped active">
         <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
         </div>
     </div>
-    <h3> Task id: </h3>
-    <h2> {{ task_id }} </h2>
+    <h3>Task id:</h3>
+    <h2 id="task_id">{{ task_id }}</h2>
     <h3><a href="/result/{{ task_id }}">CHECK RESULT</a></h3>
+
+    <br>
+    <p>CZY KOLKO MA SIE KRECIC: <span id="kolko_status">TAK</span></p>
        
   {% endblock %}
