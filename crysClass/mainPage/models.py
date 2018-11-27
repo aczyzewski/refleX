@@ -20,4 +20,7 @@ class ExamineType(models.Model):
 
 class UserAdding(models.Model):
     examine_type = models.ForeignKey(ExamineType, on_delete='cascade')
-    pic = models.ImageField(upload_to="test_photos/",default="test_photos/noname.jpg")
+    pic = models.ImageField(upload_to="mainPage/test_photos/",default="mainPage/test_photos/noname.jpg")
+
+    def __str__(self):
+        return self.examine_type

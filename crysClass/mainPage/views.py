@@ -1,19 +1,17 @@
-from django.views.generic import ListView, CreateView, UpdateView
-from .models import ExamineType,UserAdding
 from mainPage.forms import ImageUploadForm
+from django.template import RequestContext
 from django.template import RequestContext
 from django.http import Http404,HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.shortcuts import redirect, render, render_to_response
 
+from django.conf import settings
 from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
 from .serializers import UserSerializer, GroupSerializer
 
 from django.contrib.auth.models import User
-from django.contrib import messages
-from django.views.generic.edit import FormView
-from .tasks import create_random_user_accounts
+import os
 
 """
 class ClassCreateView(CreateView):
@@ -32,27 +30,23 @@ class GenerateRandomUserView(FormView):
         return redirect('users_list')
 """
 
+#function responsible for image handling
+def handle_uploaded_file(nameOFFile_,f):
+    #fixme with open(...) optimize '+' signs
+    with open(settings.BASE_DIR + '/mainPage/test_photos/' + nameOFFile_ + '.jpg','wb+') as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+
 def post_new(request):
     if request.method == "POST":
         form = ImageUploadForm(request.POST,request.FILES)
         if form.is_valid():
-            m = UserAdding()
-            m.examine_type = form.cleaned_data['examine_type']
-            m.pic = form.cleaned_data['pic']
-            m.save()
-
-            #handle_uploaded_file(request.POST[''],request.FILES['pic'])
+            handle_uploaded_file(request.POST['examine_type'],request.FILES['pic'])
             return HttpResponseRedirect('success')
     else:
-        form = ImageUploadForm()
+        ImageUploadForm()
+    return render(request, 'mainPage/useradding_form.html', {'form': ImageUploadForm()})
 
-    return render(request, 'mainPage/useradding_form.html', {'form': form})
-
-#function responsible for image handling
-def handle_uploaded_file(nameOFFile_,f):
-    with open('uploadedPhotos/'+nameOFFile_, 'wb+') as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
 
 # just pages rendering ---------------------------------------------------
 def index(request):

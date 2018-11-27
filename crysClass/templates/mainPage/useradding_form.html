@@ -39,12 +39,11 @@ $(document).ready(function () {
 {% endblock %}
 
 {% block content %}
-
     <h4>Crystalography feature-detector </h4>
     <div class="container">
-      <form action="" method="post"> {% csrf_token %}
+      <form action="" method="post" enctype="multipart/form-data"> {% csrf_token %}
       {{ form|crispy }}
-      <input class="btn btn-primary bts-lg btn-block" name="pic" type="submit" value="Create" />
-  </form>
+      <input class="btn btn-primary bts-lg btn-block" type="submit" /> Submit
+    </form>
     </div>
 {% endblock %}
