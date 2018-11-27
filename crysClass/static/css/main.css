@@ -85,7 +85,7 @@ h4 {
     padding-bottom: 15px;
     font-family: 'Raleway', Helvetica, Arial, sans-serif;
     border-top: solid 1px #eeeeee;
-    background-color: #F8F8F8;  
+    background-color: #F8F8F8;
 }
 
 #cmb-footer p {
@@ -341,4 +341,32 @@ h4 {
 
 .blob-row {
     margin: 0;
+}
+
+
+.tasks{
+    background-color: #F6F8F8;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+.tasks span{
+    font-weight: bold;
+}
+.tasks input{
+    display: block;
+    margin: 0 auto;
+    margin-top: 10px;
+}
+.tasks a{
+    color: #000;
+    text-decoration: none;
+    border:none;
+}
+.tasks a:hover{
+    border-bottom: dashed 1px #0088cc;
+}
+.tasks label{
+    display: block;
+    text-align: center;
 }

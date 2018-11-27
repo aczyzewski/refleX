@@ -34,14 +34,39 @@
 
       updateFooter();
   });
+
+
+  <!-- code for move progress bar -->
+      $('input').on('click', function(){
+        var valeur = 0;
+        $('input:checked').each(function(){
+             if ( $(this).attr('value') > valeur )
+             {
+                 valeur =  $(this).attr('value');
+             }
+        });
+        $('.progress-bar').css('width', valeur+'%').attr('aria-valuenow', valeur);
+      });
+  <!-- code for move progress bar -->
+
   </script>
+
   {% endblock %}
 
-  <div class="progress">
-  <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 75%"></div>
-</div>
+  <div class="progress progress-striped active">
+         <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+         </div>
+     </div>
+  <div class="row tasks">
+         <div class="col-md-6">
+           <p><span>Try of moving progress bra</p>
+         </div>
+         <div class="col-md-2">
+           <input name="progress" class="done" type="checkbox" value="10">
+         </div>
+       </div><!-- tasks -->
 
-  <a id="logo-anchor" href="{% url 'mainPage:success'}">
-    <h3> Progress: ... </h3>
-    <h3> Desrciption of work: ... </h3>
+       <h3> Progress: ... </h3>
+       <h3> Desrciption of work: ... </h3>
+       
   {% endblock %}

@@ -3,6 +3,10 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from .models import UserAdding, ExamineType
 from django.utils.translation import gettext_lazy as _
+from django.core.validators import MinValueValidator, MaxValueValidator
+
+
+
 
 class ImageUploadForm(ModelForm):
     class Meta:

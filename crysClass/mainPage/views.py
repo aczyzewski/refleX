@@ -1,5 +1,5 @@
 from django.views.generic import ListView, CreateView, UpdateView
-from .models import Person,ExamineType,UserAdding
+from .models import ExamineType,UserAdding
 from mainPage.forms import ImageUploadForm
 from django.template import RequestContext
 from django.http import Http404,HttpResponseRedirect
@@ -10,10 +10,27 @@ from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
 from .serializers import UserSerializer, GroupSerializer
 
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.views.generic.edit import FormView
+from .tasks import create_random_user_accounts
+
+"""
 class ClassCreateView(CreateView):
     model = UserAdding
     form_class = ImageUploadForm
     success_url = reverse_lazy('mainPage:loading')
+
+class GenerateRandomUserView(FormView):
+    template_name = 'mainPage/useradding_form.html'
+    form_class = GenerateRandomUserForm
+
+    def form_valid(self, form):
+        total = form.cleaned_data.get('total')
+        create_random_user_accounts.delay(total)
+        messages.success(self.request, 'We are generating your random users! Wait a moment and refresh this page.')
+        return redirect('users_list')
+"""
 
 def post_new(request):
     if request.method == "POST":

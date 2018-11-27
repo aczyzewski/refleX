@@ -69,6 +69,8 @@ REST_FRAMEWORK = {
 'PAGE_SIZE': 10,
 }
 
+CELERY_BROKER_URL = 'amqp://localhost'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
