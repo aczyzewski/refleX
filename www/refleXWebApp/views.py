@@ -46,11 +46,10 @@ def index(request):
         if form.is_valid():
             if save_uploaded_file(request.FILES['picture']):
 
-                long_task.delay(60)
+                task = long_task.delay(60)
 
                 template = loader.get_template('refleXWebApp/loading.html')
-                return HttpResponse(template.render({}, request))
-
+                return HttpResponse(template.render({'task_id': task.id}, request))
 
                 # TODO: Generate key!
                 # TODO: Add task to the queue
