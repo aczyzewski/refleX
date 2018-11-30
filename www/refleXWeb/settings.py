@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'refleXWebApp',
     'django_celery_results',
     'rest_framework',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
@@ -47,6 +48,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -55,6 +57,8 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'refleXWeb.urls'
 
 CELERY_BROKER_URL = 'amqp://localhost'
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 TEMPLATES = [
     {

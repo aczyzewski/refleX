@@ -1,107 +1,125 @@
 <!DOCTYPE html>
+
 {% extends "base.html"%}
 {% load staticfiles %}
+{% block content %}
 
-  {% block content %}
-
-  {% block javascript %}
-  <script
-  src="https://code.jquery.com/jquery-3.3.1.js"
-  integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
-  crossorigin="anonymous"></script>
-
+    {% block javascript %}
+        <script
+                src="https://code.jquery.com/jquery-3.3.1.js"
+                integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+                crossorigin="anonymous"></script>
 
 
-  <script>
 
-  function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+        <script>
 
-  function updateFooter() {
-      var footerH = $("#cmb-footer").height();
-      var contentH = $("#cmb-header").height() + $("#cmb-content").height() + 40 + 10 + 20;
-      var windowH = $(window).height();
-      if (contentH + footerH > windowH) {
-          $("#cmb-footer").removeClass("fixed");
-      } else {
-          $("#cmb-footer").addClass("fixed");
-      }
-  }
+            function sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
 
-  $(document)
-      .on('change', '.btn-file :file', function () {
-          var input = $(this),
-              label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
-          console.log(label);
-          input.parent().find('.filename-holder').html(label);
-      });
+            <!-- header/footer part -->
 
-  $(document).ready(function () {
-      $(window).resize(function () {
-          updateFooter();
-      });
+            function updateFooter() {
+                var footerH = $("#cmb-footer").height();
+                var contentH = $("#cmb-header").height() + $("#cmb-content").height() + 40 + 10 + 20;
+                var windowH = $(window).height();
+                if (contentH + footerH > windowH) {
+                    $("#cmb-footer").removeClass("fixed");
+                } else {
+                    $("#cmb-footer").addClass("fixed");
+                }
+            }
 
-      $('#id_application').change(function() {
-          setTimeout(function(){ updateFooter(); },30)
-      });
+            $(document)
+                .on('change', '.btn-file :file', function () {
+                    var input = $(this),
+                        label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+                    console.log(label);
+                    input.parent().find('.filename-holder').html(label);
+                });
 
-      updateFooter();
-  });
+            $(document).ready(function () {
+                $(window).resize(function () {
+                    updateFooter();
+                });
+
+                $('#id_application').change(function() {
+                    setTimeout(function(){ updateFooter(); },30)
+                });
+
+                updateFooter();
+            });
 
 
-//  <!-- code for move progress bar -->
+            //  <!-- code for move progress bar -->
 
-      $('input').on('click', function(){
-        var valeur = 0;
-        $('input:checked').each(function(){
-             if ( $(this).attr('value') > valeur )
-             {
-                 valeur =  $(this).attr('value');
-             }
-        });
-        $('.progress-bar').css('width', valeur+'%').attr('aria-valuenow', valeur);
-      });
-// <!-- code for move progress bar -->
-
-  </script>
-
-    <script>
-
-        $(async function(){
-            status_element = document.getElementById('kolko_status')
-            task_id = document.getElementById('task_id').innerHTML
-            loader_id = document.getElementById('loader')
-            final_result_id = document.getElementById('final_result')
-            final_result_id.style.visibility = 'hidden';
-            while_heartbit = true
-            while(while_heartbit) {
-                $.ajax({
-                    url: '/result/' + task_id,
-                    success: function (data) {
-                        if (data.includes("SUCCESS")) {
-                            status_element.innerHTML = 'NIE';
-                            loader_id.style.visibility = 'hidden';
-                            final_result_id.style.visibility = 'visible';
-                            while_heartbit = false;
-                        }
-                        else
-                            status_element.innerHTML = 'TAK';
+            $('input').on('click', function(){
+                var valeur = 0;
+                $('input:checked').each(function(){
+                    if ( $(this).attr('value') > valeur )
+                    {
+                        valeur =  $(this).attr('value');
                     }
                 });
-                await sleep(2000);
-            }
-        });
+                $('.progress-bar').css('width', valeur+'%').attr('aria-valuenow', valeur);
+            });
+        </script>
+
+        <script>
+
+            // <!-- show api on screen with click me button - just for tests -->
+
+            $('.apireq').click( function() {
+                console.log("Test")
+                $.ajax({
+                    url : "http://localhost:8000/snippets/",
+                    dataType: "json",
+                    success : function (data) {
+                        $('#status').text( data[0].status);
+                        $('#loop_scattering').text( data[0].loop_scattering);
+                        $('#background_ring').text( data[0].background_ring);
+                        $('#strong_background').text( data[0].strong_background);
+                        $('#diffuse_scattering').text( data[0].diffuse_scattering);
+                        $('#artifact').text( data[0].artifact);
+                        $('#ice_ring').text( data[0].ice_ring);
+                        $('#non_uniform_detector').text( data[0].non_uniform_detector);
+
+                    }
+                });
+            });
+
+            <!-- handling of task 1 status -->
+            $(async function(){
+                status_element = document.getElementById('kolko_status')
+                task_id = document.getElementById('task_id').innerHTML
+                loader_id = document.getElementById('loader')
+                final_result_id = document.getElementById('final_result')
+                final_result_id.style.visibility = 'hidden';
+                while_heartbit = true
+                while(while_heartbit) {
+                    $.ajax({
+                        url: '/result/' + task_id,
+                        success: function (data) {
+                            if (data.includes("SUCCESS")) {
+                                status_element.innerHTML = 'NIE';
+                                loader_id.style.visibility = 'hidden';
+                                final_result_id.style.visibility = 'visible';
+                                while_heartbit = false;
+                            }
+                            else
+                                status_element.innerHTML = 'TAK';
+                        }
+                    });
+                    await sleep(2000);
+                }
+            });
 
         </script>
 
 
-  {% endblock %}
+    {% endblock %}
 
-    <div class="progress progress-striped active">
-        <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-        </div>
-    </div>
     <h3>Task id:</h3>
     <h2 id="task_id">{{ task_id }}</h2>
     <h3><a href="/result/{{ task_id }}">CHECK RESULT</a></h3>
@@ -113,20 +131,41 @@
         <img src= "{% static "gif/load.gif" %}" alt="Loading gif"  width="128" height="128">
     </div>
 
-      <div id="final_result">
+    <div id="final_result">
         JESTEM WYNIKIEM
     </div>
 
 
-<!-- javascript visibility no na divie -->
+
+    <div class="Api-check">
+
+        <div>
+            <button class="apireq">Dane z Api</button>
+        </div>
+
+        <div id="jsonresp" style="margin-top: 100px">
+            <p><label> Stastus :</label> <span id="status"></span></p>
+            <p><label> Loop_scattering :</label> <span id="loop_scattering"></span></p>
+            <p><label> background_ring :</label> <span id="background_ring"></span></p>
+            <p><label> strong_background :</label> <span id="strong_background"></span></p>
+            <p><label> diffuse_scattering :</label> <span id="diffuse_scattering"></span></p>
+            <p><label> artifact :</label> <span id="artifact"></span></p>
+            <p><label> ice_ring :</label> <span id="ice_ring"></span></p>
+            <p><label> non_uniform_detector :</label> <span id="non_uniform_detector"></span></p>
+        </div>
+        <script type="text/javascript"></script>
+    </div>
+    <!-- javascript visibility no na divie -->
 
 
-<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<!------ Include the above in your HEAD tag ---------->
+
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!------ Include the above in your HEAD tag ---------->
 
 
 
 
-  {% endblock %}
+{% endblock %}

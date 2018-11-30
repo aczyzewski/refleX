@@ -17,3 +17,7 @@ class OutputScore(models.Model):
     non_uniform_detector = models.FloatField(default=0, max_length=10)
     def __str__(self):
             return str(self.id)
+
+# check if keys is in db
+class Keys(models.Model):
+    key = models.IntegerField();
