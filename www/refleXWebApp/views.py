@@ -6,7 +6,7 @@ from django.conf import settings
 from django.template import loader
 
 from .forms import ImageUploadForm
-from .models import UserAdding
+from .models import UserAdding, OutputScore
 
 from .celery import app as celery_app
 from .tasks import long_task
@@ -16,6 +16,16 @@ import time
 import random
 import string
 import os
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.reverse import reverse
+
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.renderers import JSONRenderer
+from rest_framework.parsers import JSONParser
+from .serializer import OutputScoreSerializer
 
 # TODO: Ajax
 # TODO: Celary
@@ -38,7 +48,7 @@ def save_uploaded_file(file_object):
     return True
 
 # --- VIEWS ---
-@login_required()
+#@login_required()
 def index(request):
     # TODO: Merge redundant if-else cases.
     if request.method == "POST":
@@ -46,7 +56,7 @@ def index(request):
         if form.is_valid():
             if save_uploaded_file(request.FILES['picture']):
 
-                task = long_task.delay(60)
+                task = long_task.delay()
 
                 template = loader.get_template('refleXWebApp/loading.html')
                 return HttpResponse(template.render({'task_id': task.id}, request))
@@ -71,10 +81,35 @@ def get_task_result(request, task_id):
     task_result = AsyncResult(task_id, app=celery_app)
 
     if task_result.ready():
-        return HttpResponse('Task state: %s | Result: %s' % (task_result.state, task_result.get()))
+        try:
+            return HttpResponse('Task state: %s | Result: %s' % (task_result.state, task_result.get()))
+        except:
+            msg = ("77 views.py error")
+            return HttpResponse(msg)
     else:
         return HttpResponse("Not ready!")
 
 def credits(request):
     template = loader.get_template('refleXWebApp/credits.html')
     return HttpResponse(template.render({}, request))
+
+def return_loading(request):
+    return render(request, 'refleXWebApp/loading.html')
+
+@csrf_exempt
+def snippet_list(request):
+    """
+    List all code snippets, or create a new snippet.
+    """
+    if request.method == 'GET':
+        snippets = OutputScore.objects.all()
+        serializer = OutputScoreSerializer(snippets, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = OutputScoreSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)

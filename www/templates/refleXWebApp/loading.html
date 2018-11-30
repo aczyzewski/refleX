@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 {% extends "base.html"%}
+{% load staticfiles %}
+
   {% block content %}
 
   {% block javascript %}
@@ -7,8 +9,15 @@
   src="https://code.jquery.com/jquery-3.3.1.js"
   integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
   crossorigin="anonymous"></script>
-  
+
+
+
   <script>
+
+  function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
   function updateFooter() {
       var footerH = $("#cmb-footer").height();
       var contentH = $("#cmb-header").height() + $("#cmb-content").height() + 40 + 10 + 20;
@@ -42,6 +51,7 @@
 
 
 //  <!-- code for move progress bar -->
+
       $('input').on('click', function(){
         var valeur = 0;
         $('input:checked').each(function(){
@@ -57,28 +67,34 @@
   </script>
 
     <script>
-        function update_kolko() {
 
+        $(async function(){
             status_element = document.getElementById('kolko_status')
             task_id = document.getElementById('task_id').innerHTML
-
-            $.ajax({
-                url: '/result/' + task_id,
-                success: function (data) {
-                    if(data.includes("SUCCESS"))
-                        status_element.innerHTML = 'NIE';
-                    else
-                        status_element.innerHTML = 'TAK';
-                }
-            });
-
-        };
-
-        $(function(){
-            setInterval(update_kolko, 1000);
+            loader_id = document.getElementById('loader')
+            final_result_id = document.getElementById('final_result')
+            final_result_id.style.visibility = 'hidden';
+            while_heartbit = true
+            while(while_heartbit) {
+                $.ajax({
+                    url: '/result/' + task_id,
+                    success: function (data) {
+                        if (data.includes("SUCCESS")) {
+                            status_element.innerHTML = 'NIE';
+                            loader_id.style.visibility = 'hidden';
+                            final_result_id.style.visibility = 'visible';
+                            while_heartbit = false;
+                        }
+                        else
+                            status_element.innerHTML = 'TAK';
+                    }
+                });
+                await sleep(2000);
+            }
         });
 
         </script>
+
 
   {% endblock %}
 
@@ -92,5 +108,25 @@
 
     <br>
     <p>CZY KOLKO MA SIE KRECIC: <span id="kolko_status">TAK</span></p>
-       
+
+    <div id="loader">
+        <img src= "{% static "gif/load.gif" %}" alt="Loading gif"  width="128" height="128">
+    </div>
+
+      <div id="final_result">
+        JESTEM WYNIKIEM
+    </div>
+
+
+<!-- javascript visibility no na divie -->
+
+
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!------ Include the above in your HEAD tag ---------->
+
+
+
+
   {% endblock %}
