@@ -97,6 +97,17 @@ def return_loading(request):
     return render(request, 'refleXWebApp/loading.html')
 
 @csrf_exempt
+def api_list(request, task_id):
+    if request.method == 'GET':
+        task = AsyncResult(task_id, app=celery_app)
+        result = [0] * 8
+        if task.ready():
+            result = [1] + task.get()
+        output = OutputScore(*result)
+        serializer = OutputScoreSerializer(output)
+        return JsonResponse(serializer.data, safe=False)
+
+@csrf_exempt
 def snippet_list(request):
     """
     List all code snippets, or create a new snippet.

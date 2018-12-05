@@ -12,6 +12,8 @@ urlpatterns = [
     path('credits/', views.credits, name="credits"),
     path('accounts/', include('django.contrib.auth.urls')),
 
+    path('api/result/<str:task_id>', views.api_list),
+
     path('snippets/', views.snippet_list),
     #path('snippets/<int:pk>/', views.snippet_detail),
 ]

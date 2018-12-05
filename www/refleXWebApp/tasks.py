@@ -8,4 +8,4 @@ def long_task(seconds=20):
     #TODO ! Finish dict
     #results = {'status':
     #        'loop_scattering':}
-    return True
+    return [0,0,0,0,0,0,0]
