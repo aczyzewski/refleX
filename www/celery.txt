@@ -1,1 +1,3 @@
-celery -A relfeXWebApp worker -l info
+# odpalić z anaconda Prompt
+# przejść do folderu projektu (www)
+celery -A refleXWebApp worker -l info --pool=solo
