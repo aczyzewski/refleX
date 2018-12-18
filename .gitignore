@@ -111,3 +111,6 @@ logs/*
 # Apple metadata files
 **/.DS_Store
 **/__pycache__
+
+# Nohup
+nohup.out
