@@ -1,0 +1,1 @@
+FASTAI_PATH = '/home/reflex/refleX/lib/fastai'

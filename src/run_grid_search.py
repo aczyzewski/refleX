@@ -28,7 +28,9 @@ def get_data (model, PATHS, img_size, custom_transformations, batch_size, val_id
                     suffix='.png', val_idxs=val_idxs, bs=batch_size, num_workers=2)
 
 
-def grid_search(PATHS, CONFIG, val_idxs, experiment_name, PARAMS, output_csv='results.csv'):   
+def grid_search(PATHS, CONFIG, experiment_name, PARAMS, output_csv='results.csv'):   
+
+    val_idxs = PARAMS['val_idxs']
 
     # TODO: Czy LR wyznaczamy przed na samym początku czy przed kazdym uczeniem (tj. przed zmiana rozdzielczosci?)
 
@@ -130,8 +132,10 @@ def grid_search(PATHS, CONFIG, val_idxs, experiment_name, PARAMS, output_csv='re
                 
 
 def polar_configuration():
-    paths = {'CSV_PATH': '/home/reflex/refleX/metadata/csv/augmented_sample_reflex.csv',
-             'DATA_FOLDER' : 'augmented_polar512_sample'} # PARAMETER
+    paths = {
+        'CSV_PATH': '/home/reflex/refleX/metadata/csv/augmented_sample_reflex.csv',
+        'DATA_FOLDER' : 'augmented_polar512_sample'
+        } # PARAMETER
     params = {'transformations' : None}
     config = {
         'image_sizes': [64, 128, 256, 512],
@@ -144,32 +148,64 @@ def polar_configuration():
 
     return params, paths, config
 
-def test_configuration():
-    paths = {}
-    params = {}
+def ac_resnet_configuration():
+    paths = {
+        'CSV_PATH': '/home/reflex/refleX/metadata/csv/fastai_validate_train.csv',
+        'DATA_PATH': '/home/reflex/refleX/metadata/labeled/',
+        'DATA_FOLDER': 'original512',
+        'EXP_PATH': '/home/reflex/refleX/results/fastai_experiments'
+    }
+
+    params = {
+        'val_idxs': range(200),
+        'dropout': 0.5,
+        'earlystopping': 12,
+        'log_step': 1,
+        'gpu_id': 1,
+        'transformations' : [RandomLighting(0.1, 0.1), RandomDihedral()]
+    }
+
     config = {
-        'image_sizes': [32, 64],
+        'image_sizes': [64, 128, 256, 512],
         'predefined_metrics': [f2, average_precision, average_recall, hamming_score],
-        'batch_sizes': [32, 64],
+        'batch_sizes': [8, 16],
         'architectures' : {
-            'resnet18' : resnet18
+            'resnet18' : resnet18,
+            'resnet34' : resnet34
         }
     }
+
     return params, paths, config
 
-def custom_configuration():
-    paths = {}
-    params = {}
+
+def ac_polar_configuration():
+    paths = {
+        'CSV_PATH': '/home/reflex/refleX/metadata/csv/fastai_validate_train.csv',
+        'DATA_PATH': '/home/reflex/refleX/metadata/labeled/',
+        'DATA_FOLDER': 'polar512',
+        'EXP_PATH': '/home/reflex/refleX/results/fastai_experiments'
+    }
+
+    params = {
+        'dropout': 0.5,
+        'earlystopping': 12,
+        'log_step': 1,
+        'gpu_id': 2,
+        'transformations' : [RandomLighting(0.05, 0.05)]
+    }
+
     config = {
         'image_sizes': [64, 128, 256, 512],
         'predefined_metrics': [f2, average_precision, average_recall, hamming_score],
         'batch_sizes': [8, 16, 32, 64],
         'architectures' : {
-            'resnext50': resnext50
+            'resnet18' : resnet18,
+            'resnet34' : resnet34
         }
     }
+
     return params, paths, config
-    
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('working_title')
@@ -194,6 +230,7 @@ if __name__ == '__main__':
 
     # --- DEFAULT PARAMS ---
     PARAMS = {
+        'val_idxs': range(200),
         'dropout': 0.5,
         'earlystopping': 12,
         'log_step': 5,
@@ -216,8 +253,6 @@ if __name__ == '__main__':
 
     # Set validation set
     # convert_csv_to_fastai_format.py
-    # [INFO] Train subset size: 1782 [0 - 1781] | Test subset size: 446 [1782 - 2227] 
-    val_idxs = list(range(1782, 2227)) # 2228 -> ERROR -> ?
 
     # Run grid search
-    grid_search(PATHS, CONFIG, val_idxs, args.working_title, PARAMS)
+    grid_search(PATHS, CONFIG, args.working_title, PARAMS)
