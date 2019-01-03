@@ -1,1 +1,6 @@
+<<<<<<< HEAD
+=======
+# odpalić z anaconda Prompt
+# przejść do folderu projektu (www)
+>>>>>>> e25de1ec8acf6213b936d6c64da3fbd95774d2fa
 celery -A refleXWebApp worker -l info --pool=solo
