@@ -1,1 +1,1 @@
-celery -A relfeXWebApp worker -l info
+celery -A refleXWebApp worker -l info --pool=solo

@@ -2,7 +2,6 @@ from .models import OutputScore
 from rest_framework import serializers
 
 class OutputScoreSerializer(serializers.Serializer):
-    id = serializers.IntegerField(read_only=True)
     status = serializers.BooleanField()
     loop_scattering = serializers.FloatField(default=0)
     background_ring = serializers.FloatField(default=0)
@@ -32,4 +31,3 @@ class OutputScoreSerializer(serializers.Serializer):
         instance.non_uniform_detector = validated_data.get('non_uniform_detector', instance.non_uniform_detector)
         instance.save()
         return instance
-

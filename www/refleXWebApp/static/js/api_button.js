@@ -1,12 +1,11 @@
    // <!-- show api on screen with click me button - just for tests -->
 
             $('.apireq').click( function() {
-                console.log("Test")
                 $.ajax({
                     url : "http://localhost:8000/snippets/",
                     dataType: "json",
                     success : function (data) {
-                        $('#status').text( data[0].status);
+                        $('#test').text( data[0].status);
                         $('#loop_scattering').text( data[0].loop_scattering);
                         $('#background_ring').text( data[0].background_ring);
                         $('#strong_background').text( data[0].strong_background);

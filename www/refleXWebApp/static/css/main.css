@@ -370,3 +370,7 @@ h4 {
     display: block;
     text-align: center;
 }
+
+#result_table {
+  display: none;
+}

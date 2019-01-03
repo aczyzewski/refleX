@@ -8,7 +8,7 @@
     <script
             src="https://code.jquery.com/jquery-3.3.1.js"
             integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
-            crossorigin="anonymous"></script>
+            crossorigin="anonymous">  </script>
 
     <script src="{% static '/js/sleep.js' %}"></script>
     <script src="{% static '/js/footer_repair.js' %}"></script>
@@ -20,23 +20,51 @@
 
     <h3>Task id:</h3>
     <h2 id="task_id">{{ task_id }}</h2>
-    <h3><a href="/result/{{ task_id }}">CHECK RESULT</a></h3>
-
-    <br>
-    <p>CZY KOLKO MA SIE KRECIC: <span id="kolko_status">TAK</span></p>
+    <h3><a href="/api/result/{{ task_id }}">CHECK RESULT</a></h3>
 
     <div id="loader">
-        <img src= "{% static "gif/load.gif" %}" alt="Loading gif"  width="128" height="128">
+        <img src= "{% static "gif/load.gif" %}" alt="Loading gif" width="128" height="128">
     </div>
 
     <div id="final_result">
-        JESTEM WYNIKIEM
+      <table class="table">
+<thead>
+  <tr>
+    <th scope="col"> No. </th>
+    <th scope="col"> Img </th>
+    <th scope="col">Feature name</th>
+    <th scope="col">Probability</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <th scope="row">1</th>
+    <td>img1</td>
+    <td>Loop_scattering</td>
+    <td id="test">prob1</td>
+  </tr>
+  <tr>
+    <th scope="row">2</th>
+    <td>img2</td>
+    <td>Background_ring</td>
+    <td> prob2 </td>
+  </tr>
+  <tr>
+    <th scope="row">3</th>
+    <td>img3</td>
+    <td>strong_background</td>
+    <td> prob3 </td>
+  </tr>
+</tbody>
+</table>
     </div>
 
 
+{% endblock %}
 
+
+<!--
     <div class="Api-check">
-
         <div>
             <button class="apireq">Dane z Api</button>
         </div>
@@ -51,19 +79,4 @@
             <p><label> ice_ring :</label> <span id="ice_ring"></span></p>
             <p><label> non_uniform_detector :</label> <span id="non_uniform_detector"></span></p>
         </div>
-        <script type="text/javascript"></script>
-    </div>
-    <!-- javascript visibility no na divie -->
-
-
-
-    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <!------ Include the above in your HEAD tag ---------->
-
-
-
-
-{% endblock %}
+-->

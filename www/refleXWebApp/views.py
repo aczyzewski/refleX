@@ -28,7 +28,6 @@ from rest_framework.parsers import JSONParser
 from .serializer import OutputScoreSerializer
 
 # TODO: Ajax
-# TODO: Celary
 
 # --- HELPERS ---
 def generate_random_hash(size):
@@ -90,7 +89,7 @@ def get_task_result(request, task_id):
         return HttpResponse("Not ready!")
 
 def credits(request):
-    template = loader.get_template('refleXWebApp/credits.html')
+    template = loader.get_stemplate('refleXWebApp/credits.html')
     return HttpResponse(template.render({}, request))
 
 def return_loading(request):
@@ -100,9 +99,9 @@ def return_loading(request):
 def api_list(request, task_id):
     if request.method == 'GET':
         task = AsyncResult(task_id, app=celery_app)
-        result = [0] * 8
+        result = [0] * 7
         if task.ready():
-            result = [1] + task.get()
+            result = [0] + [True] +  task.get()
         output = OutputScore(*result)
         serializer = OutputScoreSerializer(output)
         return JsonResponse(serializer.data, safe=False)
