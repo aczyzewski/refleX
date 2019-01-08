@@ -43,7 +43,6 @@ def save_uploaded_file(file_object):
                 dest_file.write(chunk)
     except:
         return False
-
     return True
 
 # --- VIEWS ---
