@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+{% extends "error.html"%}
+
+{% load static %}
+{% block content %}
+
+  <div class="container" id="cmb-content">
+          <div class="error-page-content text-center">
+              <img src="static/img/book_22.svg" alt="CheckMyBlob"></a>
+              <div class="error-info">ERROR 404</div>
+              <div class="error-info">The page you're looking for was not found.</div>
+              <div class="error-action">
+                <div id="browse_app">
+                  <a class="btn btn-primary bts-lg btn-block" href={% url 'index' %}>Back to the main page</a>
+                </div>
+
+              </div>
+          </div>
+       </div>
+
+{% endblock %}

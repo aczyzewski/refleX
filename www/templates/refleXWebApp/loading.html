@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+
+{% extends "base.html"%}
+{% load staticfiles %}
+{% block content %}
+
+{% block javascript %}
+    <script
+            src="https://code.jquery.com/jquery-3.3.1.js"
+            integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+            crossorigin="anonymous">  </script>
+
+    <script src="{% static '/js/sleep.js' %}"></script>
+    <script src="{% static '/js/footer_repair.js' %}"></script>
+    <script src="{% static '/js/move_progress_bar.js' %}"></script>
+    <script src="{% static '/js/handle_async_tasks.js' %}"></script>
+    <script src="{% static '/js/api_button.js' %}"></script>
+
+{% endblock %}
+
+    <h3>Task id:</h3>
+    <h2 id="task_id">{{ task_id }}</h2>
+    <h3><a href="/api/result/{{ task_id }}">CHECK RESULT</a></h3>
+
+    <div id="loader">
+        <img src= "{% static "gif/load.gif" %}" alt="Loading gif" width="128" height="128">
+    </div>
+
+    <div id="final_result">
+      <table class="table">
+
+<thead>
+  <tr>
+    <th scope="col">No.</th>
+    <th scope="col">Pictogram</th>
+    <th scope="col">Feature name</th>
+    <th scope="col">Probability</th>
+  </tr>
+</thead>
+
+<tbody>
+  <tr>
+    <th scope="row">1</th>
+    <td><img src="{% static '/img/pictogram1.svg' %}" id="main-logo" alt="logo"></td>
+    <td>Loop_scattering</td>
+    <td><span id="prob_loop_scaterring">Prob_try</span> </td>
+  </tr>
+  <tr>
+    <th scope="row">2</th>
+    <td><img src="{% static '/img/pictogram2.svg' %}" id="main-logo" alt="logo"></td>
+    <td>Background_ring</td>
+    <td> <span id="prob_background_ring"></span> </td>
+  </tr>
+  <tr>
+    <th scope="row">3</th>
+    <td><img src="{% static '/img/pictogram3.svg' %}" id="main-logo" alt="logo"></td>
+    <td>strong_background</td>
+    <td> <span id="prob_strong_background"></span> </td>
+  </tr>
+  <tr>
+    <th scope="row">4</th>
+    <td><img src="{% static '/img/pictogram4.svg' %}" id="main-logo" alt="logo"></td>
+    <td>strong_background</td>
+    <td> <span id="prob_strong_background"></span> </td>
+  </tr>
+  <tr>
+    <th scope="row">5</th>
+    <td><img src="{% static '/img/pictogram5.svg' %}" id="main-logo" alt="logo"></td>
+    <td>strong_background</td>
+    <td> <span id="prob_strong_background"></span> </td>
+  </tr>
+
+  <tr>
+    <th scope="row">6</th>
+    <td><img src="{% static '/img/pictogram6.svg' %}" id="main-logo" alt="logo"></td>
+    <td>strong_background</td>
+    <td> <span id="prob_strong_background"></span> </td>
+  </tr>
+
+  <tr>
+    <th scope="row">7</th>
+    <td><img src="{% static '/img/pictogram7.svg' %}" id="main-logo" alt="logo"></td>
+    <td>strong_background</td>
+    <td> <span id="prob_strong_background"></span> </td>
+  </tr>
+</tbody>
+
+</table>
+    </div>
+
+
+{% endblock %}
+
+
+<!--
+    <div class="Api-check">
+        <div>
+            <button class="apireq">Dane z Api</button>
+        </div>
+
+        <div id="jsonresp" style="margin-top: 100px">
+            <p><label> Stastus :</label> <span id="status"></span></p>
+            <p><label> Loop_scattering :</label> <span id="loop_scattering"></span></p>
+            <p><label> background_ring :</label> <span id="background_ring"></span></p>
+            <p><label> strong_background :</label> <span id="strong_background"></span></p>
+            <p><label> diffuse_scattering :</label> <span id="diffuse_scattering"></span></p>
+            <p><label> artifact :</label> <span id="artifact"></span></p>
+            <p><label> ice_ring :</label> <span id="ice_ring"></span></p>
+            <p><label> non_uniform_detector :</label> <span id="non_uniform_detector"></span></p>
+        </div>
+-->
