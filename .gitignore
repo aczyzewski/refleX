@@ -111,10 +111,6 @@ logs/*
 # Apple metadata files
 **/.DS_Store
 **/__pycache__
-/crysClass/static_root
-/crysClass/.idea/crysClass.iml
-/crysClass/.idea/encodings.xml
-/crysClass/.idea/misc.xml
-/crysClass/.idea/modules.xml
-/crysClass/.idea/vcs.xml
-/crysClass/.idea/workspace.xml
+
+# Nohup
+nohup.out

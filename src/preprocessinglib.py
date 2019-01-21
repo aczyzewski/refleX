@@ -5,7 +5,7 @@ import ntpath
 
 import numpy as np
 import cv2 as cv
-import modules.util as util
+import util as util
 import pandas as pd
 
 from math import cos, sin, log
