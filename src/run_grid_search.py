@@ -131,12 +131,17 @@ def grid_search(PATHS, CONFIG, experiment_name, PARAMS, output_csv='results.csv'
     print("[ --- DONE! --- ]")
                 
 
-def polar_configuration():
+def ac_polar_max_configuration():
+
     paths = {
-        'CSV_PATH': '/home/reflex/refleX/metadata/csv/augmented_sample_reflex.csv',
-        'DATA_FOLDER' : 'augmented_polar512_sample'
-        } # PARAMETER
-    params = {'transformations' : None}
+        'DATA_FOLDER' : 'polar512_max'
+    }
+        
+    params = {
+        'transformations': [RandomLighting(0.1, 0.1)],
+        'gpu_id': 0
+    }
+
     config = {
         'image_sizes': [64, 128, 256, 512],
         'predefined_metrics': [f2, average_precision, average_recall, hamming_score],
@@ -148,59 +153,65 @@ def polar_configuration():
 
     return params, paths, config
 
-def ac_resnet_configuration():
+def ac_polar_min_configuration():
+
     paths = {
-        'CSV_PATH': '/home/reflex/refleX/metadata/csv/fastai_validate_train.csv',
-        'DATA_PATH': '/home/reflex/refleX/metadata/labeled/',
-        'DATA_FOLDER': 'original512',
-        'EXP_PATH': '/home/reflex/refleX/results/fastai_experiments'
+        'DATA_FOLDER' : 'polar512_min'
+    }
+        
+    params = {
+        'transformations': [RandomLighting(0.1, 0.1)],
+        'gpu_id': 1
+    }
+
+    config = {
+        'image_sizes': [64, 128, 256, 512],
+        'predefined_metrics': [f2, average_precision, average_recall, hamming_score],
+        'batch_sizes': [8, 16, 32, 64], # PARAMETER
+        'architectures' : {
+            'resnet34' : resnet34 # PARAMETER
+        }
+    }
+
+    return params, paths, config
+
+def ac_resnet34_configuration():
+    paths = {
+        'DATA_FOLDER': 'original512'
     }
 
     params = {
-        'val_idxs': range(200),
-        'dropout': 0.5,
-        'earlystopping': 12,
-        'log_step': 1,
-        'gpu_id': 1,
+        'gpu_id': 2,
         'transformations' : [RandomLighting(0.1, 0.1), RandomDihedral()]
     }
 
     config = {
         'image_sizes': [64, 128, 256, 512],
         'predefined_metrics': [f2, average_precision, average_recall, hamming_score],
-        'batch_sizes': [8, 16],
+        'batch_sizes': [8, 16, 32],
         'architectures' : {
-            'resnet18' : resnet18,
             'resnet34' : resnet34
         }
     }
 
     return params, paths, config
 
-
-def ac_polar_configuration():
+def ac_resnet18_configuration():
     paths = {
-        'CSV_PATH': '/home/reflex/refleX/metadata/csv/fastai_validate_train.csv',
-        'DATA_PATH': '/home/reflex/refleX/metadata/labeled/',
-        'DATA_FOLDER': 'polar512',
-        'EXP_PATH': '/home/reflex/refleX/results/fastai_experiments'
+        'DATA_FOLDER': 'original512'
     }
 
     params = {
-        'dropout': 0.5,
-        'earlystopping': 12,
-        'log_step': 1,
-        'gpu_id': 2,
-        'transformations' : [RandomLighting(0.05, 0.05)]
+        'gpu_id': 3,
+        'transformations' : [RandomLighting(0.1, 0.1), RandomDihedral()]
     }
 
     config = {
         'image_sizes': [64, 128, 256, 512],
         'predefined_metrics': [f2, average_precision, average_recall, hamming_score],
-        'batch_sizes': [8, 16, 32, 64],
+        'batch_sizes': [64, 128, 256],
         'architectures' : {
-            'resnet18' : resnet18,
-            'resnet34' : resnet34
+            'resnet18' : resnet18
         }
     }
 
@@ -218,8 +229,8 @@ if __name__ == '__main__':
 
     #  --- DEFAULT PATHS ---
     PATHS = {
-        'CSV_PATH': '/home/reflex/refleX/metadata/csv/fastai_train_test_split20.csv',
-        'DATA_PATH': '/home/reflex/refleX/metadata/labeled/',
+        'CSV_PATH': '/home/reflex/refleX/metadata/6K/csv/fastai_labels_val_train.csv',
+        'DATA_PATH': '/home/reflex/refleX/metadata/6K/',
         'DATA_FOLDER': 'original512',
         'EXP_PATH': '/home/reflex/refleX/results/fastai_experiments'
     }
@@ -230,7 +241,7 @@ if __name__ == '__main__':
 
     # --- DEFAULT PARAMS ---
     PARAMS = {
-        'val_idxs': range(200),
+        'val_idxs': range(631),
         'dropout': 0.5,
         'earlystopping': 12,
         'log_step': 5,

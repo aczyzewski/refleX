@@ -1,7 +1,7 @@
 import warnings
 import numpy as np
 import os
-from sklearn.metrics import fbeta_score, precision_score, recall_score, matthews_corrcoef, confusion_matrix, f1_score, hamming_loss
+from sklearn.metrics import fbeta_score, precision_score, recall_score, matthews_corrcoef, confusion_matrix, f1_score, hamming_loss, roc_auc_score, accuracy_score
 
 def get_raw_scores(preds, targs):
     tp, fp, tn, fn = 0, 0, 0, 0
@@ -35,7 +35,7 @@ def macro_mcc(preds, targs, threshold=0.5, num_classes=7):
         warnings.simplefilter("ignore")
         return sum([matthews_corrcoef(targs[:,i], preds[:,i] > threshold) for i in range(num_classes)]) / num_classes
 
-def macro_f1(preds, targs):
+def macro_f1(preds, targs, threshold=0.5, num_classes=7):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         return sum([f1_score(targs[:,i], preds[:,i] > threshold) for i in range(num_classes)]) / num_classes
@@ -59,11 +59,31 @@ def hamming_score(y_pred, y_true, threshold=0.5):
             acc_list.append(tmp_a)
         return np.mean(acc_list)
 
+def exact_match_ratio(preds, targs, threshold=0.5):
+    return sum([int(np.array_equal(t, p > threshold)) for p, t in zip(preds, targs)]) / len(preds)
+
+# FIXME hamming loss score jest zle. w ogole jaka roznica wzgledem hamming_score?
+def hamming_loss_score(preds, targs, num_classes=7, threshold=0.5):
+    return (preds != targs).sum() / len(preds) * num_classes
+
+    
+    
 def confusion_matrices(preds, targs, threshold=0.5, num_classes=7):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         return {i: confusion_matrix(targs[:,i], preds[:,i] > threshold) for i in range(num_classes)}
 
+    
+##################################### Class-specific ###############################################
+
+def recall_macro(preds, targs, num_classes=7, threshold=0.5):
+    return [recall_score(targs[:,i], preds[:,i] > threshold, average='macro') for i in range(num_classes)]
+
+def roc_auc(preds, targs, num_classes=7, threshold=0.5): 
+    return [roc_auc_score(targs[:,i], preds[:,i]) for i in range(num_classes)]
+
+def f1(preds, targs, num_classes=7, threshold=0.5):
+    return [f1_score(targs[:,i], preds[:,i] > threshold) for i in range(num_classes)]
 
 def only_fp(preds, targs, num_classes=7, threshold=0.5):
     results = []
@@ -83,14 +103,13 @@ def precision(preds, targs, num_classes=7, threshold=0.5):
         warnings.simplefilter("ignore")
         return [precision_score(targs[:,i], preds[:,i] > threshold) for i in range(num_classes)]
 
-def exact_match_ratio(preds, targs, threshold=0.5):
-    return sum([int(np.array_equal(targs, preds > threshold)) in zip(preds, targs)]) / len(preds)
-
-def hamming_loss_score(preds, targs, num_classes=7, threshold=0.5):
-    return (preds != targs).sum() / len(preds) * num_classes
+def accuracy(preds, targs, num_classes=7, threshold=0.5):
+    return [accuracy_score(targs[:,i], preds[:,i] > threshold) for i in range(num_classes)]
+    
+    
 
 def get_predefined_metrics():
-    return [f2, macro_average_precision, macro_average_recall, macro_mcc, hamming_score, exact_match_ratio, hamming_loss_score]
+    return [f2, macro_average_precision, macro_average_recall, macro_mcc, hamming_score, exact_match_ratio, hamming_loss_score, macro_f1]
 
 def get_class_specific_metrics():
-    return [precision, recall, only_fp]
+    return [precision, recall, only_fp, accuracy, roc_auc, recall_macro, f1]
