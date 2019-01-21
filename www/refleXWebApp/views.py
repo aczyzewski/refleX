@@ -55,27 +55,25 @@ def index(request):
             if save_uploaded_file(request.FILES['picture']):
 
                 task = long_task.delay()
-
                 template = loader.get_template('refleXWebApp/loading.html')
                 return HttpResponse(template.render({'task_id': task.id}, request))
 
                 # TODO: Generate key!
-                # TODO: Add task to the queue
             else:
                 #FIXME: Error page: Cannot save the file!
                 template = loader.get_template('refleXWebApp/success.html')
                 return HttpResponse(template.render({}, request))
         else:
             # FIXME: Error page: Invalid form!
-            template = loader.get_template('refleXWebApp/credits.html')
-            return HttpResponse(template.render(context, request))
+            return_credits(request)
     else:
         context = {'form': ImageUploadForm()}
         template = loader.get_template('refleXWebApp/useradding_form.html')
         return HttpResponse(template.render(context, request))
 
+    
+
 def get_task_result(request, task_id):
-    # 93abbdf4-117a-4a46-9d5d-234d718bdb79
     task_result = AsyncResult(task_id, app=celery_app)
 
     if task_result.ready():
@@ -87,12 +85,13 @@ def get_task_result(request, task_id):
     else:
         return HttpResponse("Not ready!")
 
-def credits(request):
+def return_credits(request):
     template = loader.get_stemplate('refleXWebApp/credits.html')
     return HttpResponse(template.render({}, request))
 
-def return_loading(request):
-    return render(request, 'refleXWebApp/loading.html')
+def return_results(request):
+    template = loader.get_stemplate('refleXWebApp/credits.html')
+    return HttpResponse(template.render({}, request))
 
 @csrf_exempt
 def api_list(request, task_id):

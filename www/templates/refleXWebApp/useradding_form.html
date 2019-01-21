@@ -3,47 +3,21 @@
 {% load crispy_forms_tags %}
 {% load static %}
 
-{% block javascript %}
-<script>
-function updateFooter() {
-    var footerH = $("#cmb-footer").height();
-    var contentH = $("#cmb-header").height() + $("#cmb-content").height() + 40 + 10 + 20;
-    var windowH = $(window).height();
-    if (contentH + footerH > windowH) {
-        $("#cmb-footer").removeClass("fixed");
-    } else {
-        $("#cmb-footer").addClass("fixed");
-    }
-}
-
-$(document)
-    .on('change', '.btn-file :file', function () {
-        var input = $(this),
-            label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
-        console.log(label);
-        input.parent().find('.filename-holder').html(label);
-    });
-
-$(document).ready(function () {
-    $(window).resize(function () {
-        updateFooter();
-    });
-
-    $('#id_application').change(function() {
-        setTimeout(function(){ updateFooter(); },30)
-    });
-
-    updateFooter();
-});
-</script>
-{% endblock %}
-
 {% block content %}
-    <h4>Crystalography feature-detector </h4>
+<div class="description content-section">
+RefleX aims to classify anomalies which occur in X-ray crystallography images. Upon completion this system will become part of a major crystallography image database website.
+</div>
+
+<div class="add-photo content-section">
+    <h2>Submit your photos here ! </h2>
     <div class="container">
-      <form action="" method="post" enctype="multipart/form-data"> {% csrf_token %}
+      <form id="uploadForm" action="" method="post" enctype="multipart/form-data"> {% csrf_token %}
       {{ form|crispy }}
-      <button class="btn btn-primary bts-lg btn-block" type="submit">Submit</button>
+      <button class="btn btn-primary bts-lg btn-block submit-btn" type="submit">Submit</button>
     </form>
     </div>
+</div>
+
+<script src={% static "js/helper.js" %}></script>
+
 {% endblock %}

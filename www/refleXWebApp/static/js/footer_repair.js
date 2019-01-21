@@ -1,3 +1,5 @@
+src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"
+
 function updateFooter() {
     var footerH = $("#cmb-footer").height();
     var contentH = $("#cmb-header").height() + $("#cmb-content").height() + 40 + 10 + 20;
@@ -28,4 +30,3 @@ $(document).ready(function () {
 
     updateFooter();
 });
-

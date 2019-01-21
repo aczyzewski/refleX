@@ -7,13 +7,13 @@ urlpatterns = [
 
     # API
     # path('api/', ...)
-    path('loading/', views.return_loading),
-    path('result/<str:task_id>', views.get_task_result),
-    path('credits/', views.credits, name="credits"),
-    path('accounts/', include('django.contrib.auth.urls')),
+    path('credits/', views.return_credits, name="credits"),
+    path('results/', views.return_results, name="results"),
 
+    path('result/<str:task_id>', views.get_task_result),
     path('api/result/<str:task_id>', views.api_list),
 
+    path('accounts/', include('django.contrib.auth.urls')),
     path('snippets/', views.snippet_list),
     #path('snippets/<int:pk>/', views.snippet_detail),
 ]

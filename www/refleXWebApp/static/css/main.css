@@ -1,3 +1,4 @@
+
 h4 {
     margin-top: 20px;
     border-bottom: 1px solid #eee;
@@ -14,7 +15,7 @@ h4 {
   height: 2%;
   width: 2%;
 }
-
+32
 @media (min-width: 768px) {
     .left-separated {
         border-left: 1px solid #ccc;
@@ -26,7 +27,7 @@ h4 {
 }
 
 #main-logo {
-    height: 50px;
+    height: 125px;
     margin-top: -6px;
     margin-left: -5px;
 }
@@ -35,7 +36,9 @@ h4 {
   position: relative;
     margin-left: 0;
     margin-right: 0;
+    padding: 1rem 1rem;
 }
+
 
 #header-panel {
     margin-top: 15px;
@@ -159,9 +162,11 @@ h4 {
 
 .progress {
     width: 80%;
-    margin: 10px auto;
     height: 32px;
     border-radius: 0;
+}
+
+#loader {
 }
 
 @media (min-width: 768px) {
@@ -232,10 +237,6 @@ h4 {
     padding-bottom: 6px;
     width: 40px;
 }
-
-/*.blob-header-status > .fas {*/
-    /*top: 0px !important;*/
-/*}*/
 
 .blob-results {
     margin-top: 10px;
@@ -339,11 +340,6 @@ h4 {
     }
 }
 
-.blob-row {
-    margin: 0;
-}
-
-
 .tasks{
     background-color: #F6F8F8;
     padding: 10px;
@@ -371,6 +367,74 @@ h4 {
     text-align: center;
 }
 
-#result_table {
-  display: none;
+
+.parent {
+  /* display: flex; */
+  height: 60vh;
+  display: grid;
+  grid-template-columns: 30% 70%;
+}
+
+.content-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left: 100px;
+}
+
+.description {
+  font-size: 1.5rem;
+}
+
+.add-photo {
+  flex-direction: column;
+  font-size: 1.5rem;
+}
+
+.add-photo .container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.submit-btn {
+  font-size: 1.5rem;
+  width: 700px;
+}
+
+.progress__container {
+height: 100%;
+display: flex;
+justify-content: center;
+align-items: center;
+flex-direction: column;
+width: 100%;
+position: relative;
+}
+
+.progress__container .progress {
+  width: 80%;
+}
+
+#processing_text {
+  position: absolute;
+  top: calc(50% + 30px);
+}
+
+#task_id {display: hidden}
+
+.loading-content {
+  background: url('../img/1.jpg');
+  background-size: cover;
+}
+
+.final_result{
+  background: #FFFFFF;
+  background-size: cover;
+  height: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 50%;
 }

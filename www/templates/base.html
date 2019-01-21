@@ -10,8 +10,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" media="all" href="/static/css/main.css">
     <link href="https://use.fontawesome.com/releases/v5.0.6/css/solid.css" rel="stylesheet">
-    <!--<link rel="stylesheet" href="/static/css/jquery.fileupload.css">
-    <link rel="stylesheet" href="/static/css/jquery.fileupload-ui.css">-->
+
     <title>Crystalography</title>
 
   </head>
@@ -24,27 +23,25 @@
         <div class="container">
             <ul class="nav navbar-nav">
               <a id="logo-anchor" href="/">
-                <img src="{% static '/img/cloud-network.svg' %}" id="main-logo" alt="logo"> Crystalography Helper </a>
-                <span class="small"></span>
+                <img src="{% static '/img/refleX.svg' %}" id="main-logo" alt="logo">Title</a>
+                <span class="medium"></span>
           </ul>
         </div>
+
       </div>
   </nav>
 
-    <div class="container">
-      <div class="row justify-content-center">
+      <!--<div class="row justify-content-center">
         <div class="col-8">
           <hr class="mt-0 mb-4">
+        -->
+          <div class="parent">
           {% block content %}
 
           {% endblock %}
-
-
         </div>
-      </div>
-    </div>
 
-<footer class="footer" style="margin-top: 350px;">
+<!-- <footer class="footer" style="margin-top: 350px;"> -->
     <div id="cmb-footer">
     <div class="container">
         <div class="row">
@@ -59,7 +56,7 @@
                 <h4>Contact</h4>
                 <p>
                     Need help? Found a bug? Interested in a different set of ligands? Want to collaborate?
-                    <script>document.write('');</script><a href="mailto:marcin.konieczny.poznan@gmail.com">marcin.konieczny.poznan@gmail.com</a><noscript>[Turn on JavaScript to see the email address]</noscript>
+                    <script> document.write(''); </script> <a href="mailto:marcin.konieczny.poznan@gmail.com">marcin.konieczny.poznan@gmail.com</a><noscript>[Turn on JavaScript to see the email address]</noscript>
                   </p>
             </div>
             <div class="col-sm-3 col-xs-6">
@@ -72,14 +69,10 @@
         </div>
     </div>
 </div>
-</footer>
+<!-- </footer> -->
 
-<!-- <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.1.js"></script> -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src={% static "js/footer_repair.js" %}></script>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-
-{% block javascript %}
-{% endblock %}
 
 
 </body>
