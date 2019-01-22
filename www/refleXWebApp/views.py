@@ -71,7 +71,7 @@ def index(request):
         template = loader.get_template('refleXWebApp/useradding_form.html')
         return HttpResponse(template.render(context, request))
 
-    
+
 
 def get_task_result(request, task_id):
     task_result = AsyncResult(task_id, app=celery_app)

@@ -13,24 +13,28 @@
 
     <title>Crystalography</title>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src={% static "js/footer_repair.js" %}></script>
+
   </head>
   <body>
 
 
 <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+<div class="blob-header">
 <nav class="navbar navbar-default navbar-static-top" style="background-color: #F8F8F8;">
   <div class="header">
         <div class="container">
             <ul class="nav navbar-nav">
               <a id="logo-anchor" href="/">
-                <img src="{% static '/img/refleX.svg' %}" id="main-logo" alt="logo">Title</a>
+                <img src="{% static '/img/refleX.svg' %}" id="main-logo" alt="logo"> Tool for detecting anomalies on Crystalography images </a>
                 <span class="medium"></span>
           </ul>
         </div>
 
       </div>
   </nav>
-
+</div>
       <!--<div class="row justify-content-center">
         <div class="col-8">
           <hr class="mt-0 mb-4">
@@ -41,26 +45,25 @@
           {% endblock %}
         </div>
 
-<!-- <footer class="footer" style="margin-top: 350px;"> -->
     <div id="cmb-footer">
     <div class="container">
         <div class="row">
-            <div class="col-sm-6 col-xs-12">
-                <h4>About</h4>
+            <div class="col-sm-3 col-xs-6">
+                <h5>About</h5>
                 <p>
-                    Crystalography project enables .....
-                    See here also <a href="{% url 'credits' %}">credits page</a>.
+                    Crystalography
+                   <a href="{% url 'credits' %}">credits page</a>.
                 </p>
             </div>
             <div class="col-sm-3 col-xs-6">
-                <h4>Contact</h4>
+                <h5>Contact</h5>
                 <p>
                     Need help? Found a bug? Interested in a different set of ligands? Want to collaborate?
                     <script> document.write(''); </script> <a href="mailto:marcin.konieczny.poznan@gmail.com">marcin.konieczny.poznan@gmail.com</a><noscript>[Turn on JavaScript to see the email address]</noscript>
                   </p>
             </div>
             <div class="col-sm-3 col-xs-6">
-                <h4>Citing</h4>
+                <h5>Citing</h5>
                 <p>
                     D.Brzezinski,F.Krawiec,A.Czyżewski,M.Konieczny
                     <i>Crystalography features detection</i>.
@@ -69,11 +72,6 @@
         </div>
     </div>
 </div>
-<!-- </footer> -->
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src={% static "js/footer_repair.js" %}></script>
-
 
 </body>
 </html>

@@ -7,8 +7,9 @@ const setVal = (progress, val) => {
   progress.value = val;
 };
 
-const setBackground = (container, bgUrl) => {
-  container.style.background = `url(${bgUrl})`;
+const setBackground = (container, val) => {
+  // container.style.background = `url(${val})`;
+  container.style.background = val;
 };
 
 function move_progress_bar(iteration) {
@@ -17,39 +18,39 @@ function move_progress_bar(iteration) {
   const val = document.getElementById('val');
   const backgroundImgContainer = document.getElementById('loading-bg')
 
-  const beegees = ['static/img/1.jpg','static/img/1.jpg','static/img/1.jpg']
-
+  // const beegees = ['static/img/blue.png','static/img/red.png','static/img/yellow.png','static/img/green.png','static/img/White.png']
+  const beegees = ['#2196f3', '#84fd84', '#fadase', '#f44336', '#ffffff']
   const actionId = iteration;
 
     switch (parseInt(actionId)) {
       case 1:
         setVal(progress, 10);
-        //setBackground(backgroundImgContainer, beegees[0])
+        setBackground(backgroundImgContainer, beegees[0])
         processing_text_id.innerHTML = "Transfering your photo";
         break;
       case 2:
         setVal(progress, 30);
-        //setBackground(backgroundImgContainer, beegees[1])
+        setBackground(backgroundImgContainer, beegees[3])
         processing_text_id.innerHTML = "Anomalies searching ... ";
         break;
       case 3:
         setVal(progress, 50);
-        //setBackground(backgroundImgContainer, beegees[2])
+        setBackground(backgroundImgContainer, beegees[1])
         processing_text_id.innerHTML = "Anomalies searching  ...";
         break;
       case 4:
         setVal(progress, 70);
-        //setBackground(backgroundImgContainer, beegees[0])
+        setBackground(backgroundImgContainer, beegees[2])
         processing_text_id.innerHTML = "Anomalies searching continues ...";
         break;
       case 5:
         setVal(progress, 90);
-        //setBackground(backgroundImgContainer, beegees[1])
+        setBackground(backgroundImgContainer, beegees[3])
         processing_text_id.innerHTML = "Finishing your results !";
         break;
       case 6:
         setVal(progress, 100);
-        //setBackground(backgroundImgContainer, beegees[2])
+        setBackground(backgroundImgContainer, beegees[4])
         processing_text_id.innerHTML = "Here is your result table !";
         break;
     }
@@ -66,9 +67,9 @@ $(async function(){
                 // loader_id.style.visibility = 'visible';
                 //
                 final_result_id = document.getElementById('final_result')
-                final_result_id.style.visibility = 'hidden';
+                final_result_id.style.display = 'none';
 
-                prob_loop_scaterring_id = document.getElementById('prob_loop_scaterring').innerHTML
+                prob_loop_scaterring_id = document.getElementById('prob_loop_scaterring')
                 prob_background_ring_id = document.getElementById('prob_background_ring')
                 prob_strong_background_id = document.getElementById('prob_strong_background')
                 prob_diffuse_scattering_id = document.getElementById('prob_diffuse_scattering')
@@ -91,8 +92,8 @@ $(async function(){
 
                               move_progress_bar(6);
                               sleep(500);
-                              progress__container_id.style.visibility = 'hidden';
-                              final_result_id.style.visibility = 'visible';
+                              progress__container_id.style.display = 'none';
+                              final_result_id.style.display = 'block';
 
                               prob_loop_scaterring_id.innerHTML = data.loop_scattering;
                               prob_background_ring_id.innerHTML = data.background_ring;

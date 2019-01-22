@@ -9,7 +9,6 @@ h4 {
     font-size: 12px;
 }
 
-
 .container_right img
 {
   height: 2%;
@@ -27,9 +26,10 @@ h4 {
 }
 
 #main-logo {
-    height: 125px;
     margin-top: -6px;
     margin-left: -5px;
+    height: 100px;
+    margin-right: 15px;
 }
 
 #main-navbar-header {
@@ -48,6 +48,7 @@ h4 {
 #logo-anchor {
     text-decoration: none;
     color: inherit;
+    font-size: 1.5rem;
 }
 
 #logo-anchor:hover {
@@ -84,11 +85,19 @@ h4 {
 }
 
 #cmb-footer {
+  height: 10vh;
     margin-top: 40px;
     padding-bottom: 15px;
     font-family: 'Raleway', Helvetica, Arial, sans-serif;
     border-top: solid 1px #eeeeee;
     background-color: #F8F8F8;
+}
+
+#cmb-footer .container {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #cmb-footer p {
@@ -106,6 +115,14 @@ h4 {
     position: fixed;
     bottom: 0;
     width: 100%;
+    height: 150px;
+    margin:0;
+    padding: 0;
+    font-size: 1.2rem;
+}
+
+#cmb-footer p {
+  font-size: .75rem;
 }
 
 .error-page-content {
@@ -133,13 +150,6 @@ h4 {
     margin-top: 20px;
 }
 
-.cmb-color-title {
-    color: #404040;
-}
-
-#ligand-dictionary {
-    margin-top: 40px;
-}
 
 .progress-container {
     margin-top: 50px;
@@ -164,9 +174,6 @@ h4 {
     width: 80%;
     height: 32px;
     border-radius: 0;
-}
-
-#loader {
 }
 
 @media (min-width: 768px) {
@@ -197,6 +204,7 @@ h4 {
     position: relative;
     padding-left: 0;
     padding-right: 0;
+
 }
 
 .result-list .list-group {
@@ -208,11 +216,13 @@ h4 {
     width: 100%;
     display: block;
     color: inherit;
-    font-size: 18px;
+    font-size: 32px;
     font-weight: 500;
     line-height: 1.1;
     padding: 0 15px 0 0;
     border-radius: 0 !important;
+    padding: 0;
+    height: 100px;
 }
 
 .blob-header:hover, .blob-header:active, .blob-header:focus {
@@ -340,37 +350,12 @@ h4 {
     }
 }
 
-.tasks{
-    background-color: #F6F8F8;
-    padding: 10px;
-    border-radius: 5px;
-    margin-top: 10px;
-}
-.tasks span{
-    font-weight: bold;
-}
-.tasks input{
-    display: block;
-    margin: 0 auto;
-    margin-top: 10px;
-}
-.tasks a{
-    color: #000;
-    text-decoration: none;
-    border:none;
-}
-.tasks a:hover{
-    border-bottom: dashed 1px #0088cc;
-}
-.tasks label{
-    display: block;
-    text-align: center;
-}
 
+/*  ---  useradding part --- */
 
 .parent {
   /* display: flex; */
-  height: 60vh;
+  height: calc(100vh - 250px);
   display: grid;
   grid-template-columns: 30% 70%;
 }
@@ -379,16 +364,19 @@ h4 {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-left: 100px;
+  padding: 0 50px;
 }
 
 .description {
-  font-size: 1.5rem;
+  font-family: 'Raleway', Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  margin-left: 40px;
+  
 }
 
 .add-photo {
   flex-direction: column;
-  font-size: 1.5rem;
+  font-size: 1rem;
 }
 
 .add-photo .container {
@@ -400,6 +388,17 @@ h4 {
 .submit-btn {
   font-size: 1.5rem;
   width: 700px;
+}
+/* loading part */
+
+.loading-content {
+  background-size: cover;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
 }
 
 .progress__container {
@@ -413,28 +412,41 @@ position: relative;
 }
 
 .progress__container .progress {
+  position: relative;
   width: 80%;
 }
 
 #processing_text {
-  position: absolute;
-  top: calc(50% + 30px);
+
 }
 
-#task_id {display: hidden}
+#task_id {
+  font-family: 'Raleway', Helvetica, Arial, sans-serif;
+  font-size: 1rem;
 
-.loading-content {
-  background: url('../img/1.jpg');
-  background-size: cover;
 }
 
-.final_result{
-  background: #FFFFFF;
-  background-size: cover;
-  height: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+#final_result{
+  font-family: 'Raleway', Helvetica, Arial, sans-serif;
+  font-size: .9rem;
+  position relatve;
+  height: 100%;
+  width: 100%;
+}
+
+.navbar {
+  height: 100%;
+}
+
+.description_loading {
+  padding: 0 30px;
   flex-direction: column;
-  width: 50%;
+}
+
+.loading-bg {
+  transition: background .2s ease;
+}
+
+.result-img{
+  height: 42px;
 }
