@@ -9,7 +9,7 @@ from .forms import ImageUploadForm
 from .models import UserAdding, OutputScore
 
 from .celery import app as celery_app
-from .tasks import long_task
+from .tasks import long_task, run_classifier
 from celery.result import AsyncResult
 
 import time
@@ -43,7 +43,7 @@ def save_uploaded_file(file_object):
                 dest_file.write(chunk)
     except:
         return False
-    return True
+    return dest_file_path
 
 # --- VIEWS ---
 #@login_required()
@@ -52,10 +52,10 @@ def index(request):
     if request.method == "POST":
         form = ImageUploadForm(request.POST, request.FILES)
         if form.is_valid():
-            if save_uploaded_file(request.FILES['picture']):
+            path = save_uploaded_file(request.FILES['picture'])
+            if path is not None:
 
-                task = long_task.delay()
-
+                task = run_classifier.delay(path)
                 template = loader.get_template('refleXWebApp/loading.html')
                 return HttpResponse(template.render({'task_id': task.id}, request))
 
