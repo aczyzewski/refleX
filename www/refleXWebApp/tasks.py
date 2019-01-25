@@ -9,7 +9,7 @@ from fastai.conv_learner import *
 @shared_task
 def long_task(seconds=20):
     time.sleep(seconds)
-    return [0,0,1,0,1,0,0]
+    return [0.1,0.2,0.2,0.02,0.4,0.04,0.04]
 
 @shared_task
 def run_classifier(img_path):
