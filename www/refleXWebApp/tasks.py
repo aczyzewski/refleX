@@ -5,7 +5,11 @@ import sys
 
 try:
     sys.path.insert(0, '/home/reflex/refleX/lib/fastai')
+    sys.path.insert(0, '/home/reflex/refleX/src')
+
+    import cv2 as cv
     from fastai.conv_learner import *
+    from rawdatalib import RawDataFile
 
     @shared_task
     def long_task(seconds=20):
@@ -19,6 +23,16 @@ try:
         model = resnet34
         image_size = 512
         # ***
+
+        # TODO: TEST!
+        if img_path.endswith('.npy.bz2'):
+            img_file = RawDataFile(img_path)
+            img = img_file.to_img(self, size=image_size)
+            if img is None:
+                return [0] * 7
+
+            img_path = img_path[:-len('.npy.bz2')] + ".png"
+            cv.imwrite(img_path, img)
 
         PATHS = {
             'CSV_PATH': '/home/reflex/refleX/metadata/6K/csv/fastai_labels_val_train.csv',

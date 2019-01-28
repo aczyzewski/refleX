@@ -147,3 +147,6 @@ LOGOUT_REDIRECT_URL = '/'
 UPLOADS_URL = os.path.join(BASE_DIR, 'uploads')
 CELERY_BROKER_URL = 'amqp://localhost'
 CELERY_RESULT_BACKEND = 'django-db'
+
+
+SUPPORTED_EXTENSIONS = ['png', 'npy.bz2']

@@ -53,17 +53,16 @@ def index(request):
         form = ImageUploadForm(request.POST, request.FILES)
         if form.is_valid():
             path = save_uploaded_file(request.FILES['picture'])
-            if path is not None:
-
+            supported_file_type = [path.endswith(ext) for ext in settings.SUPPORTED_EXTENSIONS]
+            if path is not None and any(supported_file_type):
                 task = run_classifier.delay(path)
                 template = loader.get_template('refleXWebApp/loading.html')
                 return HttpResponse(template.render({'task_id': task.id}, request))
-
                 # TODO: Generate key!
             else:
                 #FIXME: Error page: Cannot save the file!
-                template = loader.get_template('refleXWebApp/success.html')
-                return HttpResponse(template.render({}, request))
+                #template = loader.get_template('refleXWebApp/success.html')
+                return HttpResponse("Invalid file type!")
         else:
             # FIXME: Error page: Invalid form!
             return_credits(request)
