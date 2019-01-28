@@ -39,7 +39,8 @@ try:
         img = val_tfms(open_image(img_path))
         learner.precompute = False 
         print(data.classes)
-        return list(map(float, list(learner.predict_array(img[None])[0])))
+
+        return [round(float(value), 3) for value in list(learner.predict_array(img[None])[0])]
 except:
     print(" --- !!! FASTAI IS NOT SUPPORTED !!! --- ")
     @shared_task
