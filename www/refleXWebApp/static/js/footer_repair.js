@@ -23,10 +23,5 @@ $(document).ready(function () {
     $(window).resize(function () {
         updateFooter();
     });
-
-    $('#id_application').change(function() {
-        setTimeout(function(){ updateFooter(); },30)
-    });
-
     updateFooter();
 });

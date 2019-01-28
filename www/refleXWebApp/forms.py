@@ -1,12 +1,14 @@
-from django.forms import ModelForm
-from .models import UserAdding
+from django import forms
 
-class ImageUploadForm(ModelForm):
-    class Meta:
-        model = UserAdding
-        fields = ['picture']
-
-        labels = {'picture': 'Load image:'}
-
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
+class ImageUploadForm(forms.Form):
+    picture = forms.FileField(
+        label = 'Choose a file...',
+        required = True,
+        widget = forms.FileInput(
+            attrs = {
+                'id' : "file",
+                'class' : "inputfile",
+                'onchange' : "$('#uploadForm label').html(this.files[0].name)"
+                }
+        )
+    )

@@ -25,32 +25,32 @@ function move_progress_bar(iteration) {
     switch (parseInt(actionId)) {
       case 1:
         setVal(progress, 10);
-        setBackground(backgroundImgContainer, beegees[0])
+        //setBackground(backgroundImgContainer, beegees[0])
         processing_text_id.innerHTML = "Transfering your photo";
         break;
       case 2:
         setVal(progress, 30);
-        setBackground(backgroundImgContainer, beegees[3])
+        // setBackground(backgroundImgContainer, beegees[3])
         processing_text_id.innerHTML = "Anomalies searching ... ";
         break;
       case 3:
         setVal(progress, 50);
-        setBackground(backgroundImgContainer, beegees[1])
+        // setBackground(backgroundImgContainer, beegees[1])
         processing_text_id.innerHTML = "Anomalies searching  ...";
         break;
       case 4:
         setVal(progress, 70);
-        setBackground(backgroundImgContainer, beegees[2])
+        // setBackground(backgroundImgContainer, beegees[2])
         processing_text_id.innerHTML = "Anomalies searching continues ...";
         break;
       case 5:
         setVal(progress, 90);
-        setBackground(backgroundImgContainer, beegees[3])
+        // setBackground(backgroundImgContainer, beegees[3])
         processing_text_id.innerHTML = "Finishing your results !";
         break;
       case 6:
         setVal(progress, 100);
-        setBackground(backgroundImgContainer, beegees[4])
+        // setBackground(backgroundImgContainer, beegees[4])
         processing_text_id.innerHTML = "Here is your result table !";
         break;
     }
