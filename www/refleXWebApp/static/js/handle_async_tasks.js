@@ -26,12 +26,12 @@ function move_progress_bar(iteration) {
       case 1:
         setVal(progress, 10);
         //setBackground(backgroundImgContainer, beegees[0])
-        processing_text_id.innerHTML = "Transfering your photo";
+        processing_text_id.innerHTML = "Uploading your photo";
         break;
       case 2:
         setVal(progress, 30);
         // setBackground(backgroundImgContainer, beegees[3])
-        processing_text_id.innerHTML = "Anomalies searching ... ";
+        processing_text_id.innerHTML = "Searching for anomalies";
         break;
       case 3:
         setVal(progress, 50);
