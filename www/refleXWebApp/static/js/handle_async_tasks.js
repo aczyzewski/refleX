@@ -26,12 +26,12 @@ function move_progress_bar(iteration) {
       case 1:
         setVal(progress, 10);
         //setBackground(backgroundImgContainer, beegees[0])
-        processing_text_id.innerHTML = "Uploading your photo";
+        processing_text_id.innerHTML = "Transfering your photo";
         break;
       case 2:
         setVal(progress, 30);
         // setBackground(backgroundImgContainer, beegees[3])
-        processing_text_id.innerHTML = "Searching for anomalies";
+        processing_text_id.innerHTML = "Anomalies searching ... ";
         break;
       case 3:
         setVal(progress, 50);
@@ -56,6 +56,20 @@ function move_progress_bar(iteration) {
     }
   };
 
+// $("#table tr").each(function(){
+// $(this).find("td:eq(3)").empty()
+// });
+
+var prob1;
+var prob2;
+var prob3;
+var prob4;
+var prob5;
+var prob6;
+var prob7;
+
+
+
 $(async function(){
                 task_id = document.getElementById('task_id').innerHTML
                 processing_text_id = document.getElementById('processing_text')
@@ -69,13 +83,16 @@ $(async function(){
                 final_result_id = document.getElementById('final_result')
                 final_result_id.style.display = 'none';
 
-                prob_loop_scaterring_id = document.getElementById('prob_loop_scaterring')
+                var prob_loop_scaterring_id = document.getElementById('prob_loop_scaterring')
+
                 prob_background_ring_id = document.getElementById('prob_background_ring')
                 prob_strong_background_id = document.getElementById('prob_strong_background')
                 prob_diffuse_scattering_id = document.getElementById('prob_diffuse_scattering')
                 prob_artifact_id = document.getElementById('prob_artifact')
                 prob_ice_ring_id = document.getElementById('prob_ice_ring')
                 prob_non_uniform_detector_id = document.getElementById('prob_non_uniform_detector')
+
+
 
                 actionType = parseInt('1')
 
@@ -94,18 +111,26 @@ $(async function(){
                               sleep(500);
                               progress__container_id.style.display = 'none';
                               final_result_id.style.display = 'block';
+                              //
+                              // $("#final_table tr td:nth-child(3)").each(function () {
+                              // $(this).empty()
+                              // });
 
-                              prob_loop_scaterring_id.innerHTML = data.loop_scattering;
-                              prob_background_ring_id.innerHTML = data.background_ring;
-                              prob_diffuse_scattering_id.innerHTML = data.diffuse_scattering;
-                              prob_strong_background_id.innerHTML = data.strong_background;
-                              prob_ice_ring_id.innerHTML = data.ice_ring;
-                              prob_artifact_id.innerHTML = data.artifact;
-                              prob_non_uniform_detector_id.innerHTML = data.non_uniform_detector;
+                              prob_loop_scaterring_id.innerHTML =  parseFloat(data.loop_scattering);
+                              prob_background_ring_id.innerHTML = parseFloat(data.background_ring);
+                              prob_diffuse_scattering_id.innerHTML = parseFloat(data.diffuse_scattering);
+                              prob_strong_background_id.innerHTML = parseFloat(data.strong_background);
+                              prob_ice_ring_id.innerHTML = parseFloat(data.ice_ring);
+                              prob_artifact_id.innerHTML = parseFloat(data.artifact);
+                              prob_non_uniform_detector_id.innerHTML =  parseFloat(data.non_uniform_detector);
+
+                              prob1 = data.loop_scattering;
+                              prob2 = data.background_ring;
 
                               console.log("END!")
                               while_heartbit = false;
                             }}
+
                 })
 
               await sleep(3400);
@@ -113,5 +138,6 @@ $(async function(){
               actionType = actionType + 1;
               console.log("HERE I AM!")
             }
+
 
           });

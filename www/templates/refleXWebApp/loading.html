@@ -6,6 +6,10 @@
 
 {% block content %}
 
+
+<link rel="stylesheet" type="text/css" media="all" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+<!-- <link rel="stylesheet" type="text/css" media="all" href="/static/css/sort.css"> -->
+
 <div class="description_loading content-section">
   <p id="task_id" visibility="hidden">{{ task_id }}</p>
   <h2 id="processing_text">The processing begins!</h2>
@@ -92,22 +96,13 @@
 
 </div>
 
-
-
-
-
 {% block javascript %}
-<script src={% static "js/handle_async_tasks.js" %}></script>
-<script src={% static "js/gs_sortable.js" %}></script>
-
-<script type="text/javascript">
-<!--
-var TSort_Data = new Array ('final_table', '','','s','s');
-tsRegister();
-</script>
-
-
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src={% static "js/handle_async_tasks.js" %}></script>
+<script src={% static "js/bootstrap_sort.js" %}></script>
+
+
 
 {% endblock %}
 
