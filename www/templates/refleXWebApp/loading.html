@@ -29,7 +29,7 @@
 </div>
 
   <div id="final_result">
-      <table class="table">
+      <table class="table" id="final_table">
 
   <thead>
     <tr>
@@ -40,69 +40,75 @@
     </tr>
   </thead>
 
-  <tbody>
     <tr>
-      <th scope="row">1</th>
+      <td>1</td>
       <td><img src="{% static '/img/loop.svg' %}" id="img1" alt="logo" class="result-img"></td>
       <td>Loop Scattering</td>
-      <td><span id="prob_loop_scaterring">Prob_try</span> </td>
+      <td id="prob_loop_scaterring"><span>77</span></td>
     </tr>
     <tr>
-      <th scope="row">2</th>
+      <td>2</td>
       <td><img src="{% static '/img/bg_ring.svg' %}" id="img2" alt="logo" class="result-img"></td>
       <td>Background Ring</td>
-      <td> <span id="prob_background_ring"></span> </td>
+      <td id="prob_background_ring"><span>66</span></td>
     </tr>
     <tr>
-      <th scope="row">3</th>
+      <td>3</td>
       <td><img src="{% static '/img/strong.svg' %}" id="img3" alt="logo" class="result-img"></td>
       <td>Strong Background</td>
-      <td> <span id="prob_strong_background"></span> </td>
+      <td id="prob_strong_background"><span>55</span></td>
     </tr>
     <tr>
-      <th scope="row">4</th>
+      <td>4</td>
       <td><img src="{% static '/img/diffuse.svg' %}" id="img4" alt="logo" class="result-img"></td>
       <td>Diffuse Scattering</td>
-      <td> <span id="prob_diffuse_scattering"></span> </td>
+      <td id="prob_diffuse_scattering"><span>44</span></td>
     </tr>
     <tr>
-      <th scope="row">5</th>
+      <td>5</td>
       <td><img src="{% static '/img/artifact.svg' %}" id="img5" alt="logo" class="result-img"></td>
       <td>Artifact</td>
-      <td> <span id="prob_artifact"></span> </td>
+      <td id="prob_artifact"><span class="try_replace_artifact">33</span></td>
     </tr>
 
     <tr>
-      <th scope="row">6</th>
+      <td>6</td>
       <td><img src="{% static '/img/ice_ring.svg' %}" id="img6" alt="logo" class="result-img"></td>
       <td>Ice Ring</td>
-      <td> <span id="prob_ice_ring"></span> </td>
+      <td id="prob_ice_ring"><span></span></td>
     </tr>
 
     <tr>
-      <th scope="row">7</th>
+      <td>7</td>
       <td><img src="{% static '/img/non_uniform.svg' %}" id="img7" alt="logo" class="result-img"></td>
-      <td>Non-uniform Detectors</td>
-      <td> <span id="prob_non_uniform_detector"></span> </td>
+      <td>Non-Uniform Detector</td>
+      <td id="prob_non_uniform_detector"><span></span></td>
     </tr>
-  </tbody>
 
   </table>
     </div>
 
 
+
 </div>
 
-{% block javascript %}
 
-<script>
-   $("#prob_background_ring").change(function () {
-     console.log( $(this).val() );
-   });
- </script>
+
+
+
+{% block javascript %}
+<script src={% static "js/handle_async_tasks.js" %}></script>
+<script src={% static "js/gs_sortable.js" %}></script>
+
+<script type="text/javascript">
+<!--
+var TSort_Data = new Array ('final_table', '','','s','s');
+tsRegister();
+</script>
+
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src={% static "js/handle_async_tasks.js" %}></script>
+
 {% endblock %}
 
 
