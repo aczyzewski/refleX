@@ -89,9 +89,9 @@ def return_credits(request):
     template = loader.get_stemplate('refleXWebApp/credits.html')
     return HttpResponse(template.render({}, request))
 
-def return_results(request):
-    template = loader.get_stemplate('refleXWebApp/credits.html')
-    return HttpResponse(template.render({}, request))
+# def return_results(request):
+#     template = loader.get_stemplate('refleXWebApp/credits.html')
+#     return HttpResponse(template.render({}, request))
 
 @csrf_exempt
 def api_list(request, task_id):
