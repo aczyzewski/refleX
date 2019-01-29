@@ -11,7 +11,6 @@ urlpatterns = [
     # API
     # path('api/', ...)
     path('credits/', views.return_credits, name="credits"),
-    path('results/', views.return_results, name="results"),
 
     re_path(r'^favicon\.ico$', favicon_view),
 
