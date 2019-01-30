@@ -114,3 +114,6 @@ logs/*
 
 # Nohup
 nohup.out
+
+# web server
+/www/uploads/
