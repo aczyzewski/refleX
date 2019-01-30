@@ -400,6 +400,7 @@ h4 {
   align-items: center;
   flex-direction: column;
   width: 100%;
+  margin-top: 150px;
 }
 
 .progress__container {
@@ -475,20 +476,20 @@ table.dataTable tfoot th {
 html, body {
     height: 100%;
   }
-  
+
   #wrap {
     min-height: 100%;
   }
-  
+
   #main {
     overflow:auto;
     padding-bottom:150px; /* this needs to be bigger than footer height*/
   }
-  
+
   .footer {
     position: relative;
     margin-top: -150px; /* negative value of footer height */
     height: 150px;
     clear:both;
     padding-top:20px;
-  } 
+  }
