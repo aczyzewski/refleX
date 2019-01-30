@@ -102,7 +102,7 @@ $(async function(){
 
                 json_result_id = document.getElementById('json_result');
 
-                loader_id = document.getElementById('loader')
+                loader_id = document.getElementById('loading-bg')
                 loader_id.style.visibility = 'visible';
 
                 final_result_id = document.getElementById('final_result')
