@@ -36,22 +36,22 @@ function move_progress_bar(iteration) {
       case 3:
         setVal(progress, 50);
         // setBackground(backgroundImgContainer, beegees[1])
-        processing_text_id.innerHTML = "Anomalies searching  ...";
+        processing_text_id.innerHTML = "Anomalies searching";
         break;
       case 4:
         setVal(progress, 70);
         // setBackground(backgroundImgContainer, beegees[2])
-        processing_text_id.innerHTML = "Anomalies searching continues ...";
+        processing_text_id.innerHTML = "Anomalies searching continues";
         break;
       case 5:
         setVal(progress, 90);
         // setBackground(backgroundImgContainer, beegees[3])
-        processing_text_id.innerHTML = "Finishing your results !";
+        processing_text_id.innerHTML = "Finishing your results!";
         break;
       case 6:
-        setVal(progress, 100);
+        //setVal(progress, 100);
         // setBackground(backgroundImgContainer, beegees[4])
-        processing_text_id.innerHTML = "Here is your result table !";
+        processing_text_id.innerHTML = "Here is your result table!";
         break;
     }
   };
@@ -101,10 +101,10 @@ $(async function(){
                 progress__container_id = document.getElementById('progress__container');
 
                 json_result_id = document.getElementById('json_result');
-                //
-                // loader_id = document.getElementById('loader')
-                // loader_id.style.visibility = 'visible';
-                //
+
+                loader_id = document.getElementById('loader')
+                loader_id.style.visibility = 'visible';
+
                 final_result_id = document.getElementById('final_result')
                 final_result_id.style.display = 'none';
 
@@ -128,16 +128,12 @@ $(async function(){
 
                             if (data.status) {
 
-                              //loader_id.style.visibility = 'hidden';
+                              loader_id.style.display = 'none';
 
                               move_progress_bar(6);
                               sleep(500);
-                              progress__container_id.style.display = 'none';
+                              //progress__container_id.style.display = 'none';
                               final_result_id.style.display = 'block';
-                              //
-                              // $("#final_table tr td:nth-child(3)").each(function () {
-                              // $(this).empty()
-                              // });
 
                               prob_loop_scaterring_id.innerHTML =  (parseFloat(data.loop_scattering) * 100).toString() + "%";
                               prob_background_ring_id.innerHTML = (parseFloat(data.background_ring) * 100).toString() + "%";
@@ -159,10 +155,8 @@ $(async function(){
                 })
 
               await sleep(3400);
-              move_progress_bar(actionType)
-              actionType = actionType + 1;
-              console.log("HERE I AM!")
+              //move_progress_bar(actionType)
+              //actionType = actionType + 1;
             }
-
 
           });
