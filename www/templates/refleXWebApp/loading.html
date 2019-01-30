@@ -9,17 +9,14 @@
 <link rel="stylesheet" type="text/css" media="all" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
 <!-- <link rel="stylesheet" type="text/css" media="all" href="/static/css/sort.css"> -->
 
-<div class="description_loading content-section">
-  <a href="{% url 'credits'  %}"> Your task REST API representation </a>.
-  <h4>Task id:<p id="task_id" visibility="hidden">{{ task_id }}</p></h2>
-  <h2 id="processing_text">The processing begins!</h2>
-</div>
-
-<div class="loading-content content-section" id="loading-bg">
-
-    <div id="loader">
-        <img src= "{% static "gif/load.gif" %}" alt="Loading gif"  width="128" height="128">
+<div class="row">
+  <div class="col-md-5">
+    <div class="description_loading content-section" style="margin-top: 10%">
+      <h2 id="processing_text">Analysing image ...</h2>
+      <hr>
+      <h4>Task id:<p id="task_id" visibility="hidden">{{ task_id }}</p></h4>
     </div>
+  </div>
 
   <!-- <div class="progress__container" id="progress__container">
 
@@ -36,7 +33,15 @@
     </div>
 </div> -->
 
-  <div id="final_result">
+<div class="col-md-7">  
+
+  <div class="loading-content content-section" id="loading-bg" style="margin-top: 10%">
+    <div id="loader" style="visibility: visible">
+        <img src= "{% static "gif/load.gif" %}" alt="Loading gif"  width="128" height="128">
+    </div>
+  </div>
+
+  <div id="final_result" style="display: none">
       <table class="table" id="final_table">
 
   <thead>
@@ -96,8 +101,9 @@
   </table>
     </div>
 
+  </div>
 
-
+</div>
 </div>
 
 {% block javascript %}

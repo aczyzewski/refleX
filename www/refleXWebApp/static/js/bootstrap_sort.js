@@ -26,7 +26,7 @@ $(document).ready(function () {
         "bAutoWidth": false,
         "columnDefs": [
             { 
-            "type": 'numeric', 
+            "type": null, 
             "targets": -1 
             }
         ]

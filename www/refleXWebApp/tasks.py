@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from celery import shared_task
 import time
 import sys
+import os
 
 try:
     sys.path.insert(0, '/home/reflex/refleX/lib/fastai')
@@ -54,6 +55,7 @@ try:
         learner.precompute = False 
         print(data.classes)
 
+        os.remove(img_path)
         return [round(float(value), 3) for value in list(learner.predict_array(img[None])[0])]
 except:
     print(" --- !!! FASTAI IS NOT SUPPORTED !!! --- ")
@@ -65,4 +67,5 @@ except:
     @shared_task
     def run_classifier(img_path):
         time.sleep(10)
+        os.remove(img_path)
         return [0.1,0.6,0.2,0.02,0.8,0.04,0.04]

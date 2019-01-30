@@ -39,40 +39,36 @@
       </div>
   </nav>
 </div>
-      <!--<div class="row justify-content-center">
-        <div class="col-8">
-          <hr class="mt-0 mb-4">
-        -->
-          <div class="parent">
-          {% block content %}
 
-          {% endblock %}
-        </div>
+    <div class="container">
+    {% block content %}
+
+    {% endblock %}
+  </div>
 
     <div id="cmb-footer">
     <div class="container">
         <div class="row">
-            <div class="col-sm-3 col-xs-6">
+            <div class="col-sm-4 col-xs-12">
                 <h5>About</h5>
                 <p>
                     RefleX aims to classify anomalies which occur in X-ray crystallography images. Upon completion this system will become part of a major crystallography image database website.
                    Feel free to visit our <a href="{% url 'credits' %}">credits page</a>.
                 </p>
             </div>
-            <div class="col-sm-3 col-xs-6">
+            <div class="col-sm-4 col-xs-6">
                 <h5>Contact</h5>
                 <p>
                     Need help? Found a bug? Interested in a different different set of anomalies? Want to collaborate?
                     <script> document.write(''); </script> <a href="mailto:marcin.konieczny.poznan@gmail.com">marcin.konieczny.poznan@gmail.com</a><noscript>[Turn on JavaScript to see the email address]</noscript>
                   </p>
             </div>
-            <div class="col-sm-3 col-xs-6">
+            <div class="col-sm-4 col-xs-6">
                 <h5>Citing</h5>
                 <p>
                     D.Brzezinski, .
                     A.Czyżewski, M.Konieczny, F.Krawiec
-                    <i><b>RefleX</b>: A System for automatic anomaly detection in X-ray diffraction images
-</i>.
+                    <i><b>RefleX</b>: A System for automatic anomaly detection in X-ray diffraction images</i>.
                 </p>
             </div>
         </div>
