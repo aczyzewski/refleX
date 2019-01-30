@@ -36,25 +36,66 @@ function move_progress_bar(iteration) {
       case 3:
         setVal(progress, 50);
         // setBackground(backgroundImgContainer, beegees[1])
-        processing_text_id.innerHTML = "Anomalies searching  ...";
+        processing_text_id.innerHTML = "Anomalies searching";
         break;
       case 4:
         setVal(progress, 70);
         // setBackground(backgroundImgContainer, beegees[2])
-        processing_text_id.innerHTML = "Anomalies searching continues ...";
+        processing_text_id.innerHTML = "Anomalies searching continues";
         break;
       case 5:
         setVal(progress, 90);
         // setBackground(backgroundImgContainer, beegees[3])
-        processing_text_id.innerHTML = "Finishing your results !";
+        processing_text_id.innerHTML = "Finishing your results!";
         break;
       case 6:
-        setVal(progress, 100);
+        //setVal(progress, 100);
         // setBackground(backgroundImgContainer, beegees[4])
-        processing_text_id.innerHTML = "Here is your result table !";
+        processing_text_id.innerHTML = "Here is your result table!";
         break;
     }
   };
+
+function update_table() {
+  var table = document.getElementById("final_table");
+  for (var i = 0, row; row = table.rows[i]; i++) {
+    //iterate through rows
+    //rows would be accessed using the "row" variable assigned in the for loop
+    var element = row.cells[3]
+    if(element.tagName == 'TD') {
+
+      str = element.innerHTML
+      str = str.substring(0, str.length - 1);
+      value = parseInt(str)
+
+      if(value >= 50 && value < 75) {
+        row.className = 'highlight_orange'
+      }
+
+      if (value >= 75) {
+        row.className = 'highlight_green'
+      }
+
+    }
+  }
+}
+
+function sort_table() {
+    $('#final_table').DataTable({
+        "order": [[ 3, "desc" ]],
+        "bPaginate": false,
+        "bLengthChange": false,
+        "bFilter": false,
+        "bInfo": false,
+        "bAutoWidth": false,
+        "columnDefs": [
+          { "type": "percent", "targets": 3 }
+        ]
+    });
+
+  $('.dataTables_length').addClass('bs-select');
+}
+
 
 $(async function(){
                 task_id = document.getElementById('task_id').innerHTML
@@ -62,14 +103,15 @@ $(async function(){
                 progress__container_id = document.getElementById('progress__container');
 
                 json_result_id = document.getElementById('json_result');
-                //
-                // loader_id = document.getElementById('loader')
-                // loader_id.style.visibility = 'visible';
-                //
+
+                loader_id = document.getElementById('loading-bg')
+                loader_id.style.visibility = 'visible';
+
                 final_result_id = document.getElementById('final_result')
                 final_result_id.style.display = 'none';
 
-                prob_loop_scaterring_id = document.getElementById('prob_loop_scaterring')
+                var prob_loop_scaterring_id = document.getElementById('prob_loop_scaterring')
+
                 prob_background_ring_id = document.getElementById('prob_background_ring')
                 prob_strong_background_id = document.getElementById('prob_strong_background')
                 prob_diffuse_scattering_id = document.getElementById('prob_diffuse_scattering')
@@ -88,30 +130,36 @@ $(async function(){
 
                             if (data.status) {
 
-                              //loader_id.style.visibility = 'hidden';
+                              loader_id.style.display = 'none';
 
                               move_progress_bar(6);
                               sleep(500);
-                              progress__container_id.style.display = 'none';
+                              //progress__container_id.style.display = 'none';
                               final_result_id.style.display = 'block';
 
-                              prob_loop_scaterring_id.innerHTML = data.loop_scattering;
-                              prob_background_ring_id.innerHTML = data.background_ring;
-                              prob_diffuse_scattering_id.innerHTML = data.diffuse_scattering;
-                              prob_strong_background_id.innerHTML = data.strong_background;
-                              prob_ice_ring_id.innerHTML = data.ice_ring;
-                              prob_artifact_id.innerHTML = data.artifact;
-                              prob_non_uniform_detector_id.innerHTML = data.non_uniform_detector;
+                              prob_loop_scaterring_id.innerHTML =  (parseFloat(data.loop_scattering) * 100).toString()  + "%";
+                              prob_background_ring_id.innerHTML = (parseFloat(data.background_ring) * 100).toString()  + "%";
+                              prob_diffuse_scattering_id.innerHTML = (parseFloat(data.diffuse_scattering) * 100).toString()  + "%";
+                              prob_strong_background_id.innerHTML = (parseFloat(data.strong_background) * 100).toString()  + "%";
+                              prob_ice_ring_id.innerHTML = (parseFloat(data.ice_ring) * 100).toString()  + "%";
+                              prob_artifact_id.innerHTML = (parseFloat(data.artifact) * 100).toString()  + "%";
+                              prob_non_uniform_detector_id.innerHTML =  (parseFloat(data.non_uniform_detector) * 100).toString()  + "%";
+
+                              prob1 = data.loop_scattering;
+                              prob2 = data.background_ring;
+
+                              update_table()
+                              sort_table()
 
                               console.log("END!")
                               while_heartbit = false;
                             }}
+
                 })
 
               await sleep(3400);
-              move_progress_bar(actionType)
-              actionType = actionType + 1;
-              console.log("HERE I AM!")
+              //move_progress_bar(actionType)
+              //actionType = actionType + 1;
             }
 
           });

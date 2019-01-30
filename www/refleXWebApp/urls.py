@@ -1,8 +1,8 @@
 from django.views.generic.base import RedirectView
 from django.urls import re_path, path, include
+from django.contrib.staticfiles.storage import staticfiles_storage
+from django.conf.urls import url
 from . import views
-
-favicon_view = RedirectView.as_view(url='/static/favicon.ico', permanent=True)
 
 urlpatterns = [
     re_path(r'^index\.*', views.index),                     # TODO: one explicit regex!
@@ -11,9 +11,14 @@ urlpatterns = [
     # API
     # path('api/', ...)
     path('credits/', views.return_credits, name="credits"),
-    path('results/', views.return_results, name="results"),
 
-    re_path(r'^favicon\.ico$', favicon_view),
+    url('favicon.ico$',
+        RedirectView.as_view( # the redirecting function
+            url=staticfiles_storage.url('favicon.ico'), # converts the static directory + our favicon into a URL
+            # in my case, the result would be http://www.tumblingprogrammer.com/static/img/favicon.ico
+        ),
+        name="favicon" # name of our view
+    ),
 
     path('result/<str:task_id>', views.get_task_result),
     path('api/result/<str:task_id>', views.api_list),

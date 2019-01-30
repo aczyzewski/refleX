@@ -6,14 +6,21 @@
 
 {% block content %}
 
-<div class="description_loading content-section">
-  <p id="task_id" visibility="hidden">{{ task_id }}</p>
-  <h2 id="processing_text">The processing begins!</h2>
-</div>
+<link rel="stylesheet" type="text/css" media="all" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
 
-<div class="loading-content content-section" id="loading-bg">
+<div class="row">
+  <div class="col-md-5">
+    <div class="description_loading content-section" style="margin-top: 10%">
+      <h2 id="processing_text">The processing begins!</h2>
+      <hr>
+      <h4>Task id:<p id="task_id" visibility="hidden">{{ task_id }}</p></h4>
+      <hr>
+      <p>Track your task using <a href="/api/result/{{ task_id }}">REST API</a></p>
+      <hr>
+    </div>
+  </div>
 
-  <div class="progress__container" id="progress__container">
+  <!-- <div class="progress__container" id="progress__container">
 
     <div class="progress">
       <div
@@ -26,10 +33,18 @@
         aria-valuemax="100"
       ></div>
     </div>
-</div>
+</div> -->
 
-  <div id="final_result">
-      <table class="table">
+<div class="col-md-7" style="height: 800px">
+
+  <div class="loading-content content-section" id="loading-bg">
+    <div id="loader">
+        <img src= "{% static "gif/loader2.gif" %}" alt="Loading gif" width="128" height="128">
+    </div>
+  </div>
+
+  <div id="final_result" style="display: none">
+      <table class="table" id="final_table">
 
   <thead>
     <tr>
@@ -40,69 +55,65 @@
     </tr>
   </thead>
 
-  <tbody>
     <tr>
-      <th scope="row">1</th>
+      <td>1</td>
       <td><img src="{% static '/img/loop.svg' %}" id="img1" alt="logo" class="result-img"></td>
       <td>Loop Scattering</td>
-      <td><span id="prob_loop_scaterring">Prob_try</span> </td>
+      <td id="prob_loop_scaterring">1</td>
     </tr>
     <tr>
-      <th scope="row">2</th>
+      <td>2</td>
       <td><img src="{% static '/img/bg_ring.svg' %}" id="img2" alt="logo" class="result-img"></td>
       <td>Background Ring</td>
-      <td> <span id="prob_background_ring"></span> </td>
+      <td id="prob_background_ring">2</td>
     </tr>
     <tr>
-      <th scope="row">3</th>
+      <td>3</td>
       <td><img src="{% static '/img/strong.svg' %}" id="img3" alt="logo" class="result-img"></td>
       <td>Strong Background</td>
-      <td> <span id="prob_strong_background"></span> </td>
+      <td id="prob_strong_background">3</td>
     </tr>
     <tr>
-      <th scope="row">4</th>
+      <td>4</td>
       <td><img src="{% static '/img/diffuse.svg' %}" id="img4" alt="logo" class="result-img"></td>
       <td>Diffuse Scattering</td>
-      <td> <span id="prob_diffuse_scattering"></span> </td>
+      <td id="prob_diffuse_scattering">4</td>
     </tr>
     <tr>
-      <th scope="row">5</th>
+      <td>5</td>
       <td><img src="{% static '/img/artifact.svg' %}" id="img5" alt="logo" class="result-img"></td>
       <td>Artifact</td>
-      <td> <span id="prob_artifact"></span> </td>
+      <td id="prob_artifact">5</td>
     </tr>
 
     <tr>
-      <th scope="row">6</th>
+      <td>6</td>
       <td><img src="{% static '/img/ice_ring.svg' %}" id="img6" alt="logo" class="result-img"></td>
       <td>Ice Ring</td>
-      <td> <span id="prob_ice_ring"></span> </td>
+      <td id="prob_ice_ring">6</td>
     </tr>
 
     <tr>
-      <th scope="row">7</th>
+      <td>7</td>
       <td><img src="{% static '/img/non_uniform.svg' %}" id="img7" alt="logo" class="result-img"></td>
       <td>Non-Uniform Detector</td>
-      <td> <span id="prob_non_uniform_detector"></span> </td>
+      <td id="prob_non_uniform_detector">7</td>
     </tr>
-  </tbody>
 
   </table>
     </div>
 
+  </div>
 
+</div>
 </div>
 
 {% block javascript %}
-
-<script>
-   $("#prob_background_ring").change(function () {
-     console.log( $(this).val() );
-   });
- </script>
-
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src="//cdn.datatables.net/plug-ins/1.10.19/sorting/percent.js"></script>
 <script src={% static "js/handle_async_tasks.js" %}></script>
+
 {% endblock %}
 
 

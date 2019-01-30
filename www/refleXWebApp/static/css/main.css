@@ -396,12 +396,11 @@ h4 {
 
 .loading-content {
   background-size: cover;
-  height: 100%;
-  display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   width: 100%;
+  margin-top: 150px;
 }
 
 .progress__container {
@@ -431,10 +430,12 @@ position: relative;
 
 #final_result{
   font-family: 'Raleway', Helvetica, Arial, sans-serif;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
+  line-height: 60px;
   position relatve;
   height: 100%;
   width: 100%;
+  margin-top:50px;
 }
 
 .navbar {
@@ -451,9 +452,45 @@ position: relative;
 }
 
 .result-img{
-  height: 40px;
+  height: 60px;
 }
 
 #reflex_name{
   font-style: italic;
 }
+
+.highlight_orange {
+    background-color: rgba(255, 165, 0, 0.3) !important
+}
+
+.highlight_green {
+    background-color: rgba(0, 255, 0, 0.4) !important
+}
+table.dataTable thead th {
+  border-bottom: 0;
+}
+table.dataTable tfoot th {
+  border-top: 0;
+}
+
+
+html, body {
+    height: 100%;
+  }
+
+  #wrap {
+    min-height: 100%;
+  }
+
+  #main {
+    overflow:auto;
+    padding-bottom:150px; /* this needs to be bigger than footer height*/
+  }
+
+  .footer {
+    position: relative;
+    margin-top: -150px; /* negative value of footer height */
+    height: 150px;
+    clear:both;
+    padding-top:20px;
+  }

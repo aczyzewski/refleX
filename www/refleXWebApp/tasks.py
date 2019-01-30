@@ -2,10 +2,15 @@ from __future__ import absolute_import
 from celery import shared_task
 import time
 import sys
+import os
 
 try:
     sys.path.insert(0, '/home/reflex/refleX/lib/fastai')
+    sys.path.insert(0, '/home/reflex/refleX/src')
+
+    import cv2 as cv
     from fastai.conv_learner import *
+    from rawdatalib import RawDataFile
 
     @shared_task
     def long_task(seconds=20):
@@ -19,6 +24,16 @@ try:
         model = resnet34
         image_size = 512
         # ***
+
+        # TODO: TEST!
+        if img_path.endswith('.npy.bz2'):
+            img_file = RawDataFile(img_path)
+            img = img_file.to_img(self, size=image_size)
+            if img is None:
+                return [0] * 7
+
+            img_path = img_path[:-len('.npy.bz2')] + ".png"
+            cv.imwrite(img_path, img)
 
         PATHS = {
             'CSV_PATH': '/home/reflex/refleX/metadata/6K/csv/fastai_labels_val_train.csv',
@@ -40,15 +55,18 @@ try:
         learner.precompute = False 
         print(data.classes)
 
+        os.remove(img_path)
         return [round(float(value), 3) for value in list(learner.predict_array(img[None])[0])]
 except:
     print(" --- !!! FASTAI IS NOT SUPPORTED !!! --- ")
     @shared_task
     def long_task(seconds=20):
         time.sleep(seconds)
-        return [0.1,0.2,0.2,0.02,0.4,0.04,0.04]
+        return [0.1,0.6,0.2,0.02,0.8,0.04,0.04]
 
     @shared_task
     def run_classifier(img_path):
         time.sleep(10)
-        return [0.1,0.2,0.2,0.02,0.4,0.04,0.04]
+        print(img_path)
+        os.remove(img_path)
+        return [0.1,0.6,0.2,0.02,0.8,0.04,0.04]

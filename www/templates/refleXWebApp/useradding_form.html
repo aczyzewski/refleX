@@ -7,24 +7,29 @@
 
 {% block content %}
 
-<div class="description content-section">
-    RefleX combines two areas of study: crystallography and machine learning.<br>The goal of the project is to automatically analyze X-ray diffraction images. In particular, we aim to detect anomalies in the images, which might be indicative of mistakes made during the experimental process.
-</div>
+<div class="row">
 
-<div class="add-photo content-section">
-    <h2><b>Start here ! </b></h2>
-    <br>
-    <div class="container">
-        <div class="row">
-            <form  id="uploadForm" action="/" method="POST" enctype="multipart/form-data"> 
-            {% csrf_token %}
-            {{ form }}
-            <button class="btn btn-primary bts-lg btn-block submit-btn" type="submit">Submit</button>
-            </form>
+    <div class="align-middle col-md-6" style="margin-top: 15%">
+        <div class="description">
+            <p>RefleX combines two areas of study: crystallography and machine learning.</p>
+            <p>The goal of the project is to automatically analyze X-ray diffraction images. In particular, we aim to detect anomalies in the images, which might be indicative of mistakes made during the experimental process.</p>
         </div>
     </div>
-</div>
 
-<script src={% static "js/helper.js" %}></script>
+    <div class="align-middle col-md-6" style="margin-top: 5%">
+        <div class="add-photo content-section">
+            <div class="container">
+                <div class="row">
+                    <form  id="uploadForm" action="/" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form }}
+                    <button class="btn btn-primary bts-lg btn-block submit-btn" type="submit">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
 
 {% endblock %}
