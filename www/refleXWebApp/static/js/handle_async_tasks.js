@@ -56,20 +56,6 @@ function move_progress_bar(iteration) {
     }
   };
 
-// $("#table tr").each(function(){
-// $(this).find("td:eq(3)").empty()
-// });
-
-var prob1;
-var prob2;
-var prob3;
-var prob4;
-var prob5;
-var prob6;
-var prob7;
-
-
-
 function update_table() {
   var table = document.getElementById("final_table");
   for (var i = 0, row; row = table.rows[i]; i++) {
