@@ -7,7 +7,6 @@
 {% block content %}
 
 <link rel="stylesheet" type="text/css" media="all" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
-<!-- <link rel="stylesheet" type="text/css" media="all" href="/static/css/sort.css"> -->
 
 <div class="row">
   <div class="col-md-5">
@@ -15,6 +14,9 @@
       <h2 id="processing_text">The processing begins!</h2>
       <hr>
       <h4>Task id:<p id="task_id" visibility="hidden">{{ task_id }}</p></h4>
+      <hr>
+      <p>See your task in <a href="/api/result/{{ task_id }}">REST API</a></p>
+      <hr>
     </div>
   </div>
 
