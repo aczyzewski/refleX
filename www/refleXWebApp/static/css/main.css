@@ -430,7 +430,8 @@ position: relative;
 
 #final_result{
   font-family: 'Raleway', Helvetica, Arial, sans-serif;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
+  line-height: 60px;
   position relatve;
   height: 100%;
   width: 100%;
