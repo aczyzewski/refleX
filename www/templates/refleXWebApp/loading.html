@@ -11,13 +11,18 @@
 <!-- <link rel="stylesheet" type="text/css" media="all" href="/static/css/sort.css"> -->
 
 <div class="description_loading content-section">
-  <p id="task_id" visibility="hidden">{{ task_id }}</p>
+  <a href="{% url 'credits'  %}"> Your task REST API representation </a>.
+  <h4>Task id:<p id="task_id" visibility="hidden">{{ task_id }}</p></h2>
   <h2 id="processing_text">The processing begins!</h2>
 </div>
 
 <div class="loading-content content-section" id="loading-bg">
 
-  <div class="progress__container" id="progress__container">
+    <div id="loader">
+        <img src= "{% static "gif/load.gif" %}" alt="Loading gif"  width="128" height="128">
+    </div>
+
+  <!-- <div class="progress__container" id="progress__container">
 
     <div class="progress">
       <div
@@ -30,7 +35,7 @@
         aria-valuemax="100"
       ></div>
     </div>
-</div>
+</div> -->
 
   <div id="final_result">
       <table class="table" id="final_table">

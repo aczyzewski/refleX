@@ -435,6 +435,7 @@ position: relative;
   position relatve;
   height: 100%;
   width: 100%;
+  margin-top:50px;
 }
 
 .navbar {
@@ -451,9 +452,16 @@ position: relative;
 }
 
 .result-img{
-  height: 40px;
+  height: 60px;
 }
 
 #reflex_name{
   font-style: italic;
+}
+
+table.dataTable thead th {
+  border-bottom: 0;
+}
+table.dataTable tfoot th {
+  border-top: 0;
 }

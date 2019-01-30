@@ -86,7 +86,7 @@ def get_task_result(request, task_id):
         return HttpResponse("Not ready!")
 
 def return_credits(request):
-    template = loader.get_stemplate('refleXWebApp/credits.html')
+    template = loader.get_template('refleXWebApp/credits.html')
     return HttpResponse(template.render({}, request))
 
 # def return_results(request):
