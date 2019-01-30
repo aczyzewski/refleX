@@ -24,8 +24,10 @@
 
 
 <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+
+
 <div class="blob-header">
-<nav class="navbar navbar-default navbar-static-top" style="background-color: #F8F8F8;">
+<nav class="navbar navbar-default navbar-static-top" id="cmb-header" style="background-color: #F8F8F8;">
   <div class="header">
         <div class="container">
             <ul class="nav navbar-nav">
@@ -40,13 +42,15 @@
   </nav>
 </div>
 
-    <div class="container">
+    <div class="container" id="cmd-content">
     {% block content %}
 
     {% endblock %}
   </div>
+  <div class=>
+</div>
 
-    <div id="cmb-footer">
+<div id="cmb-footer">
     <div class="container">
         <div class="row">
             <div class="col-sm-4 col-xs-12">
