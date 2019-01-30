@@ -17,11 +17,11 @@
 
     <div class="align-middle col-md-6" style="margin-top: 10%">
         <div class="add-photo content-section">
-            <h2><b>Start here ! </b></h2>
+            <h2><b>Start here!</b></h2>
             <br>
             <div class="container">
                 <div class="row">
-                    <form  id="uploadForm" action="/" method="POST" enctype="multipart/form-data"> 
+                    <form  id="uploadForm" action="/" method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                     {{ form }}
                     <button class="btn btn-primary bts-lg btn-block submit-btn" type="submit">Submit</button>
@@ -32,7 +32,5 @@
     </div>
 
 </div>
-
-<script src={% static "js/helper.js" %}></script>
 
 {% endblock %}
