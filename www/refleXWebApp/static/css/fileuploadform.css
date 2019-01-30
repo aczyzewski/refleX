@@ -9,13 +9,19 @@
 
 #uploadForm label {
     width: 100%;
-    height: 100px;
+    height: 350px;
+    line-height: 350px;
     font-size: 1.25em;
     font-weight: 700;
-    color: gray;
+    color: black;
+
+    font-size: 24px;
+    
+    background-image: url("../img/box_bg.png");
     background-color: white;
+    background-position: center;
+    
     display: inline-block;
-    line-height: 100px;
     border-radius: 5px;
     text-align: center;
     border: 3px dashed gray;
