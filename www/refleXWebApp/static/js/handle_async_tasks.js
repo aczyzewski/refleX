@@ -94,6 +94,22 @@ function update_table() {
   }
 }
 
+function sort_table() {
+    $('#final_table').DataTable({
+        "order": [[ 3, "desc" ]],
+        "bPaginate": false,
+        "bLengthChange": false,
+        "bFilter": false,
+        "bInfo": false,
+        "bAutoWidth": false,
+        "columnDefs": [
+          { "type": "percent", "targets": 3 }
+        ]
+    });
+
+  $('.dataTables_length').addClass('bs-select');
+}
+
 
 $(async function(){
                 task_id = document.getElementById('task_id').innerHTML
@@ -135,18 +151,19 @@ $(async function(){
                               //progress__container_id.style.display = 'none';
                               final_result_id.style.display = 'block';
 
-                              prob_loop_scaterring_id.innerHTML =  (parseFloat(data.loop_scattering) * 100).toString() + "%";
-                              prob_background_ring_id.innerHTML = (parseFloat(data.background_ring) * 100).toString() + "%";
-                              prob_diffuse_scattering_id.innerHTML = (parseFloat(data.diffuse_scattering) * 100).toString() + "%";
-                              prob_strong_background_id.innerHTML = (parseFloat(data.strong_background) * 100).toString() + "%";
-                              prob_ice_ring_id.innerHTML = (parseFloat(data.ice_ring) * 100).toString() + "%";
-                              prob_artifact_id.innerHTML = (parseFloat(data.artifact) * 100).toString() + "%";
-                              prob_non_uniform_detector_id.innerHTML =  (parseFloat(data.non_uniform_detector) * 100).toString() + "%";
+                              prob_loop_scaterring_id.innerHTML =  (parseFloat(data.loop_scattering) * 100).toString()  + "%";
+                              prob_background_ring_id.innerHTML = (parseFloat(data.background_ring) * 100).toString()  + "%";
+                              prob_diffuse_scattering_id.innerHTML = (parseFloat(data.diffuse_scattering) * 100).toString()  + "%";
+                              prob_strong_background_id.innerHTML = (parseFloat(data.strong_background) * 100).toString()  + "%";
+                              prob_ice_ring_id.innerHTML = (parseFloat(data.ice_ring) * 100).toString()  + "%";
+                              prob_artifact_id.innerHTML = (parseFloat(data.artifact) * 100).toString()  + "%";
+                              prob_non_uniform_detector_id.innerHTML =  (parseFloat(data.non_uniform_detector) * 100).toString()  + "%";
 
                               prob1 = data.loop_scattering;
                               prob2 = data.background_ring;
 
                               update_table()
+                              sort_table()
 
                               console.log("END!")
                               while_heartbit = false;

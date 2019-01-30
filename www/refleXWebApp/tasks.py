@@ -67,5 +67,6 @@ except:
     @shared_task
     def run_classifier(img_path):
         time.sleep(10)
+        print(img_path)
         os.remove(img_path)
         return [0.1,0.6,0.2,0.02,0.8,0.04,0.04]
