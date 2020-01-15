@@ -1,1 +1,1 @@
-FASTAI_PATH = '/home/reflex/refleX/lib/fastai'
+FASTAI_PATH = '../lib/fastai'

@@ -1,9 +1,0 @@
-*
-!*/
-!.gitignore
-!**/*.log
-!**/*.csv
-!**/*.png
-!**/*.svg
-!**/*.txt
-!**/*.json
