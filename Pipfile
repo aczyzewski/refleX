@@ -1,0 +1,27 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pylint = "*"
+
+[packages]
+torch = "*"
+torchvision = "*"
+neptune-client = "*"
+opencv-python = "*"
+pillow = "*"
+pandas = "*"
+numpy = "*"
+tqdm = "*"
+scikit-learn = "*"
+jupyter = "*"
+jupytext = "*"
+matplotlib = "*"
+pycodestyle = "*"
+flake8 = "*"
+scikit-multilearn = "*"
+
+[requires]
+python_version = "3.7"

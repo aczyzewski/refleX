@@ -16,8 +16,7 @@ The dataset contains 6311 X-ray diffraction images in 1024x1024 png format (refl
 Click [here](https://zenodo.org/record/2605120) to download the dataset.
 
 ## Installation
- - ``conda env create -f environment.yml``
- - Add ``lib/fastai`` to ``PYTHONPATH``
+`` Under construction ``
 
 ## Docs
 `` Under construction ``

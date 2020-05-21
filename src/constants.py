@@ -1,1 +1,0 @@
-FASTAI_PATH = '../lib/fastai'
